@@ -1,0 +1,1 @@
+export default function Privacy(){return <div className="p-6 max-w-2xl mx-auto"><h1 className="text-2xl font-bold">Privacy Policy - KLA MEET</h1><p className="mt-4 text-sm">We are 18+ only. We store your profile in Supabase. KYC data is private. AI messages are labeled. You can delete account in settings. Contact: support@klameet.com</p></div>}

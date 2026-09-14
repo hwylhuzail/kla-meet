@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+dist
+build
+android/app/build
+android/.gradle
+android/build
+*.apk
+.env
+.env.local
+.vercel
+.DS_Store
