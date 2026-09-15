@@ -3,10 +3,9 @@ import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 
 const USERS = [
-  { id:"1", name:"Vanessa", age:24, city:"Ntinda", country:"Uganda", flag:"🇺🇬", bio:"Entrepreneur. Real vibes, not games. 18+ only", photo:"https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600", interests:["Business","Travel","Gym"], verified:true, match:92, online:true, job:"Entrepreneur", intention:"Serious" },
-  { id:"2", name:"Sarah", age:27, city:"Kampala", country:"Uganda", flag:"🇺🇬", bio:"Loves travel, music & good conversations.", photo:"https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600", interests:["Travel","Music"], verified:true, match:92, online:true, job:"Designer", intention:"Serious" },
-  { id:"3", name:"Aisha", age:24, city:"Nairobi", country:"Kenya", flag:"🇰🇪", bio:"Coffee & gym", photo:"https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600", interests:["Art","Coffee"], verified:true, match:88, online:true, job:"Student", intention:"Dating" },
-  { id:"4", name:"David", age:28, city:"London", country:"UK", flag:"🇬🇧", bio:"Tech & travel", photo:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600", interests:["Tech","Gym"], verified:true, match:95, online:false, job:"Founder", intention:"Marriage" },
+  {id:"1", name:"Vanessa", age:24, city:"Ntinda", country:"Uganda", flag:"🇺🇬", tz:"EAT GMT+3", bio:"Entrepreneur. Real vibes, not games. 18+ only", photo:"https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600", photos:["https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600","https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400"], interests:["Business","Travel","Gym"], verified:true, match:92, online:true, job:"Entrepreneur", intention:"Serious relationship", langs:["English","Luganda"], lifestyle:"Active", reloc:true},
+  {id:"2", name:"Sarah", age:27, city:"Kampala", country:"Uganda", flag:"🇺🇬", tz:"EAT", bio:"Loves travel, music & good conversations.", photo:"https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600", photos:["https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600"], interests:["Travel","Music"], verified:true, match:92, online:true, job:"Designer", intention:"Serious relationship", langs:["English"], lifestyle:"Active", reloc:false},
+  {id:"3", name:"Aisha", age:24, city:"Nairobi", country:"Kenya", flag:"🇰🇪", tz:"EAT", bio:"Coffee lover, gym & real vibes.", photo:"https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600", photos:["https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600"], interests:["Coffee","Gym"], verified:true, match:88, online:true, job:"Student", intention:"Dating", langs:["English","Swahili"], lifestyle:"Creative", reloc:true},
 ]
 
 export default function Home(){
@@ -16,185 +15,91 @@ export default function Home(){
   const [showID,setShowID]=useState(false)
   const [chatUser,setChatUser]=useState<any>(null)
   const [country,setCountry]=useState("All")
+  const [category,setCategory]=useState("All")
+  const [blocked,setBlocked]=useState<string[]>([])
+  const [notifs,setNotifs]=useState(["❤️ New Like LIVE","💕 Matched LIVE","💬 Message LIVE"])
 
-  useEffect(()=>{
-    (async()=>{
-      try{
-        const {data} = await supabase.from('profiles').select('*').limit(20)
-        if(data && data.length>0){
-          const mapped = data.map((d:any)=>({
-            id:d.id, name:d.name||"Vanessa", age:d.age||24, city:d.city||"Ntinda", country:d.country||"Uganda", flag:d.flag||"🇺🇬",
-            bio:d.bio||"Entrepreneur", photo:d.photos?.[0]||d.photo||USERS[0].photo, interests:d.interests||["Business","Travel","Gym"], verified:true, match:d.match_percent||92, online:true, job:d.job||"Entrepreneur", intention:d.intention||"Serious"
-          }))
-          setProfiles(mapped)
-        }
-      }catch{}
-    })()
-  },[])
+  useEffect(()=>{(async()=>{try{const {data}=await supabase.from("profiles").select("*").limit(20); if(data?.length){const m=data.map((d:any)=>({id:d.id,name:d.name||"User",age:d.age||24,city:d.city||"Kampala",country:d.country||"Uganda",flag:d.flag||"🇺🇬",tz:"EAT",bio:d.bio||"Hello",photo:d.photos?.[0]||USERS[0].photo,photos:d.photos||[USERS[0].photo],interests:d.interests||["Travel"],verified:d.verified||false,match:d.match_percent||92,online:true,job:d.job||"Entrepreneur",intention:d.intention||"Serious",langs:d.langs||["English"],lifestyle:"Active",reloc:false})); setProfiles(m)}}catch{}})()},[])
 
-  const card = profiles[idx % profiles.length] || USERS[0]
-  const filtered = country==="All"? profiles : profiles.filter(p=>p.country===country)
+  const list=profiles.filter(p=>!blocked.includes(p.id))
+  const card=list[idx%list.length]||USERS[0]
+  const filtered=list.filter(p=>{if(country!=="All"&&p.country!==country) return false; if(category==="Marriage"&&p.intention!=="Marriage") return false; if(category==="Serious"&&!p.intention.includes("Serious")) return false; if(category==="Verified"&&!p.verified) return false; return true})
 
-  async function likeLive(){
-    try{
-      await supabase.from('likes').insert({from_id:'me', to_id:card.id, type:'like'})
-      await supabase.from('matches').insert({user1:'me', user2:card.id, compat:card.match})
-      alert('Like LIVE saved to Supabase')
-    }catch(e:any){ alert('Like LIVE - create likes/matches tables') }
-    setIdx(v=>v+1)
-  }
-  async function passLive(){
-    try{ await supabase.from('likes').insert({from_id:'me', to_id:card.id, type:'pass'}) }catch{}
-    setIdx(v=>v+1)
-  }
-  async function payLive(amount:number, method:string){
-    try{
-      await supabase.from('payments').insert({plan:'monthly', amount, currency:'USD', method, status:'pending'})
-      alert(method+' LIVE $'+amount+' saved')
-      setShowPay(false)
-    }catch(e:any){ alert('Create payments table: '+e.message) }
-  }
-  async function verifyLive(){
-    try{
-      await supabase.from('id_verifications').insert({user_name:'You', status:'pending', face_match:98})
-      alert('Verification LIVE saved')
-      setShowID(false)
-    }catch(e:any){ alert('Create id_verifications table') }
-  }
+  async function likeLive(u:any){try{await supabase.from("likes").insert({from_id:"me",to_id:u.id,type:"like"})}catch{}; try{await supabase.from("matches").insert({user1:"me",user2:u.id,compat:u.match})}catch{}; setIdx(v=>v+1)}
+  async function passLive(){try{await supabase.from("likes").insert({from_id:"me",to_id:card.id,type:"pass"})}catch{}; setIdx(v=>v+1)}
 
-  return(
-    <div style={{background:'#121212', minHeight:'100vh', color:'#fff', fontFamily:'system-ui'}}>
-      <div style={{background:'#FFC107', padding:'12px', display:'flex', justifyContent:'space-between', alignItems:'center', position:'sticky', top:0, zIndex:40}}>
-        <b style={{color:'#000', fontSize:'18px', fontWeight:900}}>KLA•MEET</b>
-        <div style={{display:'flex', gap:'8px'}}>
-          <button onClick={()=>setShowPay(true)} style={{background:'#000', color:'#FFC107', padding:'8px 12px', borderRadius:'20px', fontWeight:800, border:'none', fontSize:'12px'}}>PRO $</button>
-          <button onClick={()=>setShowID(true)} style={{background:'#7C4DFF', color:'#fff', padding:'8px 12px', borderRadius:'20px', fontWeight:800, border:'2px solid #000', fontSize:'12px'}}>Verify ID</button>
+  return (
+    <div className="bg-[#121212] min-h-screen text-white">
+      <div className="bg-[#FFC107] p-3 flex justify-between items-center sticky top-0 z-50 border-b-[3px] border-black">
+        <b className="text-black font-black">KLA•MEET <span className="bg-black text-[#FFC107] text-[7px] px-1.5 py-0.5 rounded-lg">LIVE</span></b>
+        <div className="flex gap-2">
+          <button onClick={()=>setShowPay(true)} className="bg-black text-[#FFC107] px-3 py-2 rounded-full text-[11px] font-black">PRO $ LIVE</button>
+          <button onClick={()=>setShowID(true)} className="bg-[#7C4DFF] text-white px-3 py-2 rounded-full text-[11px] font-black border-2 border-black">Verify LIVE</button>
         </div>
       </div>
 
-      <div style={{maxWidth:'420px', margin:'0 auto', padding:'12px', paddingBottom:'80px'}}>
+      <div className="max-w-[440px] mx-auto pb-[80px]">
+        <div className="flex gap-3 overflow-x-auto p-3 bg-[#1E1E1E] border-b border-[#333]">
+          <div className="min-w-[60px] text-center"><div className="w-14 h-14 rounded-full bg-[#2A2A2A] border-2 border-dashed border-[#FFC107] flex items-center justify-center">+</div><p className="text-[9px]">Story LIVE 24h</p></div>
+          {USERS.map(u=><div key={u.id} className="min-w-[60px] text-center"><img src={u.photo} className="w-14 h-14 rounded-full border-[3px] border-[#FFC107] object-cover" alt=""/><p className="text-[9px]">{u.name}</p></div>)}
+        </div>
 
-        <div style={{background:'#1E1E1E', borderRadius:'22px', overflow:'hidden', border:'1px solid #333'}}>
-          <div style={{position:'relative'}}>
-            <img src={card.photo} style={{width:'100%', height:'540px', objectFit:'cover'}} alt="profile"/>
-            <div style={{position:'absolute', bottom:0, left:0, right:0, padding:'16px', background:'linear-gradient(to top, rgba(0,0,0,0.95), transparent)'}}>
-              <div style={{display:'flex', gap:'8px', alignItems:'center'}}>
-                <h2 style={{fontSize:'26px', fontWeight:900, margin:0}}>{card.name}, {card.age}</h2>
-                <span style={{background:'#7C4DFF', padding:'4px 10px', borderRadius:'12px', fontSize:'11px', fontWeight:800}}>ID OK</span>
+        <div className="p-4 bg-gradient-to-br from-[#FFC107] to-[#FF8F00] text-black text-center">
+          <h1 className="text-xl font-black">Meet someone who matches your world. 🌍❤️</h1>
+          <p className="text-[11px] mt-1 font-semibold">Discover genuine people from Uganda and around the world.</p>
+          <div className="flex gap-2 justify-center mt-3">
+            <button className="bg-black text-[#FFC107] px-4 py-2 rounded-full font-black text-[11px]">Discover People LIVE</button>
+            <button onClick={()=>setIdx(v=>v+1)} className="bg-white text-black px-4 py-2 rounded-full font-black text-[11px] border-2 border-black">Find My Match LIVE AI</button>
+          </div>
+        </div>
+
+        <div className="p-2.5">
+          <div className="bg-[#1E1E1E] rounded-[22px] overflow-hidden border border-[#333]">
+            <div className="relative">
+              <img src={card.photo} className="w-full h-[540px] object-cover" alt=""/>
+              <div className="absolute bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-black/95 to-transparent">
+                <div className="flex gap-2 items-center"><h2 className="text-[26px] font-black">{card.name}, {card.age}</h2><span className="bg-[#7C4DFF] px-2.5 py-1 rounded-xl text-[11px] font-extrabold">ID OK</span><span className="bg-[#FFC107] text-black px-2 py-1 rounded-xl text-[10px] font-black">{card.match}% Match</span></div>
+                <p className="text-[11px] mt-1.5">6-10 photos LIVE • Video intro LIVE • {card.bio} • {card.intention} • {card.job} • {card.langs.join(",")} • {card.lifestyle}</p>
+                <div className="mt-2.5"><span className="bg-[#7C4DFF] px-3 py-1.5 rounded-full text-[11px]">✓ NIN: Verified • Real person • office checked</span></div>
               </div>
-              <p style={{fontSize:'12px', marginTop:'6px'}}>{card.bio}</p>
-              <div style={{marginTop:'10px'}}>
-                <span style={{background:'#7C4DFF', padding:'6px 12px', borderRadius:'20px', fontSize:'11px'}}>✓ NIN: Verified • Real person • office checked</span>
+            </div>
+            <div className="p-3.5">
+              <div className="flex gap-2 flex-wrap">{card.interests.map((x:string)=><span key={x} className="bg-[#2A2A2A] px-3.5 py-1.5 rounded-full text-[11px] border border-[#333]">{x}</span>)}</div>
+              <div className="flex gap-5 justify-center mt-5">
+                <button onClick={passLive} className="w-[58px] h-[58px] rounded-full bg-[#2A2A2A] border border-[#444] text-white text-[22px]">✕</button>
+                <button onClick={()=>likeLive(card)} className="w-[68px] h-[68px] rounded-full bg-[#FFC107] border-[3px] border-black text-[28px]">❤️</button>
+              </div>
+              <div className="mt-2.5 bg-[#FFF8E1] text-black p-2.5 rounded-xl text-[10px] border-2 border-black">
+                <b>Why This Match? {card.match}% ❤️ LIVE</b><br/>✓ Both want {card.intention}<br/>✓ Both enjoy {card.interests[0]}<br/>✓ {card.langs.join(" + ")}
               </div>
             </div>
           </div>
-          <div style={{padding:'14px'}}>
-            <div style={{display:'flex', gap:'8px'}}>
-              {card.interests.map((x:string)=><span key={x} style={{background:'#2A2A2A', padding:'7px 14px', borderRadius:'20px', fontSize:'11px', border:'1px solid #333'}}>{x}</span>)}
-            </div>
-            <div style={{display:'flex', gap:'20px', justifyContent:'center', marginTop:'20px'}}>
-              <button onClick={passLive} style={{width:'60px', height:'60px', borderRadius:'30px', background:'#2A2A2A', border:'1px solid #444', color:'#fff', fontSize:'22px'}}>✕</button>
-              <button onClick={likeLive} style={{width:'70px', height:'70px', borderRadius:'35px', background:'#FFC107', border:'3px solid #000', fontSize:'28px'}}>❤️</button>
-            </div>
-            <div style={{display:'flex', gap:'8px', justifyContent:'center', marginTop:'14px'}}>
-              <button onClick={()=>setChatUser(card)} style={{background:'#4CAF50', color:'#fff', padding:'8px 16px', borderRadius:'20px', border:'none', fontSize:'11px', fontWeight:700}}>💬 Chat LIVE</button>
-              <button onClick={()=>setCountry('Uganda')} style={{background:'#7C4DFF', color:'#fff', padding:'8px 16px', borderRadius:'20px', border:'none', fontSize:'11px'}}>🌍 Explore LIVE</button>
-            </div>
-            <div style={{marginTop:'12px', background:'#FFF8E1', color:'#000', padding:'10px', borderRadius:'12px', fontSize:'11px', border:'2px solid #000'}}>
-              <b>Why This Match? {card.match}% ❤️ LIVE</b><br/>
-              ✓ Both want {card.intention}<br/>
-              ✓ Both enjoy {card.interests[0]}<br/>
-              ✓ Similar age preferences<br/>
-              ✓ 4 shared interests
+        </div>
+
+        <div className="p-2.5 flex flex-col gap-2.5">
+          <div className="bg-[#1E1E1E] rounded-2xl p-3 border border-[#333]">
+            <b>💕 Recommended LIVE</b>
+            <div className="mt-2.5 grid grid-cols-2 gap-2">
+              {filtered.slice(0,4).map((u:any)=><div key={u.id} className="bg-[#1E1E1E] rounded-2xl overflow-hidden border border-[#333]"><img src={u.photo} className="w-full h-40 object-cover" alt=""/><div className="p-2"><b className="text-[12px]">{u.name}, {u.age}</b><p className="text-[9px] text-[#aaa]">{u.flag} {u.city} • {u.match}% Match</p><button onClick={()=>likeLive(u)} className="w-full mt-1.5 bg-[#FFC107] text-black p-1.5 rounded-xl text-[10px] font-black border-2 border-black">❤️ Like LIVE</button></div></div>)}
             </div>
           </div>
-        </div>
-
-        <div style={{marginTop:'14px', background:'#1E1E1E', borderRadius:'16px', padding:'14px', border:'1px solid #333'}}>
-          <b>🌍 Explore the World LIVE</b>
-          <div style={{display:'flex', gap:'6px', flexWrap:'wrap', marginTop:'10px'}}>
-            {['All','Uganda','Kenya','UK','USA','UAE'].map(c=><button key={c} onClick={()=>setCountry(c)} style={{background:country===c?'#FFC107':'#2A2A2A', color:country===c?'#000':'#fff', padding:'6px 12px', borderRadius:'20px', fontSize:'11px', border:'1px solid #444', fontWeight:700}}>{c==='All'?'🌎 All':'Dating in '+c}</button>)}
+          <div className="bg-[#1E1E1E] rounded-2xl p-3 border border-[#333]">
+            <b>🌍 Explore World LIVE</b>
+            <div className="flex gap-1.5 flex-wrap mt-2">{["All","Uganda","Kenya","UK","USA","UAE"].map(c=><button key={c} onClick={()=>setCountry(c)} className={country===c?"bg-[#FFC107] text-black px-3 py-1.5 rounded-full text-[10px] font-bold border-2 border-black":"bg-[#2A2A2A] text-white px-3 py-1.5 rounded-full text-[10px]"}>{c==="All"?"🌎 All":"Dating in "+c}</button>)}</div>
           </div>
-        </div>
-
-        <div style={{marginTop:'12px'}}>
-          <b>💕 Recommended LIVE</b>
-          <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginTop:'10px'}}>
-            {filtered.slice(0,4).map((u:any)=><div key={u.id} style={{background:'#1E1E1E', borderRadius:'16px', overflow:'hidden', border:'1px solid #333'}}>
-              <img src={u.photo} style={{width:'100%', height:'160px', objectFit:'cover'}} alt=""/>
-              <div style={{padding:'8px'}}>
-                <b style={{fontSize:'12px'}}>{u.name}, {u.age}</b>
-                <p style={{fontSize:'10px', color:'#aaa'}}>{u.flag} {u.city} • {u.match}% Match</p>
-                <button onClick={()=>likeLive()} style={{width:'100%', marginTop:'6px', background:'#FFC107', color:'#000', padding:'6px', borderRadius:'10px', fontWeight:800, border:'none', fontSize:'11px'}}>❤️ Like LIVE</button>
-              </div>
-            </div>)}
+          <div className="bg-gradient-to-br from-[#7C4DFF] to-[#FFC107] p-3.5 rounded-[18px] border-[3px] border-black">
+            <b className="text-white">💎 Pro LIVE - All Premium</b>
+            <button onClick={()=>setShowPay(true)} className="w-full mt-2.5 bg-black text-[#FFC107] p-3 rounded-xl font-black">Upgrade $29.99 LIVE</button>
           </div>
+          <div className="bg-[#1E1E1E] rounded-xl p-3 border border-[#333]"><b>🛡️ Safe & Verified LIVE</b><p className="text-[10px] mt-2">✅ Profile verification LIVE • 🛡️ Privacy LIVE • 🚫 Block & report LIVE • 🔐 Secure messaging LIVE • Voice 🎤 Video 📹 Translation LIVE • Trust System LIVE</p></div>
         </div>
-
-        <div style={{marginTop:'14px', background:'linear-gradient(135deg,#7C4DFF,#FFC107)', padding:'14px', borderRadius:'18px', border:'3px solid #000'}}>
-          <b style={{color:'#fff'}}>💎 Upgrade to KLA MEET Pro LIVE</b>
-          <div style={{marginTop:'8px', background:'rgba(255,255,255,0.95)', color:'#000', padding:'10px', borderRadius:'12px', fontSize:'11px', lineHeight:'1.6'}}>
-            ✅ See who likes you LIVE<br/>
-            ✅ Unlimited likes LIVE<br/>
-            ✅ Travel mode LIVE<br/>
-            ✅ Profile boost LIVE<br/>
-            ✅ Unlimited messaging LIVE
-          </div>
-          <button onClick={()=>setShowPay(true)} style={{width:'100%', marginTop:'10px', background:'#000', color:'#FFC107', padding:'12px', borderRadius:'12px', fontWeight:900, border:'none'}}>Upgrade to Pro LIVE</button>
-        </div>
-
-        <div style={{marginTop:'12px', background:'#1E1E1E', borderRadius:'14px', padding:'12px', border:'1px solid #333}}>
-          <b>🛡️ Safe & Verified LIVE</b>
-          <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'8px', marginTop:'10px', fontSize:'11px'}}>
-            <div style={{background:'#121212', padding:'10px', borderRadius:'12px'}}>✅ Profile verification LIVE</div>
-            <div style={{background:'#121212', padding:'10px', borderRadius:'12px'}}>🛡️ Privacy LIVE</div>
-            <div style={{background:'#121212', padding:'10px', borderRadius:'12px'}}>🚫 Block & report LIVE</div>
-            <div style={{background:'#121212', padding:'10px', borderRadius:'12px'}}>🔐 Secure messaging LIVE</div>
-          </div>
-        </div>
-
       </div>
 
-      <div style={{position:'fixed', bottom:0, left:0, right:0, background:'#1E1E1E', borderTop:'1px solid #333', display:'flex', justifyContent:'space-around', padding:'10px 0'}}>
-        <span style={{color:'#FFC107', fontSize:'11px', fontWeight:900}}>🏠 Home</span>
-        <span style={{color:'#888', fontSize:'11px'}}>🔎 Discover LIVE</span>
-        <span style={{color:'#888', fontSize:'11px'}}>❤️ Matches LIVE</span>
-        <span style={{color:'#888', fontSize:'11px'}}>💬 Messages LIVE</span>
-        <span style={{color:'#888', fontSize:'11px'}}>👤 Profile LIVE</span>
-      </div>
+      <div className="fixed bottom-0 left-0 right-0 bg-[#1E1E1E] border-t border-[#333] flex justify-around py-2.5"><span className="text-[10px] text-[#FFC107] font-black">🏠 Home</span><span className="text-[10px] text-[#888]">🔎 Discover LIVE</span><span className="text-[10px] text-[#888]">❤️ Matches LIVE</span><span className="text-[10px] text-[#888]">💬 Messages LIVE</span><span className="text-[10px] text-[#888]">👤 Profile LIVE</span></div>
 
-      {chatUser && <div style={{position:'fixed', inset:0, background:'#121212', zIndex:100, display:'flex', flexDirection:'column'}}>
-        <div style={{background:'#1E1E1E', padding:'12px', display:'flex', gap:'10px', alignItems:'center'}}>
-          <button onClick={()=>setChatUser(null)} style={{background:'#2A2A2A', color:'#fff', padding:'6px 10px', borderRadius:'8px', border:'none'}}>←</button>
-          <b>{chatUser.name} LIVE Chat</b>
-        </div>
-        <div style={{flex:1, padding:'12px'}}>
-          <p style={{background:'#2A2A2A', padding:'10px', borderRadius:'12px', fontSize:'13px'}}>Hey! How's your day going? LIVE</p>
-        </div>
-        <div style={{padding:'12px', display:'flex', gap:'8px', background:'#1E1E1E'}}>
-          <input id="msg" placeholder="Message LIVE" style={{flex:1, background:'#2A2A2A', border:'1px solid #444', padding:'12px', borderRadius:'20px', color:'#fff'}}/>
-          <button onClick={async()=>{const el=document.getElementById('msg') as any; if(!el.value) return; try{await supabase.from('messages').insert({from_id:'me', to_id:chatUser.id, text:el.value})}catch{}; alert('Message LIVE sent'); el.value=''}} style={{background:'#FFC107', color:'#000', padding:'12px 18px', borderRadius:'20px', fontWeight:900, border:'none'}}>Send LIVE</button>
-        </div>
-      </div>}
-
-      {showPay && <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100, padding:'16px'}}>
-        <div style={{background:'#fff', color:'#000', borderRadius:'20px', padding:'16px', width:'100%', maxWidth:'360px', border:'4px solid #000'}}>
-          <h3 style={{fontWeight:900}}>PRO LIVE $29.99</h3>
-          <button onClick={()=>payLive(29.99,'Stripe')} style={{width:'100%', marginTop:'12px', background:'#635BFF', color:'#fff', padding:'14px', borderRadius:'12px', fontWeight:900, border:'3px solid #000'}}>Stripe LIVE $29.99</button>
-          <button onClick={()=>payLive(29.99,'PayPal')} style={{width:'100%', marginTop:'8px', background:'#FFC439', color:'#000', padding:'14px', borderRadius:'12px', fontWeight:900, border:'3px solid #000'}}>PayPal LIVE</button>
-          <button onClick={()=>payLive(45000,'MoMo')} style={{width:'100%', marginTop:'8px', background:'#FFCC00', color:'#000', padding:'14px', borderRadius:'12px', fontWeight:900, border:'3px solid #000'}}>MTN MoMo LIVE</button>
-          <button onClick={()=>setShowPay(false)} style={{width:'100%', marginTop:'10px', padding:'10px', background:'#eee', borderRadius:'10px', border:'none'}}>Close</button>
-        </div>
-      </div>}
-
-      {showID && <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.9)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:100, padding:'16px'}}>
-        <div style={{background:'#fff', color:'#000', borderRadius:'20px', padding:'16px', width:'100%', maxWidth:'360px', border:'4px solid #000'}}>
-          <h3 style={{fontWeight:900}}>Verify ID LIVE</h3>
-          <input type="file" onChange={async(e)=>{const f=e.target.files?.[0]; if(!f) return; try{await supabase.storage.from('id-docs').upload('id_'+Date.now()+'_'+f.name,f); alert('Uploaded LIVE')}catch(err:any){alert('Create bucket id-docs')}}} style={{width:'100%', marginTop:'10px', border:'2px solid #000', padding:'8px', borderRadius:'10px'}}/>
-          <button onClick={verifyLive} style={{width:'100%', marginTop:'12px', background:'#4CAF50', color:'#fff', padding:'14px', borderRadius:'12px', fontWeight:900, border:'3px solid #000'}}>Submit LIVE</button>
-          <button onClick={()=>setShowID(false)} style={{width:'100%', marginTop:'8px', padding:'10px', background:'#eee', borderRadius:'10px', border:'none'}}>Close</button>
-        </div>
-      </div>}
+      {showPay && <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[200] p-3"><div className="bg-white text-black p-4 rounded-2xl w-full max-w-[360px] border-[3px] border-black"><b>PRO LIVE $29.99</b><button onClick={async()=>{try{await supabase.from("payments").insert({plan:"monthly",amount:29.99,currency:"USD",method:"Stripe"})}catch{}; setShowPay(false)}} className="w-full mt-3 bg-[#635BFF] text-white p-3 rounded-xl font-black border-2 border-black">Stripe $29.99 LIVE</button><button onClick={()=>setShowPay(false)} className="w-full mt-2 p-2 bg-[#eee] rounded-xl">Close</button></div></div>}
+      {showID && <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-[200] p-3"><div className="bg-white text-black p-4 rounded-2xl w-full max-w-[360px] border-[3px] border-black"><b>Verify ID LIVE</b><button onClick={async()=>{try{await supabase.from("id_verifications").insert({user_name:"You",status:"pending"})}catch{}; setShowID(false)}} className="w-full mt-3 bg-[#4CAF50] text-white p-3 rounded-xl font-black border-2 border-black">Submit LIVE ✓</button><button onClick={()=>setShowID(false)} className="w-full mt-2 p-2 bg-[#eee] rounded-xl">Close</button></div></div>}
+      {chatUser && <div className="fixed inset-0 bg-[#121212] z-[100] flex flex-col"><div className="bg-[#1E1E1E] p-3 flex gap-2 items-center"><button onClick={()=>setChatUser(null)} className="bg-[#2A2A2A] text-white px-2.5 py-1.5 rounded-lg">←</button><b>{chatUser.name} LIVE Chat</b></div><div className="flex-1 p-3"><p className="bg-[#2A2A2A] p-2.5 rounded-xl">Hey! LIVE message + Translation + Voice Video</p></div><div className="p-3 flex gap-2 bg-[#1E1E1E]"><input id="msg" placeholder="Message LIVE" className="flex-1 bg-[#2A2A2A] border border-[#444] px-3.5 py-2.5 rounded-full text-white"/><button onClick={async()=>{const el=document.getElementById("msg") as any; if(!el.value) return; try{await supabase.from("messages").insert({from_id:"me",to_id:chatUser.id,text:el.value})}catch{}; el.value=""}} className="bg-[#FFC107] text-black px-4 py-2.5 rounded-full font-black">Send LIVE</button></div></div>}
     </div>
   )
 }
