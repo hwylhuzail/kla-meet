@@ -24,17 +24,10 @@ export default function App(){
 
   if(step==="login"){
     return (
-      <div className="min-h-screen flex flex-col justify-between" style={{background:'#ffc629'}}>
-        <div className="p-7"><h1 className="display text-4xl font-bold tracking-tight">KLA<span>•</span></h1><p className="mt-1 text-sm font-semibold">Meet someone worth meeting.</p></div>
-        <div className="px-6 pb-10 max-w-md mx-auto w-full">
-          <div className="mb-8"><p className="text-sm font-semibold mb-2">Made for real connections in Kampala</p><h2 className="display text-5xl font-bold leading-none tracking-tight">Good people.<br/>Better dates.</h2></div>
-          <div className="bg-white rounded-[24px] p-5 shadow-xl">
-            <input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="Email or phone number" className="field mb-3" />
-            <input placeholder="Password" type="password" className="field mb-4" />
-            <button onClick={()=>setStep("swipe")} className="primary-button w-full text-base">Continue</button>
-            <p className="text-[11px] text-center text-stone-500 mt-4">By continuing, you agree to our Terms and Privacy Policy.</p>
-          </div>
-        </div>
+      <div className="entry-screen">
+        <section className="entry-story"><div><h1 className="brand">KLA<span className="brand-mark">•</span></h1><p className="text-sm font-semibold mt-1">Meet someone worth meeting.</p></div><div className="entry-copy"><p className="eyebrow text-black/60">Made for Kampala</p><h2>Good people.<br/>Better dates.</h2><p>Make space for a connection that feels easy, genuine, and close to home.</p></div><div className="entry-collage"><img src={PROFILES[0].img} alt="KLA Meet member"/><img src={PROFILES[2].img} alt="KLA Meet member"/><img src={PROFILES[4].img} alt="KLA Meet member"/></div></section>
+        <section className="entry-form"><div className="entry-form-card"><p className="eyebrow">Welcome in</p><h1 className="mt-2">Your next hello<br/>starts here.</h1><label className="form-label">Email or phone number</label><input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+256 700 000000" className="field" /><label className="form-label">Password</label><input placeholder="Enter your password" type="password" className="field mb-5" /><button onClick={()=>setStep("swipe")} className="primary-button w-full text-base">Continue</button><p className="text-[11px] text-center text-stone-500 mt-4">By continuing, you agree to our Terms and Privacy Policy.</p><div className="flex items-center gap-3 my-7 text-xs text-stone-400"><span className="h-px bg-[#ece9e2] flex-1"/>or<span className="h-px bg-[#ece9e2] flex-1"/></div><button onClick={()=>setStep("swipe")} className="w-full border border-[#ece9e2] rounded-[14px] p-3 font-bold hover:bg-white">Continue as a guest</button>
+        </div></section>
       </div>
     )
   }
@@ -60,7 +53,7 @@ export default function App(){
           <img src={chatUser.img} className="w-10 h-10 rounded-full object-cover" />
           <div><p className="font-bold">{chatUser.name}</p><p className="text-xs text-green-400">Online • {chatUser.location}</p></div>
         </div>
-        <div className="flex-1 p-4 space-y-3 bg-zinc-950">
+        <div className="flex-1 p-4 space-y-3 bg-[#f6f4ee]">
           <div className="bg-white border border-[#ece9e2] rounded-2xl rounded-bl-none p-3 max-w-[75%]">Hey! I saw you are from {chatUser.location} 😊</div>
           <div className="bg-[#ffc629] text-black rounded-2xl rounded-br-none p-3 max-w-[75%] ml-auto">Haha yes! Want to meet tomorrow?</div>
           <div className="bg-white border border-[#ece9e2] rounded-2xl rounded-bl-none p-3 max-w-[75%]">Sure! Cafe Javas Kololo 5pm?</div>
