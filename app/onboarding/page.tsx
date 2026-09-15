@@ -11,9 +11,9 @@ export default function Onboarding(){
     await supabase.from('profiles').upsert({id:user.id, email:user.email, full_name:name, gender, bio, location:'Kampala'});
     r.push('/discover');
   }
-  return <div className="p-6 max-w-sm mx-auto"><h2 className="text-2xl font-bold mb-4">Setup Profile</h2>
-  <input className="w-full p-3 border rounded-xl mb-3" placeholder="Full name" onChange={e=>setName(e.target.value)}/>
-  <select className="w-full p-3 border rounded-xl mb-3" onChange={e=>setGender(e.target.value)}><option value="male">Male</option><option value="female">Female</option></select>
-  <textarea className="w-full p-3 border rounded-xl mb-4" placeholder="Bio" onChange={e=>setBio(e.target.value)}/>
-  <button onClick={save} className="w-full bg-black text-white p-3 rounded-xl">Continue</button></div>
+  return <div className="min-h-screen p-6"><div className="max-w-sm mx-auto pt-8"><p className="eyebrow">Your profile</p><h2 className="display text-3xl font-bold mt-2 mb-2">Let people meet you.</h2><p className="text-sm text-stone-500 mb-7">A little personality goes a long way.</p>
+  <input className="field mb-3" placeholder="Full name" onChange={e=>setName(e.target.value)}/>
+  <select className="field mb-3" onChange={e=>setGender(e.target.value)}><option value="male">I am a man</option><option value="female">I am a woman</option></select>
+  <textarea className="field mb-4 min-h-32" placeholder="Tell us something people should know..." onChange={e=>setBio(e.target.value)}/>
+  <button onClick={save} className="primary-button w-full">Continue</button></div></div>
 }

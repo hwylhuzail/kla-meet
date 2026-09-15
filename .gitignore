@@ -11,3 +11,4 @@ android/build
 .env.local
 .vercel
 .DS_Store
+*.tsbuildinfo
