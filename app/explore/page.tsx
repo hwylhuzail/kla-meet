@@ -1,0 +1,11 @@
+'use client'
+
+import { useState } from 'react'
+import { COUNTRIES, countryFlag } from '@/lib/countries'
+import Link from 'next/link'
+import BottomNav from '@/components/BottomNav'
+
+export default function Explore() {
+  const [country, setCountry] = useState('')
+  return <div className="app-shell"><header className="topbar"><div><p className="eyebrow">Global discovery</p><h1 className="display text-2xl font-bold mt-1">Explore</h1></div><span className="text-2xl">🌍</span></header><main className="content animate-page"><section className="rounded-[26px] bg-gradient-to-br from-[#5b21b6] via-[#9333ea] to-[#fb7185] p-6 text-white shadow-xl"><p className="text-xs font-bold tracking-[1.5px] text-white/70">WORLDWIDE MODE</p><h2 className="display mt-3 text-3xl font-bold leading-8">Meet someone.<br />Anywhere in the world.</h2><p className="mt-3 max-w-xs text-sm text-white/80">Discover people across countries, cultures and communities.</p></section><section className="soft-panel mt-5"><label className="eyebrow">Search by country</label><select className="field mt-3" value={country} onChange={e => setCountry(e.target.value)}><option value="">All countries</option>{COUNTRIES.map(([code, name]) => <option key={code} value={code}>{countryFlag(code)} {name}</option>)}</select></section><div className="mt-5 grid grid-cols-2 gap-3">{[['❤️', 'Best Matches'], ['🟢', 'Online Now'], ['🆕', 'New Members'], ['⭐', 'Featured']].map(([icon, label]) => <Link href={`/discover?mode=${label.toLowerCase().replaceAll(' ', '-')}${country ? `&country=${country}` : ''}`} key={label} className="soft-panel no-underline transition-transform hover:-translate-y-1"><span className="text-2xl">{icon}</span><p className="mt-3 font-bold">{label}</p><p className="mt-1 text-xs text-stone-500">Explore profiles</p></Link>)}</div><section className="mt-7"><p className="eyebrow">Popular destinations</p><div className="mt-3 flex gap-2 overflow-x-auto pb-2">{COUNTRIES.slice(0, 12).map(([code, name]) => <button onClick={() => setCountry(code)} key={code} className="min-w-max rounded-full border border-[#ece9e2] bg-white px-4 py-3 text-sm shadow-sm">{countryFlag(code)} {name}</button>)}</div></section></main><BottomNav /></div>
+}

@@ -1,23 +1,10 @@
-"use client"
-import { useState } from "react"
-export default function Premium(){
-  const [method,setMethod]=useState("mtn")
-  const pay = async()=>{
-    const res = await fetch("/api/pesapal",{method:"POST",body:JSON.stringify({method,amount:15000})})
-    const data = await res.json()
-    if(data.url) window.location.href=data.url; else alert("PesaPal not configured yet - add keys in .env. Using Google Play Billing for now.")
-  }
-  return (
-    <div style={{maxWidth:"400px",margin:"20px auto",padding:"20px",color:"#fff"}}>
-      <h1 style={{color:"#ff3366"}}>KLA Premium 💎</h1>
-      <div style={{background:"#222",padding:"16px",borderRadius:"12px",marginTop:"16px"}}>
-        <h3>Choose Payment</h3>
-        <select value={method} onChange={e=>setMethod(e.target.value)} style={{width:"100%",padding:"12px",background:"#111",color:"#fff",borderRadius:"8px",marginTop:"10px"}}>
-          <option value="mtn">MTN MoMo</option><option value="airtel">Airtel Money</option><option value="visa">Visa / Mastercard</option><option value="google">Google Play Billing</option>
-        </select>
-        <button onClick={pay} style={{width:"100%",background:"#ff3366",padding:"14px",borderRadius:"12px",marginTop:"16px",fontWeight:"bold"}}>Pay 15,000 UGX / week</button>
-        <p style={{fontSize:"11px",opacity:0.5,marginTop:"10px"}}>Secure via PesaPal & Google. Auto-renews. Cancel anytime in Settings → Subscription. 18+ only.</p>
-      </div>
-    </div>
-  )
+'use client'
+
+import { useState } from 'react'
+
+const plans = [{ id: 'week', name: 'Premium Week', amount: 15000, price: '15,000 UGX' }, { id: 'month', name: 'Premium Month', amount: 45000, price: '45,000 UGX', popular: true }, { id: 'vip', name: 'VIP 3 Months', amount: 99000, price: '99,000 UGX' }]
+export default function Premium() {
+  const [selected, setSelected] = useState(plans[1]); const [email, setEmail] = useState(''); const [phone, setPhone] = useState(''); const [busy, setBusy] = useState('')
+  const pay = async (method: 'pesapal' | 'mtn' | 'airtel') => { if (!email || !phone) return alert('Add your email and mobile money number first.'); setBusy(method); const endpoint = method === 'pesapal' ? '/api/pesapal/order' : `/api/momo/${method}`; const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: selected.amount, plan: selected.name, email, phone }) }); const result = await response.json(); setBusy(''); if (!response.ok) return alert(result.error || 'Payment could not be started.'); if (result.redirect_url) window.location.href = result.redirect_url; else alert(result.message || 'Payment request sent to your phone.') }
+  return <main className="min-h-screen bg-gradient-to-br from-[#171225] via-[#24153b] to-[#581c87] p-5 text-white md:flex md:justify-center"><div className="w-full max-w-2xl py-5"><header className="flex items-center justify-between"><div><p className="brand text-white">KLA<span className="brand-mark">•</span></p><p className="mt-1 text-xs text-white/50">Premium worldwide discovery</p></div><span className="rounded-full bg-[#ffc629] px-3 py-1 text-xs font-bold text-[#171225]">18+</span></header><section className="mt-14"><p className="eyebrow text-pink-300">KLA MEET PREMIUM</p><h1 className="display mt-3 text-5xl font-bold leading-[.95] tracking-[-2px]">More chances to<br /><span className="text-[#ffc629]">meet meaningfully.</span></h1><p className="mt-5 max-w-md text-sm leading-6 text-white/65">Go beyond your local radius and discover people worldwide with tools designed for thoughtful connections.</p></section><div className="mt-9 grid gap-3 md:grid-cols-3">{plans.map(plan => <button key={plan.id} onClick={() => setSelected(plan)} className={`relative rounded-2xl border p-5 text-left transition ${selected.id === plan.id ? 'border-[#ffc629] bg-[#ffc629] text-[#171225]' : 'border-white/15 bg-white/10 text-white'}`}>{plan.popular && <span className="absolute -top-3 left-4 rounded-full bg-pink-400 px-2 py-1 text-[10px] font-bold text-white">POPULAR</span>}<span className="block font-bold">{plan.name}</span><span className="mt-3 block text-xl font-bold">{plan.price}</span><span className="mt-1 block text-xs opacity-65">Worldwide discovery</span></button>)}</div><section className="mt-7 grid gap-3 rounded-[26px] border border-white/10 bg-white/10 p-5 backdrop-blur md:grid-cols-2"><div className="space-y-3 text-sm text-white/85"><p>⭐ Unlimited discovery</p><p>🌍 Worldwide filters</p><p>❤️ See who liked you</p><p>✨ Profile priority</p></div><div className="space-y-3 text-sm text-white/85"><p>🎯 Advanced matching</p><p>🔒 Incognito mode</p><p>💬 Translation-ready chats</p><p>🛡️ Safety tools</p></div></section><section className="mt-6 space-y-3"><input className="field border-white/15 bg-black/20 text-white placeholder:text-white/40" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email for your receipt" type="email" /><input className="field border-white/15 bg-black/20 text-white placeholder:text-white/40" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Mobile money number" /><button disabled={!!busy} onClick={() => pay('pesapal')} className="primary-button w-full">{busy === 'pesapal' ? 'Opening secure checkout...' : 'Pay securely · Visa / Mastercard / MTN / Airtel'}</button><div className="grid grid-cols-2 gap-3"><button disabled={!!busy} onClick={() => pay('mtn')} className="rounded-full bg-[#ffc629] py-3.5 text-sm font-bold text-[#171225]">{busy === 'mtn' ? 'Sending...' : 'Direct MTN'}</button><button disabled={!!busy} onClick={() => pay('airtel')} className="rounded-full bg-[#ef4444] py-3.5 text-sm font-bold text-white">{busy === 'airtel' ? 'Sending...' : 'Direct Airtel'}</button></div></section><p className="mt-6 text-center text-[11px] text-white/40">Payment availability depends on configured provider credentials. Subscriptions are not activated until payment confirmation.</p></div></main>
 }

@@ -1,20 +1,32 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import BottomNav from '@/components/BottomNav'
 
-export default function Discover(){
-  const [profiles,setProfiles]=useState<any[]>([]); const [i,setI]=useState(0);
-  useEffect(()=>{supabase.from('profiles').select('*').limit(20).then(({data})=>setProfiles(data||[]))},[]);
-  const like=async(t:string)=>{
-    const {data:{user}}=await supabase.auth.getUser(); const target=profiles[i];
-    if(!user||!target) return;
-    await supabase.from('likes').insert({from_user:user.id, to_user:target.id, type:t});
-    const {data:mutual}=await supabase.from('likes').select('*').eq('from_user',target.id).eq('to_user',user.id).single();
-    if(mutual){await supabase.from('matches').insert({user1:user.id, user2:target.id}); alert('It\'s a Match! 💜')}
-    setI(i+1);
-  }
-  const cur=profiles[i];
-  if(!cur) return <div className="app-shell"><main className="content text-center pt-20"><p className="eyebrow">That&apos;s everyone</p><h1 className="display text-3xl font-bold mt-2">No more profiles nearby</h1><p className="text-sm text-stone-500 mt-3 mb-7">Try widening your preferences to meet more people.</p><button onClick={()=>setI(0)} className="primary-button">Show them again</button></main><BottomNav/></div>
-  return <div className="app-shell"><header className="topbar"><h1 className="brand">KLA<span className="brand-mark">•</span></h1><button className="icon-button" aria-label="Filters">⌁</button></header><main className="content"><div className="flex items-end justify-between mb-4"><div><p className="eyebrow">Discover</p><h2 className="display text-2xl font-bold mt-1">Fresh faces</h2></div><span className="text-xs text-stone-500">Kampala</span></div><div className="profile-card"><div className="w-full h-full bg-stone-200 flex items-center justify-center text-6xl">👤</div><div className="profile-info"><h2>{cur.full_name} {cur.is_verified?'✓':''}</h2><p>{cur.location} · {cur.bio || 'New around here'}</p><div className="chip-row"><span className="chip">Nearby</span><span className="chip">Looking to connect</span></div></div></div><div className="action-row"><button onClick={()=>like('pass')} className="round-action" aria-label="Pass">✕</button><button onClick={()=>like('superlike')} className="round-action" aria-label="Super like">★</button><button onClick={()=>like('like')} className="round-action primary" aria-label="Like">♥</button></div></main><BottomNav/></div>
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import BottomNav from '@/components/BottomNav'
+import ProfileCard from '@/components/ProfileCard'
+import SectionRow from '@/components/SectionRow'
+import { supabase } from '@/lib/supabase'
+import { normalizeProfile, Profile } from '@/lib/profile'
+import { COUNTRIES, countryFlag } from '@/lib/countries'
+
+const modes = [['worldwide', '🌍 Worldwide'], ['near-me', '📍 Near Me'], ['best-matches', '❤️ Best Matches'], ['online-now', '🟢 Online Now'], ['new-members', '🆕 New Members'], ['featured', '⭐ Featured']]
+
+function DiscoverClient() {
+  const searchParams = useSearchParams()
+  const [profiles, setProfiles] = useState<Profile[]>([])
+  const [mode, setMode] = useState(searchParams.get('mode') || 'worldwide')
+  const [country, setCountry] = useState(searchParams.get('country') || '')
+  const [loading, setLoading] = useState(true)
+  const [message, setMessage] = useState('')
+  useEffect(() => { let active = true; setLoading(true); supabase.from('profiles').select('*').limit(100).then(({ data, error }) => { if (!active) return; setProfiles(error ? [] : (data || []).map(normalizeProfile)); setLoading(false); if (error) setMessage('Discovery is temporarily unavailable. Please try again shortly.') }); return () => { active = false } }, [])
+  const filtered = useMemo(() => { let result = profiles.filter(profile => !country || profile.country?.toLowerCase() === country.toLowerCase() || profile.city?.toLowerCase() === country.toLowerCase()); if (mode === 'online-now') result = result.filter(profile => profile.isOnline); if (mode === 'new-members') result = [...result].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))); if (mode === 'best-matches') result = [...result].sort((a, b) => (b.interests.length + Number(Boolean(b.bio))) - (a.interests.length + Number(Boolean(a.bio)))); return result }, [profiles, mode, country])
+  const online = profiles.filter(profile => profile.isOnline)
+  const newMembers = [...profiles].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+  const near = country ? profiles.filter(profile => profile.country === country) : profiles.slice(0, 6)
+    const handleAction = async (profile: Profile, type: string) => { const { data: { user } } = await supabase.auth.getUser(); if (!user) return setMessage('Sign in to connect with people.'); if (type === 'pass') return setMessage(`Passed on ${profile.name}`); const { data: existingLike } = await supabase.from('likes').select('id').eq('from_id', user.id).eq('to_id', profile.id).maybeSingle(); if (!existingLike) { const { error } = await supabase.from('likes').insert({ from_id: user.id, to_id: profile.id }); if (error) return setMessage(error.message) } const { data: mutual } = await supabase.from('likes').select('id').eq('from_id', profile.id).eq('to_id', user.id).maybeSingle(); if (mutual) { const [user1, user2] = [user.id, profile.id].sort(); const { data: existingMatch } = await supabase.from('matches').select('id').eq('user1', user1).eq('user2', user2).maybeSingle(); if (!existingMatch) await supabase.from('matches').insert({ user1, user2 }); setMessage(`It's a match with ${profile.name}!`) } else setMessage(`Interest sent to ${profile.name}`) }
+  return <div className="app-shell"><header className="topbar"><div><p className="eyebrow">Global discovery</p><h1 className="display text-2xl font-bold mt-1">Discover</h1></div><div className="flex items-center gap-2"><a href="/premium" className="rounded-full bg-gradient-to-r from-violet-600 to-pink-500 px-3 py-2 text-xs font-bold text-white">Premium</a><button className="icon-button" aria-label="Open filters">⌁</button></div></header><main className="content animate-page"><section className="rounded-[26px] bg-gradient-to-br from-[#4c1d95] via-[#7c3aed] to-[#fb7185] p-6 text-white shadow-xl"><p className="text-xs font-bold tracking-[1.5px] text-white/70">MEET SOMEONE. ANYWHERE.</p><h2 className="display mt-3 text-3xl font-bold leading-8">People who make<br />the world feel smaller.</h2><p className="mt-3 text-sm text-white/80">Real connections across countries, cultures and communities.</p></section><div className="mt-5 flex gap-2 overflow-x-auto pb-2">{modes.map(([value, label]) => <button key={value} onClick={() => setMode(value)} className={`min-w-max rounded-full px-4 py-2.5 text-xs font-bold transition ${mode === value ? 'bg-[#24202e] text-white' : 'border border-[#ece9e2] bg-white text-stone-600'}`}>{label}</button>)}</div><div className="mt-2 flex gap-2"><select value={country} onChange={e => setCountry(e.target.value)} className="field max-w-full text-sm"><option value="">All countries</option>{COUNTRIES.map(([code, name]) => <option key={code} value={code}>{countryFlag(code)} {name}</option>)}</select></div>{loading ? <div className="soft-panel mt-7 text-center"><p className="text-sm text-stone-500">Finding people around the world...</p></div> : filtered.length ? <><section className="mt-7"><div className="mb-3 flex items-end justify-between"><div><p className="eyebrow text-violet-600">{mode === 'worldwide' ? 'Worldwide discovery' : modes.find(([value]) => value === mode)?.[1]}</p><h2 className="display mt-1 text-2xl font-bold">People you may like</h2></div><span className="text-xs text-stone-500">{filtered.length} profiles</span></div><div className="mx-auto max-w-[420px]"><ProfileCard profile={filtered[0]} onAction={type => handleAction(filtered[0], type)} /></div></section><SectionRow title="Best Matches" icon="❤️" profiles={profiles.slice(0, 8)} /><SectionRow title="Around the World" icon="🌍" profiles={profiles.filter(profile => profile.country).slice(0, 8)} /><SectionRow title="Near You" icon="📍" profiles={near} /><SectionRow title="Online Now" icon="🟢" profiles={online} /><SectionRow title="New Members" icon="🆕" profiles={newMembers} /></> : <section className="soft-panel mt-8 text-center"><div className="text-5xl">🌍</div><h2 className="display mt-4 text-2xl font-bold">You&apos;ve explored this view</h2><p className="mt-2 text-sm leading-5 text-stone-500">Try Worldwide Discovery, choose another country, or broaden your preferences. The KLA Meet community is growing.</p><div className="mt-5 flex flex-wrap justify-center gap-2"><button onClick={() => { setMode('worldwide'); setCountry('') }} className="primary-button">Explore worldwide</button><a href="/profile" className="rounded-[14px] border border-[#ece9e2] px-4 py-3 text-sm font-bold">Improve my profile</a></div></section>}{message && <p className="mt-4 text-center text-xs text-stone-500">{message}</p>}</main><BottomNav /></div>
+}
+
+export default function Discover() {
+  return <Suspense fallback={<div className="min-h-screen bg-[#fbf9ff]" />}><DiscoverClient /></Suspense>
 }

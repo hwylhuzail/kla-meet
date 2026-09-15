@@ -1,13 +1,12 @@
 'use client'
+
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-export default function Auth(){
-  const [email,setEmail]=useState(''); const [pass,setPass]=useState(''); const r=useRouter();
-  const login=async()=>{
-    const {data,error}=await supabase.auth.signInWithPassword({email,password:pass});
-    if(error){const {error:se}=await supabase.auth.signUp({email,password:pass}); if(se) alert(se.message); else alert('Check email, then login');}
-    else r.push('/onboarding');
-  }
-  return <div className="min-h-screen flex items-center justify-center p-6" style={{background:'#ffc629'}}><div className="bg-white p-7 rounded-[24px] w-full max-w-sm shadow-xl"><h1 className="brand">KLA<span className="brand-mark">•</span></h1><p className="text-sm text-stone-500 mt-2 mb-7">Sign in and start meeting better people.</p><input className="field mb-3" placeholder="Email" onChange={e=>setEmail(e.target.value)}/><input className="field mb-4" type="password" placeholder="Password" onChange={e=>setPass(e.target.value)}/><button onClick={login} className="primary-button w-full">Continue</button><p className="text-xs text-center text-stone-400 mt-5">18+ only · Kampala and beyond</p></div></div>
+
+export default function Auth() {
+  const router = useRouter(); const [email, setEmail] = useState(''); const [password, setPassword] = useState(''); const [mode, setMode] = useState<'login' | 'signup'>('login'); const [status, setStatus] = useState('')
+  const submit = async () => { setStatus('Working...'); const result = mode === 'login' ? await supabase.auth.signInWithPassword({ email, password }) : await supabase.auth.signUp({ email, password }); if (result.error) return setStatus(result.error.message); if (mode === 'signup' && !result.data.session) return setStatus('Check your email to confirm your account, then sign in.'); router.push('/profile') }
+  const reset = async () => { if (!email) return setStatus('Enter your email first.'); const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/profile` }); setStatus(error ? error.message : 'Password reset email sent.') }
+  return <main className="min-h-screen bg-gradient-to-br from-[#4c1d95] via-[#7c3aed] to-[#fb7185] p-6 md:flex md:items-center md:justify-center"><section className="mx-auto w-full max-w-md rounded-[28px] bg-white p-7 shadow-2xl"><p className="brand">KLA<span className="brand-mark">•</span></p><p className="eyebrow mt-8 text-violet-600">{mode === 'login' ? 'Welcome back' : 'Join the world'}</p><h1 className="display mt-2 text-3xl font-bold">{mode === 'login' ? 'Your next hello is waiting.' : 'Meet someone anywhere.'}</h1><div className="mt-7 space-y-3"><input className="field" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email address" type="email" /><input className="field" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" type="password" /><button onClick={submit} className="primary-button w-full">{mode === 'login' ? 'Sign in' : 'Create account'}</button></div><button onClick={reset} className="mt-4 w-full text-xs font-bold text-violet-600">Forgot password?</button>{status && <p className="mt-4 rounded-xl bg-stone-50 p-3 text-center text-xs text-stone-600">{status}</p>}<p className="mt-7 text-center text-sm text-stone-500">{mode === 'login' ? 'New to KLA Meet?' : 'Already have an account?'} <button onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setStatus('') }} className="font-bold text-violet-600">{mode === 'login' ? 'Create account' : 'Sign in'}</button></p><p className="mt-4 text-center text-[11px] text-stone-400">18+ only · Your data is protected by Supabase Auth.</p></section></main>
 }

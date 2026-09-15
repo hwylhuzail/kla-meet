@@ -1,14 +1,5 @@
-"use client"
-export default function Verify(){
-  return (
-    <div style={{maxWidth:"400px",margin:"40px auto",padding:"20px",color:"#fff",textAlign:"center"}}>
-      <h2>Get Verified ✓</h2>
-      <p style={{opacity:0.7}}>Upload selfie + ID to get blue tick. Reduces fake profiles.</p>
-      <div style={{background:"#222",padding:"20px",borderRadius:"12px",marginTop:"20px"}}>
-        <p>📸 Selfie Verification</p><button style={{background:"#ff3366",padding:"10px 20px",borderRadius:"20px",marginTop:"10px"}}>Take Selfie</button>
-        <p style={{marginTop:"20px"}}>🪪 ID (18+)</p><button style={{background:"#333",padding:"10px 20px",borderRadius:"20px",marginTop:"10px"}}>Upload ID (Blurry auto-deleted)</button>
-      </div>
-      <a href="/" style={{color:"#ff3366",display:"block",marginTop:"20px"}}>Back</a>
-    </div>
-  )
+import Link from 'next/link'
+
+export default function Verify() {
+  return <main className="min-h-screen bg-[#fbf9ff] p-6"><div className="mx-auto max-w-lg pt-10"><Link href="/profile" className="text-sm font-bold text-violet-600">← Back to profile</Link><p className="eyebrow mt-12 text-violet-600">Trust and safety</p><h1 className="display mt-3 text-4xl font-bold">Get verified.</h1><p className="mt-4 text-sm leading-6 text-stone-500">Verification status is only shown after a real review. Upload your ID securely through the existing KYC flow.</p><section className="soft-panel mt-7"><p className="text-3xl">✓</p><h2 className="display mt-4 text-xl font-bold">Identity review</h2><p className="mt-2 text-sm leading-6 text-stone-500">Your documents are private and reviewed by KLA Meet administrators. Never upload someone else&apos;s document.</p><Link href="/kyc" className="primary-button mt-6 inline-block">Open secure verification</Link></section></div></main>
 }
