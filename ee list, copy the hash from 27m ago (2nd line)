@@ -1,0 +1,10 @@
+[33m4656f87[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Update page.tsx
+[33mcfe271f[m restore old layout clean build - vanessa 540px + all features live
+[33macbcf6c[m keep old layout 100% same - vanessa 540px card - fix crash + live buttons
+[33mff155ab[m fix build error: all buttons live supabase, old layout kept 540px
+[33m1e84064[m live supabase implementation: old layout kept + international discovery + why match + rich profiles 6 photos video + stories 24h + categories + trust + social + gamification + admin live
+[33m2a576b6[m new main page: header + hero + old card + recommended + explore world + today's matches + popular carousel + new members + pro + safe + profile + chats + bottom nav photo-driven
+[33m2b8b0c6[m fix build error keep old layout + all features
+[33meb167c1[m international global USD stripe paypal + local momo
+[33mae9e3f4[m restore payment + verification + old layout
+[33m563bf2e[m add meaningful scroll content keep old card
