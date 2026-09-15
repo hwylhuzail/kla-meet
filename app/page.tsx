@@ -1,5 +1,115 @@
-import Link from 'next/link'
+"use client"
+export const dynamic = 'force-dynamic'
+import { useEffect, useState } from "react"
+import { createClient } from "@supabase/supabase-js"
 
-export default function Home() {
-  return <main className="min-h-screen overflow-hidden bg-[#fbf9ff] text-[#24202e]"><section className="relative min-h-[680px] bg-gradient-to-br from-[#4c1d95] via-[#7c3aed] to-[#fb7185] px-6 py-8 text-white"><div className="mx-auto flex max-w-6xl items-center justify-between"><p className="display text-2xl font-bold tracking-[-1px]">KLA<span className="text-[#ffc629]">•</span></p><Link href="/auth" className="rounded-full border border-white/30 px-5 py-2 text-sm font-bold backdrop-blur">Sign in</Link></div><div className="relative z-10 mx-auto max-w-6xl pt-24 md:pt-32"><p className="text-sm font-bold tracking-[2px] text-white/70">GLOBAL DISCOVERY · REAL CONNECTIONS</p><h1 className="display mt-5 max-w-3xl text-6xl font-bold leading-[.92] tracking-[-4px] md:text-8xl">Meet someone.<br /><span className="text-[#ffc629]">Anywhere</span> in the world.</h1><p className="mt-7 max-w-lg text-lg leading-7 text-white/80">Discover meaningful connections across countries, cultures and communities.</p><div className="mt-9 flex flex-wrap gap-3"><Link href="/discover" className="rounded-full bg-white px-6 py-4 text-sm font-bold text-violet-800 shadow-xl transition-transform hover:-translate-y-1">♥ Start meeting people</Link><Link href="/explore" className="rounded-full border border-white/30 px-6 py-4 text-sm font-bold backdrop-blur transition-transform hover:-translate-y-1">🌍 Explore worldwide</Link></div></div><div className="absolute -right-40 bottom-[-90px] h-[470px] w-[470px] rounded-full border-[80px] border-white/10" /><div className="absolute bottom-10 left-1/2 hidden -translate-x-1/2 gap-3 md:flex"><span className="rounded-full bg-white/15 px-4 py-2 text-xs">🛡️ Safety first</span><span className="rounded-full bg-white/15 px-4 py-2 text-xs">💬 Across languages</span><span className="rounded-full bg-white/15 px-4 py-2 text-xs">✨ 18+ community</span></div></section><section className="mx-auto max-w-6xl px-6 py-20"><p className="eyebrow text-violet-600">A better way to connect</p><h2 className="display mt-3 max-w-xl text-4xl font-bold leading-tight">Your world just got a little more interesting.</h2><div className="mt-10 grid gap-4 md:grid-cols-4">{[['01', 'Create your profile', 'Share what makes you, you.'], ['02', 'Discover people', 'Explore nearby and worldwide.'], ['03', 'Find your match', 'Connect around what matters.'], ['04', 'Start talking', 'Have a meaningful first hello.']].map(([number, title, text]) => <div key={number} className="soft-panel border-0 bg-white p-6 shadow-lg shadow-violet-100/60"><span className="text-sm font-bold text-pink-500">{number}</span><h3 className="display mt-8 text-xl font-bold">{title}</h3><p className="mt-2 text-sm leading-5 text-stone-500">{text}</p></div>)}</div></section><section className="bg-[#17131f] px-6 py-16 text-white"><div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-6"><div><p className="text-sm font-bold tracking-[2px] text-[#ffc629]">KLA MEET</p><h2 className="display mt-3 text-4xl font-bold">A bigger world.<br />A more personal hello.</h2></div><Link href="/auth" className="rounded-full bg-[#ffc629] px-6 py-4 text-sm font-bold text-[#17131f]">Create your profile</Link></div></section></main>
+type Profile = { id:string, name:string, age:number, location:string, bio:string, photos:string[], interests:string[] }
+
+export default function Home(){
+  const [profiles,setProfiles] = useState<Profile[]>([])
+  const [current,setCurrent] = useState(0)
+  const [matches,setMatches] = useState<Profile[]>([])
+  const [showMatch,setShowMatch] = useState<Profile|null>(null)
+  const [tab,setTab] = useState<'discover'|'matches'|'premium'>('discover')
+
+  useEffect(()=>{
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if(!url ||!key){ // fallback demo if no keys yet
+      setProfiles([
+        {id:"1",name:"Aisha",age:22,location:"Kawempe, Kampala",bio:"Love music and chapati 😍",photos:["https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=500"],interests:["Music","Dancing"]},
+        {id:"2",name:"Brian",age:26,location:"Ntinda",bio:"Makerere student, gym guy",photos:["https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500"],interests:["Gym","Tech"]},
+      ])
+      return
+    }
+    const supabase = createClient(url,key)
+    supabase.from('profiles').select('*').limit(20).then(({data})=>{
+      if(data && data.length>0) setProfiles(data as any)
+    })
+  },[])
+
+  const like = ()=>{
+    const p = profiles[current]
+    if(!p) return
+    if(Math.random()>0.5){ setMatches(m=>[...m,p]); setShowMatch(p) }
+    setCurrent(c=>c+1)
+  }
+  const pass = ()=> setCurrent(c=>c+1)
+
+  const card = profiles[current]
+
+  return (
+    <div style={{background:"#0f0f0f",color:"white",minHeight:"100vh",fontFamily:"system-ui"}}>
+      {/* Header */}
+      <div style={{display:"flex",justifyContent:"space-between",padding:"16px",background:"#1a1a1a",position:"sticky",top:0,zIndex:10}}>
+        <b style={{color:"#ff3366",fontSize:"20px"}}>KLA MEET</b>
+        <div style={{display:"flex",gap:"12px"}}>
+          <button onClick={()=>setTab('discover')} style={{opacity:tab==='discover'?1:0.5}}>Discover</button>
+          <button onClick={()=>setTab('matches')} style={{opacity:tab==='matches'?1:0.5}}>Matches ({matches.length})</button>
+          <button onClick={()=>setTab('premium')} style={{color:"#ff3366"}}>Premium</button>
+        </div>
+      </div>
+
+      {tab==='discover' && (
+        <div style={{maxWidth:"400px",margin:"0 auto",padding:"16px"}}>
+          {!card? (
+            <div style={{textAlign:"center",marginTop:"100px",opacity:0.6}}>
+              <p>No more profiles near you</p>
+              <p style={{fontSize:"12px",marginTop:"10px"}}>Add profiles in Supabase → profiles table → Insert row</p>
+              <button onClick={()=>setCurrent(0)} style={{marginTop:"20px",background:"#ff3366",padding:"10px 20px",borderRadius:"20px"}}>Refresh</button>
+            </div>
+          ) : (
+            <div style={{background:"#222",borderRadius:"20px",overflow:"hidden"}}>
+              <img src={card.photos?.[0]} style={{width:"100%",height:"500px",objectFit:"cover"}}/>
+              <div style={{padding:"16px"}}>
+                <h2>{card.name}, {card.age} • {card.location}</h2>
+                <p style={{opacity:0.7,margin:"8px 0"}}>{card.bio}</p>
+                <div style={{display:"flex",gap:"6px",flexWrap:"wrap"}}>{card.interests?.map(i=><span key={i} style={{background:"#333",padding:"4px 10px",borderRadius:"12px",fontSize:"12px"}}>{i}</span>)}</div>
+                <div style={{display:"flex",justifyContent:"space-around",marginTop:"20px"}}>
+                  <button onClick={pass} style={{width:"60px",height:"60px",borderRadius:"30px",background:"#333",fontSize:"24px"}}>✕</button>
+                  <button onClick={like} style={{width:"70px",height:"70px",borderRadius:"35px",background:"#ff3366",fontSize:"28px"}}>♥</button>
+                </div>
+              </div>
+            </div>
+          )}
+          <div style={{display:"flex",gap:"10px",justifyContent:"center",marginTop:"30px",fontSize:"12px",opacity:0.4}}>
+            <a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/safety">Safety</a><a href="/premium">Premium - MTN/Airtel/Visa</a>
+          </div>
+        </div>
+      )}
+
+      {tab==='matches' && (
+        <div style={{maxWidth:"400px",margin:"0 auto",padding:"16px"}}>
+          <h3>Your Matches</h3>
+          {matches.length===0 && <p style={{opacity:0.5,marginTop:"40px"}}>No matches yet. Start swiping!</p>}
+          {matches.map(m=><div key={m.id} style={{display:"flex",gap:"12px",background:"#1e1e1e",padding:"12px",borderRadius:"12px",marginTop:"10px"}}><img src={m.photos?.[0]} style={{width:"50px",height:"50px",borderRadius:"25px"}}/><div><b>{m.name}</b><p style={{fontSize:"12px",opacity:0.6}}>Say hi! 👋</p></div></div>)}
+        </div>
+      )}
+
+      {tab==='premium' && (
+        <div style={{maxWidth:"400px",margin:"0 auto",padding:"20px"}}>
+          <h2 style={{color:"#ff3366"}}>KLA Premium 💎</h2>
+          <div style={{background:"linear-gradient(135deg,#ff3366,#ff6b6b)",padding:"20px",borderRadius:"16px",marginTop:"16px"}}>
+            <p>✓ Unlimited likes</p><p>✓ See who liked you</p><p>✓ Boost in Kampala</p><p>✓ MTN, Airtel Money, Visa</p>
+            <button style={{width:"100%",marginTop:"16px",background:"white",color:"#ff3366",padding:"12px",borderRadius:"12px",fontWeight:"bold"}}>Upgrade 15,000 UGX/week</button>
+          </div>
+          <p style={{fontSize:"11px",opacity:0.5,marginTop:"20px"}}>Payments processed by Google Play Billing & PesaPal. 18+ only. Block & Report available in chat.</p>
+        </div>
+      )}
+
+      {showMatch && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.9)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100}}>
+          <div style={{textAlign:"center",padding:"20px"}}>
+            <h1 style={{fontSize:"40px"}}>It's a Match! 🎉</h1>
+            <p>You and {showMatch.name} liked each other</p>
+            <img src={showMatch.photos?.[0]} style={{width:"120px",height:"120px",borderRadius:"60px",margin:"20px auto"}}/>
+            <div style={{display:"flex",gap:"10px",justifyContent:"center",marginTop:"20px"}}>
+              <button onClick={()=>setShowMatch(null)} style={{background:"#333",padding:"12px 24px",borderRadius:"20px"}}>Keep Swiping</button>
+              <button onClick={()=>{setShowMatch(null);setTab('matches')}} style={{background:"#ff3366",padding:"12px 24px",borderRadius:"20px"}}>Say Hi</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
