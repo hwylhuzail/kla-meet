@@ -8,6 +8,7 @@ export type Profile = {
   country?: string | null
   bio?: string | null
   photos: string[]
+  mainPhoto?: string | null
   interests: string[]
   languages: string[]
   intention?: string | null
@@ -32,6 +33,7 @@ export function normalizeProfile(raw: any): Profile {
     country,
     bio: raw.bio || null,
     photos: list(raw.photos).concat(raw.avatar_url ? [raw.avatar_url] : []).filter(Boolean),
+    mainPhoto: raw.main_photo || null,
     interests: list(raw.interests),
     languages: list(raw.languages),
     intention: raw.relationship_intention || raw.looking_for || null,
