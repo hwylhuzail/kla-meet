@@ -1,13 +1,13 @@
 @tailwind base; @tailwind components; @tailwind utilities;
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 
-:root { --honey: #ffc629; --ink: #242424; --muted: #77736c; --paper: #fffdf9; --line: #ece9e2; }
+:root { --honey: #ffc800; --ink: #000000; --muted: #666666; --paper: #fffde7; --line: #e0e0e0; }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'DM Sans', sans-serif; padding-bottom: env(safe-area-inset-bottom); }
+body { margin: 0; background: linear-gradient(180deg, #fff9c4 0%, #fffde7 42%, #fffde7 100%); color: var(--ink); font-family: 'DM Sans', sans-serif; padding-bottom: env(safe-area-inset-bottom); }
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 .display { font-family: 'Space Grotesk', sans-serif; }
-.app-shell { min-height: 100vh; background: var(--paper); }
+.app-shell { min-height: 100vh; background: var(--paper); color: var(--ink); }
 .topbar { height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; max-width: 520px; margin: 0 auto; }
 .brand { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -1.5px; }
 .brand-mark { color: var(--honey); }
@@ -16,7 +16,7 @@ button { cursor: pointer; }
 .eyebrow { color: #a19b91; font-size: 12px; letter-spacing: 1.4px; font-weight: 700; text-transform: uppercase; }
 .profile-card { position: relative; height: min(66vh, 590px); min-height: 480px; overflow: hidden; border-radius: 28px; background: #d7d1c6; box-shadow: 0 18px 48px rgba(37, 32, 21, .14); }
 .profile-card img { width: 100%; height: 100%; display: block; object-fit: cover; }
-.profile-card::after { content: ''; position: absolute; inset: 32% 0 0; background: linear-gradient(transparent, rgba(0,0,0,.82)); }
+.profile-card::after { content: ''; position: absolute; inset: 32% 0 0; background: linear-gradient(transparent, rgba(0,0,0,.72)); }
 .profile-info { position: absolute; z-index: 1; left: 22px; right: 22px; bottom: 22px; color: white; }
 .profile-info h2 { margin: 0; font-family: 'Space Grotesk', sans-serif; font-size: 32px; letter-spacing: -1.4px; }
 .profile-info p { margin: 7px 0 0; font-size: 14px; opacity: .9; }
@@ -25,10 +25,10 @@ button { cursor: pointer; }
 .action-row { display: flex; justify-content: center; align-items: center; gap: 18px; padding: 22px 0 8px; }
 .round-action { width: 58px; height: 58px; border-radius: 50%; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; font-size: 22px; box-shadow: 0 8px 18px rgba(37,32,21,.08); }
 .round-action.primary { width: 70px; height: 70px; background: var(--honey); border-color: var(--honey); font-size: 29px; box-shadow: 0 10px 22px rgba(255,198,41,.3); }
-.bottom-nav { position: fixed; z-index: 10; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 720px; height: calc(78px + env(safe-area-inset-bottom)); display: flex; justify-content: space-around; align-items: flex-start; padding: 8px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(255,253,249,.94); border-top: 1px solid var(--line); backdrop-filter: blur(14px); }
-.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #a5a098; font-size: 11px; font-weight: 600; text-decoration: none; min-width: 64px; }
+.bottom-nav { position: fixed; z-index: 10; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 720px; height: calc(78px + env(safe-area-inset-bottom)); display: flex; justify-content: space-around; align-items: flex-start; padding: 8px 16px calc(12px + env(safe-area-inset-bottom)); background: rgba(255,255,255,.96); border-top: 1px solid var(--line); backdrop-filter: blur(14px); }
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #000000; font-size: 11px; font-weight: 600; text-decoration: none; min-width: 64px; }
 .nav-item span:first-child { font-size: 21px; line-height: 1; }
-.nav-item.active { color: var(--ink); }
+.nav-item.active { color: var(--honey); }
 .nav-item.active span:first-child { color: var(--honey); }
 .soft-panel { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 18px; }
 .primary-button { border: 0; border-radius: 14px; background: var(--honey); color: var(--ink); padding: 14px 18px; font-weight: 700; }
@@ -62,3 +62,10 @@ button { cursor: pointer; }
 @keyframes float-in { from { opacity: 0; transform: translateY(24px) rotate(3deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
 @media (max-width: 760px) { .entry-screen { display: block; } .entry-story { min-height: 56vh; padding: 26px 24px 28px; } .entry-copy { padding: 4vh 0 2vh; } .entry-copy h2 { font-size: clamp(54px, 15vw, 82px); letter-spacing: -4px; } .entry-copy p { font-size: 15px; margin-top: 20px; } .entry-collage { height: 110px; gap: 8px; } .entry-collage img { width: 82px; height: 108px; border-width: 3px; border-radius: 14px; } .entry-collage img:nth-child(2) { height: 128px; } .entry-collage img:nth-child(3) { height: 94px; } .entry-form { min-height: 44vh; padding: 34px 24px 40px; align-items: start; } .entry-form-card h1 { font-size: 30px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+
+/* Keep existing route markup while applying the light yellow theme to utility classes. */
+.bg-gradient-to-br, .bg-gradient-to-r, .bg-gradient-to-b { background-image: none !important; background-color: #fff9c4 !important; color: #000 !important; }
+[class~="bg-black"], [class~="bg-[#111111]"], [class~="bg-[#171225]"], [class~="bg-[#24202e]"], [class~="bg-[#242424]"], [class~="bg-[#1E1E1E]"] { background-color: #fff !important; color: #000 !important; }
+[class*="bg-violet-"], [class*="bg-rose-"], [class*="bg-pink-"] { background-color: #fff9e8 !important; color: #000 !important; }
+[class~="text-white"], [class*="text-white/"] { color: #000 !important; }
+[class*="from-violet-"], [class*="from-pink-"], [class*="from-rose-"] { --tw-gradient-from: #fff9c4 !important; }

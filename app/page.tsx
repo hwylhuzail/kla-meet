@@ -42,7 +42,7 @@ export default function Home() {
     <header className="topbar">
       <Link href="/" className="brand">KLA<span className="brand-mark">•</span>MEET</Link>
       <div className="flex items-center gap-2">
-        <Link href="/chat/1" className="icon-button" aria-label="Open messages">◌</Link>
+        <Link href="/matches" className="icon-button" aria-label="Open messages">◌</Link>
         <Link href="/profile" className="icon-button" aria-label="Open profile">○</Link>
       </div>
     </header>
@@ -70,6 +70,6 @@ export default function Home() {
       <section className="mt-8 flex items-center justify-between rounded-[22px] border border-[#f0dfad] bg-[#fff9e8] p-5"><div><p className="eyebrow text-[#8b6b00]">KLA MEET plus</p><h2 className="display mt-1 text-xl font-bold">More chances to connect.</h2><p className="mt-1 text-xs text-stone-500">Unlimited likes, travel mode and more.</p></div><button onClick={() => setShowUpgrade(true)} className="primary-button shrink-0">Upgrade</button></section>
     </main>
     <BottomNav />
-    {showUpgrade && <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-5"><div className="soft-panel w-full max-w-sm"><p className="eyebrow">KLA MEET plus</p><h2 className="display mt-2 text-2xl font-bold">Make your next connection count.</h2><p className="mt-3 text-sm leading-5 text-stone-500">Unlimited likes, advanced filters, travel mode and profile boost.</p><button onClick={() => setShowUpgrade(false)} className="primary-button mt-5 w-full">Continue</button><button onClick={() => setShowUpgrade(false)} className="mt-3 w-full text-sm font-bold text-stone-400">Maybe later</button></div></div>}
+    {showUpgrade && <div className="fixed inset-0 z-50 grid place-items-center bg-[#fff9c4]/80 p-5"><div className="soft-panel w-full max-w-sm"><p className="eyebrow">KLA MEET plus</p><h2 className="display mt-2 text-2xl font-bold">Make your next connection count.</h2><p className="mt-3 text-sm leading-5 text-stone-500">Unlimited likes, advanced filters, travel mode and profile boost.</p><button onClick={() => setShowUpgrade(false)} className="primary-button mt-5 w-full">Continue</button><button onClick={() => setShowUpgrade(false)} className="mt-3 w-full text-sm font-bold text-stone-400">Maybe later</button></div></div>}
   </div>
 }
