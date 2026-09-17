@@ -1,24 +1,27 @@
-export const COUNTRIES = [
-  ['US', 'United States'],
-  ['GB', 'United Kingdom'],
-  ['AE', 'United Arab Emirates'],
-  ['CA', 'Canada'],
-  ['FR', 'France'],
-  ['DE', 'Germany'],
-  ['AU', 'Australia'],
-  ['IT', 'Italy'],
-  ['ES', 'Spain'],
-  ['UG', 'Uganda'],
-] as const;
-
-export function countryFlag(value?: string | null) {
-  if (!value) return '🌍';
-  const code = value.length === 2? value.toUpperCase() : COUNTRIES.find(([, name]) => name.toLowerCase() === value.toLowerCase())?.[0];
-  if (!code) return '🌍';
-  return String.fromCodePoint(...code.split('').map((letter) => 127397 + letter.charCodeAt(0)));
+export const COUNTRIES: [string, string][] = [
+  ["US", "United States"],
+  ["GB", "United Kingdom"],
+  ["AE", "United Arab Emirates"],
+  ["CA", "Canada"],
+  ["UG", "Uganda"],
+  ["KE", "Kenya"],
+  ["DE", "Germany"],
+  ["FR", "France"],
+  ["AU", "Australia"],
+];
+export function countryFlag(code?: string | null) {
+  if (!code) return "";
+  let c = code.trim().toUpperCase();
+  if (c.length > 2) {
+    const f = COUNTRIES.find(([, n]) => n.toLowerCase() === c.toLowerCase());
+    if (f) c = f[0]; else return "";
+  }
+  if (c.length!== 2) return "";
+  return String.fromCodePoint(...[...c].map(ch => 127397 + ch.charCodeAt(0)));
 }
-
 export function countryName(value?: string | null) {
-  if (!value) return 'Worldwide';
-  return COUNTRIES.find(([code, name]) => code === value.toUpperCase() || name.toLowerCase() === value.toLowerCase())?.[1] || value;
+  if (!value) return "Worldwide";
+  const v = value.trim();
+  const found = COUNTRIES.find(([code, name]) => code.toLowerCase() === v.toLowerCase() || name.toLowerCase() === v.toLowerCase());
+  return found? found[1] : v;
 }
