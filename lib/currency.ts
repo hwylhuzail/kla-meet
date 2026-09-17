@@ -1,7 +1,4 @@
 export const UGX_RATE = 3700;
-export const UGX_RATE_ALIAS = 3700;
-export const UGXA_RATE = 3700;
-
 export function formatUGX(amount: number) {
   return `UGX ${amount.toLocaleString()}`;
 }
