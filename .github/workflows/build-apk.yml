@@ -15,31 +15,25 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-      - run: npm ci || npm install
-
-      - name: Build Next.js Export
+      - name: Install deps
+        run: npm ci || npm install
+      - name: Build Next.js
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
           npm run build
-          ls -la out/ || ls -la.next/
-
+          ls -lah out | head -20
       - name: Sync Capacitor
         run: |
           npx cap sync android || (npx cap add android && npx cap sync android)
-          ls -la android/app/src/main/assets/ || ls -la android/app/src/main/assets/public/
-
-      - name: Build Debug APK
+      - name: Build APK
         run: |
           cd android
           chmod +x gradlew
-         ./gradlew clean
-         ./gradlew assembleDebug --stacktrace
-
+         ./gradlew clean assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
         with:
           name: kla-meet-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 14
           if-no-files-found: error
