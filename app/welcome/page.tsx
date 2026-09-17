@@ -1,13 +1,10 @@
 'use client'
-
 import Link from 'next/link'
-
 const photos = [
   'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=85',
   'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=85',
 ]
-
 export default function Welcome() {
   return (
     <main className="min-h-screen bg-[#111111] text-white md:flex md:justify-center">
@@ -18,7 +15,7 @@ export default function Welcome() {
             <p className="text-[26px] font-bold leading-none tracking-[-1.5px]">KLA</p>
             <p className="mt-6 text-[14px] font-medium">Meet someone worth meeting.</p>
             <div className="mt-14">
-              <p className="text-[13px] font-medium tracking-[2px] text-black/45">MADE FOR KAMPALA</p>
+              <p className="text-[13px] font-medium tracking-[2px] text-black/45">MADE FOR REAL CONNECTIONS</p>
               <h1 className="mt-3 max-w-[330px] text-[42px] font-bold leading-[38px] tracking-[-2px]">Good people. Better dates.</h1>
               <p className="mt-4 max-w-[280px] text-[13px] leading-[18px] text-white/90">Make space for a connection that feels easy, genuine, and close to home.</p>
             </div>
