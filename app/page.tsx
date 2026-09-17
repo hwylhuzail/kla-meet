@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import AnimatedWorldPeek from "@/components/AnimatedWorldPeek";
 
 const fallbackProfiles = [
   { photos: ["https://i.pravatar.cc/300?img=1"] },
@@ -18,6 +19,7 @@ function Landing() {
         </div>
         <Link href="/auth" className="primary-button">Get Started</Link>
       </nav>
+      <AnimatedWorldPeek />
 
       <motion.section className="landing-hero" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div>
