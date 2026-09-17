@@ -16,8 +16,12 @@ jobs:
           distribution: temurin
           java-version: 17
       - run: npm ci || npm install
-      - run: npm run build
-      - run: ls -lh out | head -20 && du -sh out
+      - name: Build web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: npm run build || npx next build
+      - run: ls -lh out | head -30
       - run: npx cap sync android
       - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
