@@ -19,10 +19,9 @@ jobs:
       - name: Build web
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-key-for-build-only
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-key
         run: npm run build
-      - name: Check build output
-        run: ls -lh out | head -20 && du -sh out && ls -lh out/index.html
+      - run: ls -lh out && du -sh out
       - run: npx cap sync android
       - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
