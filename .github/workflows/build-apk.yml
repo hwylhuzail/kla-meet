@@ -22,8 +22,8 @@ jobs:
       - run: npx cap telemetry off || true
       - name: Build web
         env:
-          NEXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-key-for-build
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
       - run: ls -lh out && du -sh out && test -f out/index.html && echo "WEB BUILD OK"
       - run: npx cap sync android
