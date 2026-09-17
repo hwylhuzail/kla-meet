@@ -23,12 +23,13 @@ function Landing() {
     <section id="app" className="landing-section"><p className="eyebrow">A better way to meet</p><h2 className="display mt-2 text-4xl font-bold">Made for meaningful beginnings.</h2><div className="feature-grid mt-8"><motion.article className="feature-card" whileHover={{ y: -5 }}><span className="text-3xl text-[#ffc800]">✦</span><h3 className="mt-5 text-xl font-bold">Local and global</h3><p className="mt-2 text-sm text-stone-500">Start nearby, then discover genuine connections across borders.</p></motion.article><motion.article className="feature-card" whileHover={{ y: -5 }}><span className="text-3xl text-[#ffc800]">✓</span><h3 className="mt-5 text-xl font-bold">Safety first</h3><p className="mt-2 text-sm text-stone-500">Verification, reporting, and thoughtful community standards keep people real.</p></motion.article><motion.article className="feature-card" whileHover={{ y: -5 }}><span className="text-3xl text-[#ffc800]">♥</span><h3 className="mt-5 text-xl font-bold">Intentional dating</h3><p className="mt-2 text-sm text-stone-500">Show what you want and find people who are looking for the same thing.</p></motion.article></div></section>
     <section id="about" className="landing-section grid gap-10 md:grid-cols-2 md:items-center"><div><p className="eyebrow">Built for real life</p><h2 className="display mt-2 text-4xl font-bold">A good connection should feel close to home.</h2><p className="mt-4 leading-7 text-stone-500">From a first message to a first coffee nearby, KLA Meet gives you the tools to move at your own pace.</p></div><img className="h-[360px] w-full rounded-[24px] object-cover" src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=1200&q=85" alt="Friends talking together" /></section>
     <section className="landing-section"><p className="eyebrow">The community says</p><div className="mt-5 flex gap-4 overflow-x-auto"><blockquote className="min-w-[280px] rounded-[24px] bg-[#f8f8f8] p-6 text-lg font-bold">“I found someone who actually wanted the same things I did.”<footer className="mt-4 text-sm font-normal text-stone-500">Amina, London</footer></blockquote><blockquote className="min-w-[280px] rounded-[24px] bg-[#f8f8f8] p-6 text-lg font-bold">“The verification makes starting a conversation feel easier.”<footer className="mt-4 text-sm font-normal text-stone-500">Daniel, Toronto</footer></blockquote></div></section>
-    <Footer />
+    
   </div>
  <LiveTicker />
  <HowItWorks />
  <TrustBar />
  <FinalCTA />
+<Footer />
 </div>
 }
 
