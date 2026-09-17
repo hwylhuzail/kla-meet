@@ -1,3 +1,4 @@
+"use client";
 import { useState } from 'react'
 import { formatDual, UGX_RATE } from '@/lib/currency'
 
