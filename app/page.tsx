@@ -25,6 +25,11 @@ function Landing() {
     <section className="landing-section"><p className="eyebrow">The community says</p><div className="mt-5 flex gap-4 overflow-x-auto"><blockquote className="min-w-[280px] rounded-[24px] bg-[#f8f8f8] p-6 text-lg font-bold">“I found someone who actually wanted the same things I did.”<footer className="mt-4 text-sm font-normal text-stone-500">Amina, London</footer></blockquote><blockquote className="min-w-[280px] rounded-[24px] bg-[#f8f8f8] p-6 text-lg font-bold">“The verification makes starting a conversation feel easier.”<footer className="mt-4 text-sm font-normal text-stone-500">Daniel, Toronto</footer></blockquote></div></section>
     <Footer />
   </div>
+ <LiveTicker />
+ <HowItWorks />
+ <TrustBar />
+ <FinalCTA />
+</div>
 }
 
 function DiscoverHome() {
