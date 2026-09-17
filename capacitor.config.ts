@@ -1,4 +1,5 @@
 import { CapacitorConfig } from '@capacitor/cli';
+
 const config: CapacitorConfig = {
   appId: 'com.klameet.app',
   appName: 'KLA MEET',
@@ -7,4 +8,5 @@ const config: CapacitorConfig = {
     androidScheme: 'https'
   }
 };
+
 export default config;
