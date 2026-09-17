@@ -1,5 +1,13 @@
-export const UGX_RATE = 3700
+export const UGX_RATE = 3700;
 
-export function formatDual(ugx: number) {
-  return `UGX ${ugx.toLocaleString()} (~ $${(ugx / UGX_RATE).toFixed(2)} USD)`
+export function formatUGX(amount: number) {
+  return `UGX ${amount.toLocaleString()}`;
+}
+
+export function formatUSD(amount: number) {
+  return `$${(amount / UGX_RATE).toFixed(2)}`;
+}
+
+export function convertUGXToUSD(ugx: number) {
+  return ugx / UGX_RATE;
 }
