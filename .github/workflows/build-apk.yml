@@ -6,6 +6,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CI: "true"
+      CAPACITOR_TELEMETRY: "0"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,12 +19,13 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: npm ci || npm install
+      - run: npx cap telemetry off || true
       - name: Build web
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-key
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-key-for-build
         run: npm run build
-      - run: ls -lh out && du -sh out
+      - run: ls -lh out && du -sh out && test -f out/index.html && echo "WEB BUILD OK"
       - run: npx cap sync android
       - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
