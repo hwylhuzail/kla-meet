@@ -58,9 +58,7 @@ export function uniqueFace(id: string){
 export function normalizeProfile(raw: any): Profile {
   if (!raw) return raw;
   const id = raw.id || Math.random().toString();
-  // ALWAYS force unique face - ignore DB photo completely
   const face = uniqueFace(id);
-
   return {
     id,
     name: raw.full_name || raw.name || raw.display_name || 'User',
@@ -70,8 +68,8 @@ export function normalizeProfile(raw: any): Profile {
     photos: [face],
     mainPhoto: face,
     avatar_url: face,
-    city: raw.city || ['Kampala','Nairobi','Paris','Los Angeles','Dubai','London','Toronto','Kigali'][Math.abs(id.charCodeAt(0)+id.charCodeAt(1))%8],
-    country: raw.country || ['UG','KE','FR','US','AE','GB','CA','RW'][Math.abs(id.charCodeAt(0)+id.charCodeAt(1))%8],
+    city: raw.city || 'Kampala',
+    country: raw.country || 'UG',
     bio: raw.bio || 'Looking for real connections worldwide 🌍',
     interests: raw.interests && raw.interests.length? raw.interests : ['Travel','Music','Reading'],
     isOnline: true,
