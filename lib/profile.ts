@@ -49,46 +49,35 @@ export function profileLocation(profile: any){
 
 export function compatibility(){ return Math.min(96, 70 + Math.floor(Math.random()*15)); }
 
-// UNIQUE FACE - hash id to 1..70 = different face forever
 export function uniqueFace(id: string){
   let h=0; for(let i=0;i<id.length;i++) h = id.charCodeAt(i) + ((h<<5)-h);
   const n = Math.abs(h % 70) + 1;
-  // mix of pravatar + randomuser for more variety
-  const sources = [
-    `https://i.pravatar.cc/400?img=${n}&u=${id}`,
-    `https://randomuser.me/api/portraits/${n%2===0?'women':'men'}/${n%2===0? n%90 : n%90}.jpg`
-  ];
-  return sources[0];
+  return `https://i.pravatar.cc/500?img=${n}&u=${encodeURIComponent(id)}`;
 }
 
 export function normalizeProfile(raw: any): Profile {
   if (!raw) return raw;
   const id = raw.id || Math.random().toString();
-  const unique = uniqueFace(id + (raw.email||''));
-  // if raw photo is empty or all profiles share same url, replace with unique
-  let photos = raw.photos || [];
-  if(!photos.length && raw.avatar_url) photos = [raw.avatar_url];
-  if(!photos.length) photos = [unique];
-  // if photo looks like same seed for everyone, still force unique per id
-  const first = photos[0] || '';
-  const isGeneric = first.includes('placeholder') || first.length < 10;
-  if(isGeneric) photos = [unique];
+  // ALWAYS force unique face - ignore DB photo completely
+  const face = uniqueFace(id);
 
   return {
     id,
     name: raw.full_name || raw.name || raw.display_name || 'User',
     full_name: raw.full_name || raw.name || 'User',
-    age: raw.age || 18 + (Math.abs(id.charCodeAt(0)) % 12),
-    photos: photos.map((p:string)=> p.includes('pravatar')? uniqueFace(id + p) : p),
-    mainPhoto: unique,
-    avatar_url: unique,
-    city: raw.city || ['Kampala','Nairobi','Paris','Los Angeles','Dubai','London'][Math.abs(id.charCodeAt(1))%6],
-    country: raw.country || ['UG','KE','FR','US','AE','GB'][Math.abs(id.charCodeAt(1))%6],
-    bio: raw.bio || '',
-    interests: raw.interests || ['Reading','Travel','Music'],
-    isOnline: typeof raw.isOnline==='boolean'? raw.isOnline : Math.random()>0.4,
+    email: raw.email || '',
+    age: raw.age || 19 + (Math.abs(id.charCodeAt(0)) % 11),
+    photos: [face],
+    mainPhoto: face,
+    avatar_url: face,
+    city: raw.city || ['Kampala','Nairobi','Paris','Los Angeles','Dubai','London','Toronto','Kigali'][Math.abs(id.charCodeAt(0)+id.charCodeAt(1))%8],
+    country: raw.country || ['UG','KE','FR','US','AE','GB','CA','RW'][Math.abs(id.charCodeAt(0)+id.charCodeAt(1))%8],
+    bio: raw.bio || 'Looking for real connections worldwide 🌍',
+    interests: raw.interests && raw.interests.length? raw.interests : ['Travel','Music','Reading'],
+    isOnline: true,
     isVerified: raw.is_verified || false,
     is_verified: raw.is_verified || false,
-    createdAt: raw.created_at || raw.createdAt || new Date().toISOString(),
+    createdAt: raw.created_at || new Date().toISOString(),
+    created_at: raw.created_at || new Date().toISOString(),
   }
 }
