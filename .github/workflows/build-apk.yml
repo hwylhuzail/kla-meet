@@ -29,16 +29,18 @@ jobs:
       - name: Install dependencies
         run: npm ci || npm install
 
-      - name: Build web
+      - name: Build web (EXPORT for APK)
         env:
+          EXPORT: "true"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
           npx cap telemetry off || true
           npm run build
           ls -lh out
-          test -f out/index.html || test -f out/404.html
-          echo "WEB BUILD OK"
+          du -sh out
+          test -f out/index.html
+          echo "WEB BUILD OK - out folder exists"
 
       - name: Add and sync Android
         run: |
