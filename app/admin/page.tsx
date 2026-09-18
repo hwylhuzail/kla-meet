@@ -61,7 +61,7 @@ export default function AdminControl() {
             <h1 className="font-black text-lg">KLA MEET • ADMIN</h1>
             <p className="text-[11px] text-zinc-500">{myEmail} • {users.length} users • {kycs.length} pending KYC</p>
           </div>
-          <Link href="/app" className="text-xs bg-[#FFC629] px-4 py-2 rounded-full font-bold">Go to App</Link>
+          <Link href="/discover" className="text-xs bg-[#FFC629] px-4 py-2 rounded-full font-bold">Go to App</Link>
         </div>
 
         <div className="mt-4 flex gap-2">
