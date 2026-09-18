@@ -3,7 +3,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,23 +11,18 @@ jobs:
       CAPACITOR_TELEMETRY: "0"
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
-
       - name: Install dependencies
         run: npm ci || npm install
-
       - name: Build web (EXPORT for APK)
         env:
           EXPORT: "true"
@@ -38,22 +32,17 @@ jobs:
           npx cap telemetry off || true
           npm run build
           ls -lh out
-          du -sh out
           test -f out/index.html
-          echo "WEB BUILD OK - out folder exists"
-
       - name: Add and sync Android
         run: |
           npx cap add android || true
           npx cap sync android
           npx cap copy android
-
       - name: Build APK
         run: |
           cd android
           chmod +x gradlew
          ./gradlew assembleDebug --stacktrace
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
