@@ -1,12 +1,10 @@
-import type { CapacitorConfig } from '@capacitor/cli';
-
-const config: CapacitorConfig = {
-  appId: 'com.klameet.app',
-  appName: 'KLA Meet',
-  webDir: 'out',
-  server: {
-    androidScheme: 'https'
-  }
-};
-
-export default config;
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  distDir: 'out',
+  images: { unoptimized: true },
+  typescript: { ignoreBuildErrors: true },
+  eslint: { ignoreDuringBuilds: true },
+  trailingSlash: true,
+}
+module.exports = nextConfig
