@@ -20,8 +20,6 @@ export default function ChatClient() {
       const { data: auth } = await supabase.auth.getUser()
       if (!auth.user) return router.push('/auth')
       setUserId(auth.user.id)
-
-      // get conversation (either by conversation id or match id)
       let conversation: any = null
       const { data: byId } = await supabase.from('conversations').select('id,user1,user2').eq('id', id).maybeSingle()
       conversation = byId
@@ -38,23 +36,11 @@ export default function ChatClient() {
       }
       if (!active ||!conversation) return setStatus('This conversation is unavailable.')
       setConversationId(conversation.id)
-
-      // FIX: don't crash on created_at - try id ordering
-      const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('conversation_id', conversation.id)
-      .order('id', { ascending: true }) // safe - no created_at error
-
+      const { data, error } = await supabase.from('messages').select('*').eq('conversation_id', conversation.id).order('id', { ascending: true })
       if (!active) return
       if (error) setStatus(error.message)
       else { setMsgs(data || []); setStatus('') }
-
-      // realtime
-      channel = supabase.channel(`messages-${conversation.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversation.id}` },
-         payload => setMsgs(c => c.some(m => m.id === (payload.new as any).id)? c : [...c, payload.new])
-       ).subscribe()
+      channel = supabase.channel(`messages-${conversation.id}`).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversation.id}` }, payload => setMsgs(c => c.some(m => m.id === (payload.new as any).id)? c : [...c, payload.new])).subscribe()
     })()
     return () => { active = false; if (channel) supabase.removeChannel(channel) }
   }, [id, router])
@@ -63,56 +49,38 @@ export default function ChatClient() {
 
   const send = async () => {
     if (!txt.trim() ||!userId ||!conversationId) return
-    const payload: any = { conversation_id: conversationId, sender_id: userId, text: txt.trim(), content: txt.trim() }
-    // remove receiver_id - not needed, conversation has both users
-    const { data, error } = await supabase.from('messages').insert(payload).select().single()
+    const content = txt.trim()
+    setTxt('')
+    const tmp = { id: Date.now().toString(), sender_id: userId, text: content, content, conversation_id: conversationId }
+    setMsgs(m => [...m, tmp])
+    const { error } = await supabase.from('messages').insert({ conversation_id: conversationId, sender_id: userId, content, text: content }).select().single()
     if (error) {
-      // fallback if your table uses content only
-      const { data: data2, error: err2 } = await supabase.from('messages').insert({ conversation_id: conversationId, sender_id: userId, content: txt.trim() }).select().single()
-      if (err2) setStatus(err2.message)
-      else { setMsgs(c => [...c, data2]); setTxt('') }
-    } else { setMsgs(c => c.some(m => m.id === data.id)? c : [...c, data]); setTxt('') }
+      const { error: e2 } = await supabase.from('messages').insert({ conversation_id: conversationId, sender_id: userId, content }).select().single()
+      if (e2) setStatus(e2.message)
+    }
   }
 
   return (
     <div className="app-shell min-h-screen bg-[#fbf9ff]">
-      {/* PRO topbar - same layout, blur + shadow */}
       <header className="topbar sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-black/5 px-4 py-3 flex items-center gap-3">
-        <button className="h-9 w-9 grid place-items-center rounded-full bg-black text-white" onClick={() => router.back()} aria-label="Go back">←</button>
-        <div className="flex-1">
-          <p className="font-black text-[14px]">Messages</p>
-          <p className="text-[11px] text-zinc-500">Private • end-to-end safe</p>
-        </div>
+        <button className="h-9 w-9 grid place-items-center rounded-full bg-black text-white" onClick={() => router.back()}>←</button>
+        <div className="flex-1"><p className="font-black text-[14px]">Messages</p><p className="text-[11px] text-zinc-500">Private • end-to-end safe</p></div>
         <button className="h-9 w-9 rounded-full bg-zinc-100 grid place-items-center">⋯</button>
       </header>
-
       <main className="content px-4 pt-4 pb-24">
-        <div className="mt-2 mb-4 rounded-[16px] bg-[#fff9e8] border border-[#ffe9a8] p-3 text-center">
-          <p className="text-[12px] font-bold">Start with curiosity ✨</p>
-          <p className="mt-1 text-[11px] text-zinc-500">Never send money to someone you just met.</p>
-        </div>
-
+        <div className="mt-2 mb-4 rounded-[16px] bg-[#fff9e8] border border-[#ffe9a8] p-3 text-center"><p className="text-[12px] font-bold">Start with curiosity ✨</p><p className="mt-1 text-[11px] text-zinc-500">Never send money to someone you just met.</p></div>
         {status && <p className="py-8 text-center text-xs text-zinc-500">{status}</p>}
-
         <div className="space-y-2">
           {msgs.map((msg: any) => {
             const isMe = msg.sender_id === userId
-            return (
-              <div key={msg.id} className={`flex ${isMe? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[78%] rounded-[18px] px-4 py-2.5 text-[13px] shadow-sm ${isMe? 'bg-[#FFC800] text-black rounded-br-[6px]' : 'bg-white border border-black/5 rounded-bl-[6px]'}`}>
-                  <p>{msg.text || msg.content}</p>
-                  <p className="mt-1 text-[10px] opacity-60">{msg.created_at? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</p>
-                </div>
-              </div>
-            )
+            return <div key={msg.id} className={`flex ${isMe? 'justify-end' : 'justify-start'}`}><div className={`max-w-[78%] rounded-[18px] px-4 py-2.5 text-[13px] shadow-sm ${isMe? 'bg-[#FFC800] text-black rounded-br-[6px]' : 'bg-white border border-black/5 rounded-bl-[6px]'}`}><p>{msg.text || msg.content}</p><p className="mt-1 text-[10px] opacity-60">{msg.created_at? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</p></div></div>
           })}
           <div ref={bottomRef} />
         </div>
       </main>
-
       <div className="fixed bottom-0 left-1/2 w-full max-w-[520px] -translate-x-1/2 flex gap-2 border-t border-black/5 bg-white/90 backdrop-blur-xl p-3">
-        <input value={txt} onChange={e => setTxt(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Write a message..." className="flex-1 h-[44px] rounded-full bg-zinc-100 border border-black/5 px-5 text-[13px] outline-none focus:bg-white focus:border-black" />
-        <button onClick={send} className="h-12 w-12 grid place-items-center rounded-full bg-[#FFC800] font-black text-black shadow-md active:scale-95 transition">↑</button>
+        <input value={txt} onChange={e => setTxt(e.target.value)} onKeyDown={e => e.key === 'Enter' && send()} placeholder="Write a message..." className="flex-1 h-[44px] rounded-full bg-zinc-100 border border-black/5 px-5 text-[13px] outline-none" />
+        <button onClick={send} className="h-12 w-12 grid place-items-center rounded-full bg-[#FFC800] font-black text-black shadow-md">↑</button>
       </div>
     </div>
   )
