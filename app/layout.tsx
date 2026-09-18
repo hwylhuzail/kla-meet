@@ -1,4 +1,5 @@
 import './globals.css'
+import './kla-styles.css'
 
 export const metadata = { 
   title: 'KLA MEET - Real Connections Worldwide',
