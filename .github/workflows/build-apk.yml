@@ -39,10 +39,7 @@ jobs:
           npx cap sync android
           npx cap copy android
       - name: Build APK
-        run: |
-          cd android
-          chmod +x gradlew
-         ./gradlew assembleDebug --stacktrace
+        run: cd android && chmod +x gradlew &&./gradlew assembleDebug --stacktrace
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
