@@ -1,0 +1,39 @@
+/* KLA-MEET GLOBAL - Black Bumble style - small pics, no fullscreen */
+.kla-page {
+  background: #0a0a0a !important;
+  color: white !important;
+  min-height: 100vh;
+}
+.kla-yellow {
+  background: #FFC629 !important;
+  color: black !important;
+  border-radius: 9999px;
+  font-weight: 700;
+}
+.kla-top-pics {
+  display: flex;
+  gap: 12px;
+}
+.kla-top-pics img {
+  width: 140px !important;
+  height: 160px !important;
+  border-radius: 20px !important;
+  object-fit: cover !important;
+}
+.kla-cards img {
+  width: 100% !important;
+  max-width: 380px !important;
+  height: 440px !important;
+  border-radius: 28px !important;
+  object-fit: cover !important;
+  display: block;
+  margin: 16px 0;
+}
+.kla-hero h1 {
+  font-size: 44px !important;
+  line-height: 0.9 !important;
+  font-weight: 800 !important;
+}
+@media(min-width: 768px){
+  .kla-hero h1 { font-size: 64px !important; }
+}
