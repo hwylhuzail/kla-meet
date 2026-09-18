@@ -1,3 +1,11 @@
+:root { color-scheme: light !important; }
+html { color-scheme: light !important; background-color: white !important; color: black !important; }
+body { background-color: white !important; color: black !important; }
+@media (prefers-color-scheme: dark) {
+  html, body { background-color: white !important; color: black !important; }
+  * { border-color: #e5e7eb !important; }
+}
+
 @tailwind base; @tailwind components; @tailwind utilities;
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 

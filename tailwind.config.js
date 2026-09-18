@@ -1,1 +1,1 @@
-module.exports={content:["./app/**/*.{js,ts,jsx,tsx}","./components/**/*.{js,ts,jsx,tsx}"],theme:{extend:{colors:{honey:'#FFC800',cream:'#FFF9C4',paper:'#FFFDE7',ink:'#000000',line:'#E0E0E0'}}},plugins:[]}
+module.exports={darkMode:false,content:["./app/**/*.{js,ts,jsx,tsx}","./components/**/*.{js,ts,jsx,tsx}"],theme:{extend:{colors:{honey:'#FFC800',cream:'#FFF9C4',paper:'#FFFDE7',ink:'#000000',line:'#E0E0E0'}}},plugins:[]}
