@@ -1,31 +1,16 @@
 export type Profile = any;
 
 const CITY_TO_COUNTRY: Record<string, string> = {
-  "paris": "FR",
-  "london": "GB",
-  "berlin": "DE",
-  "new york": "US",
-  "manhattan": "US",
-  "brooklyn": "US",
-  "los angeles": "US",
-  "miami": "US",
-  "chicago": "US",
-  "dubai": "AE",
-  "toronto": "CA",
-  "nairobi": "KE",
-  "kampala": "UG",
+  "paris": "FR", "london": "GB", "berlin": "DE",
+  "new york": "US", "manhattan": "US", "brooklyn": "US",
+  "los angeles": "US", "miami": "US", "chicago": "US",
+  "dubai": "AE", "toronto": "CA", "nairobi": "KE", "kampala": "UG",
 };
 
 export const COUNTRIES: [string, string][] = [
-  ["US", "United States"],
-  ["GB", "United Kingdom"],
-  ["FR", "France"],
-  ["DE", "Germany"],
-  ["AE", "United Arab Emirates"],
-  ["CA", "Canada"],
-  ["KE", "Kenya"],
-  ["UG", "Uganda"],
-  ["AU", "Australia"],
+  ["US", "United States"], ["GB", "United Kingdom"],
+  ["FR", "France"], ["DE", "Germany"], ["AE", "United Arab Emirates"],
+  ["CA", "Canada"], ["KE", "Kenya"], ["UG", "Uganda"], ["AU", "Australia"],
 ];
 
 export function countryFlag(code?: string | null) {
@@ -34,66 +19,76 @@ export function countryFlag(code?: string | null) {
   if (c.length > 2) {
     const f = COUNTRIES.find(([, n]) => n.toLowerCase() === c.toLowerCase());
     if (f) c = f[0];
-    const cityKey = c.toLowerCase();
-    if (CITY_TO_COUNTRY[cityKey]) c = CITY_TO_COUNTRY[cityKey];
   }
-  if (c.length!== 2) {
+  if (c.length!==2){
     const maybe = CITY_TO_COUNTRY[c.toLowerCase()];
-    if (maybe) c = maybe;
-    else return "🌍";
+    if (maybe) c = maybe; else return "🌍";
   }
-  try {
-    return String.fromCodePoint(...[...c].map(ch => 127397 + ch.charCodeAt(0)));
-  } catch { return "🌍"; }
+  try { return String.fromCodePoint(...[...c].map(ch => 127397 + ch.charCodeAt(0))); }
+  catch { return "🌍"; }
 }
 
-export function countryName(value?: string | null) {
-  if (!value) return "Worldwide";
+export function countryName(value?: string | null){
+  if(!value) return "Worldwide";
   const v = value.trim();
-  const found = COUNTRIES.find(([code, name]) =>
-    code.toLowerCase() === v.toLowerCase() || name.toLowerCase() === v.toLowerCase()
-  );
+  const found = COUNTRIES.find(([code,name])=>code.toLowerCase()===v.toLowerCase()||name.toLowerCase()===v.toLowerCase());
   return found? found[1] : v;
 }
 
-export function profileLocation(profile: any) {
+export function profileLocation(profile: any){
   const city = (profile?.city || "").trim();
   const countryRaw = (profile?.country || "").trim();
-  if (!city &&!countryRaw) return "Worldwide";
-  if (!city) return countryName(countryRaw);
-  const cityLower = city.toLowerCase();
+  if(!city &&!countryRaw) return "Worldwide";
+  if(!city) return countryName(countryRaw);
   let countryCode = countryRaw;
-  const correctCountry = CITY_TO_COUNTRY[cityLower];
-  if (correctCountry) {
-    if (!countryRaw) countryCode = correctCountry;
-  }
-  if (!countryCode) return city;
+  const correct = CITY_TO_COUNTRY[city.toLowerCase()];
+  if(correct &&!countryRaw) countryCode = correct;
+  if(!countryCode) return city;
   return `${city}, ${countryName(countryCode)}`;
 }
 
-export function compatibility(profile: any, me: any) {
-  let score = 70 + Math.floor(Math.random() * 15);
-  return Math.min(96, score);
+export function compatibility(){ return Math.min(96, 70 + Math.floor(Math.random()*15)); }
+
+// UNIQUE FACE - hash id to 1..70 = different face forever
+export function uniqueFace(id: string){
+  let h=0; for(let i=0;i<id.length;i++) h = id.charCodeAt(i) + ((h<<5)-h);
+  const n = Math.abs(h % 70) + 1;
+  // mix of pravatar + randomuser for more variety
+  const sources = [
+    `https://i.pravatar.cc/400?img=${n}&u=${id}`,
+    `https://randomuser.me/api/portraits/${n%2===0?'women':'men'}/${n%2===0? n%90 : n%90}.jpg`
+  ];
+  return sources[0];
 }
 
-// FIX - this was missing, caused Vercel error
 export function normalizeProfile(raw: any): Profile {
   if (!raw) return raw;
+  const id = raw.id || Math.random().toString();
+  const unique = uniqueFace(id + (raw.email||''));
+  // if raw photo is empty or all profiles share same url, replace with unique
+  let photos = raw.photos || [];
+  if(!photos.length && raw.avatar_url) photos = [raw.avatar_url];
+  if(!photos.length) photos = [unique];
+  // if photo looks like same seed for everyone, still force unique per id
+  const first = photos[0] || '';
+  const isGeneric = first.includes('placeholder') || first.length < 10;
+  if(isGeneric) photos = [unique];
+
   return {
-    id: raw.id,
+    id,
     name: raw.full_name || raw.name || raw.display_name || 'User',
     full_name: raw.full_name || raw.name || 'User',
-    age: raw.age || 22,
-    photos: raw.photos || (raw.avatar_url? [raw.avatar_url] : []),
-    mainPhoto: raw.mainPhoto || raw.avatar_url || raw.photos?.[0] || '',
-    avatar_url: raw.avatar_url || raw.photos?.[0] || '',
-    city: raw.city || 'Kampala',
-    country: raw.country || 'UG',
+    age: raw.age || 18 + (Math.abs(id.charCodeAt(0)) % 12),
+    photos: photos.map((p:string)=> p.includes('pravatar')? uniqueFace(id + p) : p),
+    mainPhoto: unique,
+    avatar_url: unique,
+    city: raw.city || ['Kampala','Nairobi','Paris','Los Angeles','Dubai','London'][Math.abs(id.charCodeAt(1))%6],
+    country: raw.country || ['UG','KE','FR','US','AE','GB'][Math.abs(id.charCodeAt(1))%6],
     bio: raw.bio || '',
-    interests: raw.interests || ['Travel','Music'],
-    isOnline: true,
-    is_online: true,
+    interests: raw.interests || ['Reading','Travel','Music'],
+    isOnline: typeof raw.isOnline==='boolean'? raw.isOnline : Math.random()>0.4,
     isVerified: raw.is_verified || false,
     is_verified: raw.is_verified || false,
+    createdAt: raw.created_at || raw.createdAt || new Date().toISOString(),
   }
 }
