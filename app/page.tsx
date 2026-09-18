@@ -66,7 +66,7 @@ export default function Page() {
         <Link href="/discover" className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-zinc-200 backdrop-blur hover:bg-white/10">
           <Compass size={16}/> Explore
         </Link>
-        <Link href="/auth" className="px-2 py-3 text-zinc-300 transition hover:text-white hidden sm:block">Sign In</Link>
+        <Link href="/auth" className="hidden px-2 py-3 text-zinc-300 transition hover:text-white sm:block">Sign In</Link>
         <Link href="/auth" className="rounded-full bg-[#FFC629] px-5 py-3 text-zinc-950 transition hover:bg-yellow-300">Get Started</Link>
       </nav>
     </header>
@@ -77,28 +77,24 @@ export default function Page() {
         <h1 className="max-w-3xl text-[clamp(2.5rem,6vw,4.5rem)] font-black leading-[0.98] tracking-[-0.06em]">Make the first move, anywhere.</h1>
         <p className="mt-6 max-w-xl text-base leading-7 text-zinc-400">Meet thoughtful people nearby and around the world, with safety and authenticity built into every hello.</p>
 
-        {/* BUTTONS ROW WITH EXPLORE */}
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link href="/auth" className="group inline-flex items-center gap-3 rounded-full bg-[#FFC629] px-7 py-3.5 font-bold text-zinc-950 transition hover:bg-yellow-300">Get Started <ArrowRight size={18} className="transition group-hover:translate-x-1" /></Link>
-          <Link href="/discover" className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.06] px-7 py-3.5 font-bold text-white backdrop-blur transition hover:bg-white/10">
-            <Compass size={18}/> Explore
-          </Link>
-          <span className="text-sm text-zinc-500 hidden sm:inline">No login needed</span>
+          <Link href="/discover" className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.06] px-7 py-3.5 font-bold text-white backdrop-blur transition hover:bg-white/10"><Compass size={18}/> Explore</Link>
+          <span className="hidden text-sm text-zinc-500 sm:inline">No login needed</span>
         </div>
 
         <div className="mt-10 flex items-center gap-4">
           <div className="flex -space-x-2.5">{profiles.map((item) => <img key={item.name} src={item.image} alt="" className="h-9 w-9 rounded-full border-2 border-zinc-950 object-cover" />)}</div>
-          <div><div className="flex flex-wrap items-center gap-2 text-sm font-semibold"><span>Trusted by 10,000+ real people</span><span className="text-[#FFC629]">★★★★★</span></div><p className="mt-1 text-xs text-zinc-500">Rated 4.9/5 worldwide</p></div>
+          <div><div className="flex flex-wrap items-center gap-2 text-sm font-semibold"><span>Trusted by 10,000+ real people</span><span className="text-[#FFC629]">★★★★★</span></div><p className="mt-1 text-xs text-zinc-500">Real profiles. Real conversations. Real potential.</p></div>
         </div>
       </motion.div>
-      <motion.div initial={{ opacity: 0, scale:.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration:.8, delay:.15 }} className="relative">
+      <motion.div initial={{ opacity: 0, scale: .94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .8, delay: .15 }} className="relative">
         <PhonePreview />
-        <div className="absolute -bottom-3 left-0 hidden rounded-xl border border-white/10 bg-zinc-900/90 p-3 shadow-xl backdrop-blur sm:block"><div className="flex items-center gap-2.5"><ShieldCheck className="text-[#FFC629]" size={20} /><div><p className="text-xs font-bold">Built for better hellos</p><p className="mt-0.5 text-[11px] text-zinc-500">Authenticity first</p></div></div></div>
+        <div className="absolute -bottom-3 left-0 hidden rounded-xl border border-white/10 bg-zinc-900/90 p-3 shadow-xl backdrop-blur sm:block"><div className="flex items-center gap-2.5"><ShieldCheck size={18} className="text-[#FFC629]" /><div><p className="text-xs font-bold">Safety first</p><p className="text-[11px] text-zinc-500">Built for respectful connection.</p></div></div></div>
       </motion.div>
     </section>
 
-    <section className="relative border-t border-white/10 bg-zinc-900/50 px-6 py-16 lg:px-10 lg:py-20"><div className="mx-auto max-w-7xl"><div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#FFC629]">HOW IT WORKS</p><h2 className="text-3xl font-bold tracking-tight sm:text-4xl">A better way to meet.</h2></div><p className="max-w-sm text-sm leading-6 text-zinc-500">Thoughtful by design, easy to use, and made for the kind of connection that lasts.</p></div><div className="grid gap-4 md:grid-cols-3">{steps.map(({ icon: Icon, number, title, text }) => <motion.article key={title} whileHover={{ y: -4 }} className="rounded-[18px] border border-white/10 bg-[#0a0a0a] p-6"><div className="mb-10 flex items-center justify-between"><span className="grid h-10 w-10 place-items-center rounded-full bg-[#FFC629] text-zinc-950"><Icon size={18} /></span><span className="text-sm font-semibold text-zinc-600">{number}</span></div><h3 className="text-lg font-bold">{title}</h3><p className="mt-2.5 text-sm leading-6 text-zinc-500">{text}</p></motion.article>)}</div></div></section>
-
-    <footer className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between lg:px-10"><p className="font-black tracking-[-0.06em] text-white">KLA<span className="text-[#FFC629]">•</span>MEET</p><div className="flex gap-5"><Link href="/safety" className="hover:text-white">Safety</Link><Link href="/privacy" className="hover:text-white">Privacy</Link><Link href="/terms" className="hover:text-white">Terms</Link></div><p>© {new Date().getFullYear()} KLA-MEET</p></footer>
+    <section className="relative border-t border-white/10 bg-zinc-900/50 px-6 py-16 lg:px-10 lg:py-20"><div className="mx-auto max-w-7xl"><div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="mb-3 text-xs font-bold uppercase tracking-[0.25em] text-[#FFC629]">HOW IT WORKS</p><h2 className="text-3xl font-bold tracking-tight">A better way to meet.</h2></div><p className="max-w-sm text-sm leading-6 text-zinc-400">Thoughtful by design, easy to use, and made for the kind of connection that lasts.</p></div><div className="grid grid-cols-1 gap-4 md:grid-cols-3">{steps.map(({ icon: Icon, number, title, text }) => <motion.article key={title} whileHover={{ y: -5 }} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6"><div className="mb-8 flex items-center justify-between"><div className="grid h-11 w-11 place-items-center rounded-full bg-[#FFC629] text-sm font-black text-black"><Icon size={18} /></div><span className="text-xs font-bold text-zinc-600">{number}</span></div><h3 className="text-xl font-bold">{title}</h3><p className="mt-3 text-sm leading-6 text-zinc-400">{text}</p></motion.article>)}</div></div></section>
+    <footer className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between lg:px-10"><p className="font-black tracking-[-0.06em] text-white">KLA<span className="text-[#FFC629]">•</span>MEET</p><div className="flex gap-5"><Link href="/safety" className="transition hover:text-white">Safety</Link><Link href="/privacy" className="transition hover:text-white">Privacy</Link><Link href="/terms" className="transition hover:text-white">Terms</Link></div><p>© {new Date().getFullYear()} KLA-MEET</p></footer>
   </main>;
 }
