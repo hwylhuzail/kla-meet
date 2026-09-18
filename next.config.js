@@ -1,11 +1,9 @@
 /** @type {import('next').NextConfig} */
-const isExport = process.env.EXPORT === 'true'
-
 const nextConfig = {
- ...(isExport? { output: 'export', distDir: 'out', trailingSlash: true } : {}),
-  images: { unoptimized: true },
-  typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
-}
+  typescript: { ignoreBuildErrors: true },
+  // Only export static when building APK
+  ...(process.env.EXPORT === "true" ? { output: "export", images: { unoptimized: true } } : {}),
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
