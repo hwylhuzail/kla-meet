@@ -13,6 +13,7 @@ const CITY_TO_COUNTRY: Record<string, string> = {
   "dubai": "AE",
   "toronto": "CA",
   "nairobi": "KE",
+  "kampala": "UG",
 };
 
 export const COUNTRIES: [string, string][] = [
@@ -23,6 +24,7 @@ export const COUNTRIES: [string, string][] = [
   ["AE", "United Arab Emirates"],
   ["CA", "Canada"],
   ["KE", "Kenya"],
+  ["UG", "Uganda"],
   ["AU", "Australia"],
 ];
 
@@ -36,7 +38,6 @@ export function countryFlag(code?: string | null) {
     if (CITY_TO_COUNTRY[cityKey]) c = CITY_TO_COUNTRY[cityKey];
   }
   if (c.length!== 2) {
-    // if it's actually a city name passed as country
     const maybe = CITY_TO_COUNTRY[c.toLowerCase()];
     if (maybe) c = maybe;
     else return "🌍";
@@ -60,15 +61,12 @@ export function profileLocation(profile: any) {
   const countryRaw = (profile?.country || "").trim();
   if (!city &&!countryRaw) return "Worldwide";
   if (!city) return countryName(countryRaw);
-
   const cityLower = city.toLowerCase();
   let countryCode = countryRaw;
-
   const correctCountry = CITY_TO_COUNTRY[cityLower];
   if (correctCountry) {
     if (!countryRaw) countryCode = correctCountry;
   }
-
   if (!countryCode) return city;
   return `${city}, ${countryName(countryCode)}`;
 }
@@ -76,4 +74,26 @@ export function profileLocation(profile: any) {
 export function compatibility(profile: any, me: any) {
   let score = 70 + Math.floor(Math.random() * 15);
   return Math.min(96, score);
+}
+
+// FIX - this was missing, caused Vercel error
+export function normalizeProfile(raw: any): Profile {
+  if (!raw) return raw;
+  return {
+    id: raw.id,
+    name: raw.full_name || raw.name || raw.display_name || 'User',
+    full_name: raw.full_name || raw.name || 'User',
+    age: raw.age || 22,
+    photos: raw.photos || (raw.avatar_url? [raw.avatar_url] : []),
+    mainPhoto: raw.mainPhoto || raw.avatar_url || raw.photos?.[0] || '',
+    avatar_url: raw.avatar_url || raw.photos?.[0] || '',
+    city: raw.city || 'Kampala',
+    country: raw.country || 'UG',
+    bio: raw.bio || '',
+    interests: raw.interests || ['Travel','Music'],
+    isOnline: true,
+    is_online: true,
+    isVerified: raw.is_verified || false,
+    is_verified: raw.is_verified || false,
+  }
 }
