@@ -1,5 +1,12 @@
-{
-  "appId": "com.kla.meet.app",
-  "appName": "KLA MEET",
-  "webDir": "out"
-}
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.klameet.app',
+  appName: 'KLA Meet',
+  webDir: 'out',
+  server: {
+    androidScheme: 'https'
+  }
+};
+
+export default config;
