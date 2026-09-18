@@ -15,5 +15,5 @@ export const metadata = {
 export const viewport = { themeColor: '#FFC629' }
 
 export default function RootLayout({children}:{children:React.ReactNode}){
-  return <html lang="en"><body>{children}</body></html>
+  return <html lang="en"><head><meta name="apple-mobile-web-app-capable" content="yes" /><link rel="apple-touch-icon" href="/apple-touch-icon.png" /></head><body>{children}</body></html>
 }

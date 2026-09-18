@@ -12,7 +12,6 @@ const CITY_TO_COUNTRY: Record<string, string> = {
   "chicago": "US",
   "dubai": "AE",
   "toronto": "CA",
-  "kampala": "UG",
   "nairobi": "KE",
 };
 
@@ -23,7 +22,6 @@ export const COUNTRIES: [string, string][] = [
   ["DE", "Germany"],
   ["AE", "United Arab Emirates"],
   ["CA", "Canada"],
-  ["UG", "Uganda"],
   ["KE", "Kenya"],
   ["AU", "Australia"],
 ];
@@ -66,19 +64,8 @@ export function profileLocation(profile: any) {
   const cityLower = city.toLowerCase();
   let countryCode = countryRaw;
 
-  // SMART FIX: If city is known foreign city but country is Uganda/UG, fix it!
   const correctCountry = CITY_TO_COUNTRY[cityLower];
   if (correctCountry) {
-    const isWrongUganda =!countryRaw || countryRaw.toLowerCase() === "uganda" || countryRaw.toLowerCase() === "ug";
-    // If DB says Uganda but city is Paris/Berlin etc, override
-    if (isWrongUganda || (correctCountry!== "UG" && correctCountry!== "KE")) {
-      // Only override if country is UG/empty and city is foreign
-      if (cityLower === "paris" || cityLower === "berlin" || cityLower === "london" || cityLower === "manhattan" || cityLower === "dubai" || cityLower === "new york") {
-         if (countryRaw.toLowerCase() === "uganda" || countryRaw.toLowerCase() === "ug" ||!countryRaw) {
-            countryCode = correctCountry;
-         }
-      }
-    }
     if (!countryRaw) countryCode = correctCountry;
   }
 
