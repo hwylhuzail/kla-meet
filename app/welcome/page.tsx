@@ -7,9 +7,9 @@ const photos = [
 ]
 export default function Welcome() {
   return (
-    <main className="min-h-screen bg-[#111111] text-white md:flex md:justify-center">
+    <main style={{ backgroundColor: 'black', color: 'white' }} className="min-h-screen md:flex md:justify-center">
       <div className="relative min-h-screen w-full max-w-[480px] overflow-hidden bg-[#111111] shadow-2xl">
-        <section className="relative h-[60vh] min-h-[530px] overflow-hidden bg-[#FFC800] px-6 pt-7">
+        <section style={{ backgroundColor: '#FFC629', color: 'black' }} className="relative h-[60vh] min-h-[530px] overflow-hidden px-6 pt-7">
           <div className="absolute -right-28 -top-24 h-[360px] w-[360px] rounded-full bg-[#FFD740]/40" />
           <div className="relative z-10">
             <p className="text-[26px] font-bold leading-none tracking-[-1.5px]">KLA</p>
@@ -26,7 +26,7 @@ export default function Welcome() {
             </div>
           </div>
         </section>
-        <section className="min-h-[40vh] bg-[#111111] px-6 pb-5 pt-8">
+        <section style={{ backgroundColor: 'black', color: 'white' }} className="min-h-[40vh] px-6 pb-5 pt-8">
           <p className="text-[12px] tracking-[2px] text-white/40">WELCOME IN</p>
           <h2 className="mt-3 text-[32px] font-bold leading-[34px] tracking-[-1.2px]">Your next hello starts here.</h2>
           <div className="mt-5 space-y-3">

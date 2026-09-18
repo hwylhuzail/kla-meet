@@ -1,10 +1,10 @@
-name: Build APK
+name: Build Android APK and iOS
 on:
   push:
     branches: [main]
   workflow_dispatch:
 jobs:
-  build:
+  android:
     runs-on: ubuntu-latest
     env:
       CI: "true"
@@ -19,29 +19,65 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v3
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
-      - name: Build web (EXPORT for APK)
+        run: npm ci
+      - name: Build web export
         env:
           EXPORT: "true"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
-          npx cap telemetry off || true
-          npm run build || (echo "Build failed, trying with dummy env" && NEXT_PUBLIC_SUPABASE_URL=https://dummy.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy npm run build)
-          ls -lh out || ls -lh
-          test -f out/index.html || (echo "out folder missing" && exit 1)
+          npm run build
+          test -f out/index.html
       - name: Add and sync Android
         run: |
-          npx cap add android || true
+          npx cap add android
           npx cap sync android
           npx cap copy android
-      - name: Build APK
-        run: cd android && chmod +x gradlew &&./gradlew assembleDebug --stacktrace
-      - name: Upload APK
+      - name: Build debug APK
+        run: |
+          chmod +x android/gradlew
+          android/gradlew assembleDebug
+      - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
-          name: kla-meet-apk
+          name: kla-meet-android-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+  ios:
+    runs-on: macos-latest
+    env:
+      CI: "true"
+      CAPACITOR_TELEMETRY: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build web export
+        env:
+          EXPORT: "true"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          npm run build
+          test -f out/index.html
+      - name: Add and sync iOS
+        run: |
+          npx cap add ios
+          npx cap sync ios
+          npx cap copy ios
+      - name: Build iOS app
+        run: |
+          xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO -derivedDataPath ios/build build
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kla-meet-ios-app
+          path: ios/build/Build/Products/Debug-iphonesimulator/App.app
+          if-no-files-found: error
+      
