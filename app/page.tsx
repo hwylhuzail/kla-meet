@@ -52,7 +52,7 @@ function PhonePreview() {
 
 export default function Page() {
   return (
-    <main className="min-h-screen overflow-hidden bg-[#0a0a0a] text-white">
+    <main style={{ backgroundColor: 'black', color: 'white' }} className="min-h-screen overflow-hidden">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
         <Link href="/" className="text-xl font-black tracking-[-0.08em]">KLA<span className="text-[#FFC629]">•</span>MEET</Link>
         <nav className="flex items-center gap-2 text-sm font-semibold">
@@ -61,7 +61,7 @@ export default function Page() {
         </nav>
       </header>
 
-      <section className="mx-auto grid max-w-7xl items-center gap-10 px-6 pb-20 pt-10 lg:grid-cols-[1fr_0.8fr] lg:px-10 lg:pt-20">
+      <section style={{ backgroundColor: 'yellow', color: 'black' }} className="mx-auto grid max-w-7xl items-center gap-10 px-6 pb-20 pt-10 lg:grid-cols-[1fr_0.8fr] lg:px-10 lg:pt-20">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
           <p className="mb-6 text-xs font-bold uppercase tracking-[0.25em] text-[#FFC629]">REAL CONNECTIONS • WORLDWIDE</p>
           <h1 className="max-w-3xl text-[clamp(2.5rem,6vw,4.5rem)] font-black leading-[0.98] tracking-[-0.06em]">Make the first move, anywhere.</h1>
@@ -75,7 +75,7 @@ export default function Page() {
       </section>
 
       {/* EXPLORE INFO ONLY ON WELCOME PAGE */}
-      <section id="explore" className="border-t border-white/10 bg-[#111] px-6 py-20 lg:px-10">
+      <section id="explore" style={{ backgroundColor: 'black', color: 'white' }} className="border-t border-white/10 px-6 py-20 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
@@ -106,6 +106,18 @@ export default function Page() {
           ))}
         </div>
       </section>
+
+      <section style={{ backgroundColor: 'white', color: 'black' }} className="border-t-8 border-black px-6 py-16 lg:px-10">
+        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_1.4fr] md:items-center">
+          <div><p className="text-sm font-black uppercase tracking-[0.2em]" style={{ color: 'crimson' }}>SAFETY FIRST</p><h2 className="mt-3 text-4xl font-black">Connection feels better when it feels safe.</h2></div>
+          <p className="max-w-2xl text-base leading-7">We build KLA-MEET around thoughtful conversations, clear boundaries, and tools that help you stay in control. Take your time, trust your instincts, and report anything that does not feel right.</p>
+        </div>
+      </section>
+
+      <footer style={{ backgroundColor: 'black', color: 'white' }} className="flex flex-col gap-5 px-6 py-10 lg:flex-row lg:items-center lg:justify-between lg:px-10">
+        <p className="text-xl font-black tracking-[-0.08em]">KLA<span style={{ color: '#FFC629' }}>•</span>MEET</p>
+        <nav className="flex flex-wrap gap-5 text-sm font-bold" aria-label="Footer"><a href="#explore">Explore</a><Link href="/safety">Safety</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></nav>
+      </footer>
     </main>
   );
 }
