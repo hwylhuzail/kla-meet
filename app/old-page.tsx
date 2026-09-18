@@ -1,5 +1,104 @@
-import Link from 'next/link'
+"use client";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function Home() {
-  return <main className="min-h-screen overflow-hidden bg-[#fbf9ff] text-[#24202e]"><section className="relative min-h-[680px] bg-gradient-to-br from-[#4c1d95] via-[#7c3aed] to-[#fb7185] px-6 py-8 text-white"><div className="mx-auto flex max-w-6xl items-center justify-between"><p className="display text-2xl font-bold tracking-[-1px]">KLA<span className="text-[#ffc629]">•</span></p><Link href="/auth" className="rounded-full border border-white/30 px-5 py-2 text-sm font-bold backdrop-blur">Sign in</Link></div><div className="relative z-10 mx-auto max-w-6xl pt-24 md:pt-32"><p className="text-sm font-bold tracking-[2px] text-white/70">GLOBAL DISCOVERY · REAL CONNECTIONS</p><h1 className="display mt-5 max-w-3xl text-6xl font-bold leading-[.92] tracking-[-4px] md:text-8xl">Meet someone.<br /><span className="text-[#ffc629]">Anywhere</span> in the world.</h1><p className="mt-7 max-w-lg text-lg leading-7 text-white/80">Discover meaningful connections across countries, cultures and communities.</p><div className="mt-9 flex flex-wrap gap-3"><Link href="/discover" className="rounded-full bg-white px-6 py-4 text-sm font-bold text-violet-800 shadow-xl transition-transform hover:-translate-y-1">♥ Start meeting people</Link><Link href="/explore" className="rounded-full border border-white/30 px-6 py-4 text-sm font-bold backdrop-blur transition-transform hover:-translate-y-1">🌍 Explore worldwide</Link></div></div><div className="absolute -right-40 bottom-[-90px] h-[470px] w-[470px] rounded-full border-[80px] border-white/10" /><div className="absolute bottom-10 left-1/2 hidden -translate-x-1/2 gap-3 md:flex"><span className="rounded-full bg-white/15 px-4 py-2 text-xs">🛡️ Safety first</span><span className="rounded-full bg-white/15 px-4 py-2 text-xs">💬 Across languages</span><span className="rounded-full bg-white/15 px-4 py-2 text-xs">✨ 18+ community</span></div></section><section className="mx-auto max-w-6xl px-6 py-20"><p className="eyebrow text-violet-600">A better way to connect</p><h2 className="display mt-3 max-w-xl text-4xl font-bold leading-tight">Your world just got a little more interesting.</h2><div className="mt-10 grid gap-4 md:grid-cols-4">{[['01', 'Create your profile', 'Share what makes you, you.'], ['02', 'Discover people', 'Explore nearby and worldwide.'], ['03', 'Find your match', 'Connect around what matters.'], ['04', 'Start talking', 'Have a meaningful first hello.']].map(([number, title, text]) => <div key={number} className="soft-panel border-0 bg-white p-6 shadow-lg shadow-violet-100/60"><span className="text-sm font-bold text-pink-500">{number}</span><h3 className="display mt-8 text-xl font-bold">{title}</h3><p className="mt-2 text-sm leading-5 text-stone-500">{text}</p></div>)}</div></section><section className="bg-[#17131f] px-6 py-16 text-white"><div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-6"><div><p className="text-sm font-bold tracking-[2px] text-[#ffc629]">KLA MEET</p><h2 className="display mt-3 text-4xl font-bold">A bigger world.<br />A more personal hello.</h2></div><Link href="/auth" className="rounded-full bg-[#ffc629] px-6 py-4 text-sm font-bold text-[#17131f]">Create your profile</Link></div></section></main>
+  return (
+    <main className="min-h-screen bg-white text-[#111]">
+      {/* HEADER - Like Bumble */}
+      <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-6 py-4 lg:px-10 border-b border-black/5">
+        <Link href="/" className="text-2xl font-black tracking-tight">KLA<span className="text-[#FFC629]">•</span>MEET</Link>
+        <div className="flex items-center gap-3">
+          <a href="#explore" className="hidden md:inline-flex text-sm font-bold">Explore</a>
+          <Link href="/auth" className="rounded-full border-2 border-black px-6 py-2.5 text-sm font-black hover:bg-black hover:text-white transition">Sign In</Link>
+        </div>
+      </header>
+
+      {/* HERO - Bumble style */}
+      <section className="bg-[#FFC629] px-6 py-16 lg:px-10 lg:py-24">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2">
+          <div>
+            <h1 className="text-[52px] md:text-[84px] font-black leading-[0.85] tracking-[-0.05em]">Make the<br/>first move.</h1>
+            <p className="mt-6 max-w-md text-lg font-medium leading-6">Meet new people nearby and worldwide. Real connections start with a thoughtful hello.</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/auth" className="rounded-full bg-black px-8 py-4 text-base font-black text-white hover:bg-zinc-800 transition">Create Account</Link>
+              <Link href="/discover" className="rounded-full bg-white px-8 py-4 text-base font-black text-black border-2 border-black hover:bg-black hover:text-white transition">Start Meeting</Link>
+            </div>
+            <p className="mt-4 text-xs font-bold opacity-60">18+ • Safety first • Free to start</p>
+          </div>
+          <div className="relative mx-auto">
+            <div className="relative h-[520px] w-[340px] rounded-[48px] bg-white p-3 shadow-[0_30px_80px_rgba(0,0,0,0.2)] rotate-[-2deg]">
+              <img src="https://i.pravatar.cc/640?img=47" className="h-[65%] w-full rounded-[36px] object-cover"/>
+              <div className="p-4">
+                <h3 className="text-xl font-black">Maya, 28</h3>
+                <p className="text-sm text-zinc-500">Curious mind • Loves long walks • Kampala</p>
+                <div className="mt-3 flex gap-2">
+                  <span className="rounded-full bg-black px-3 py-1 text-xs font-bold text-white">♥ Like</span>
+                  <span className="rounded-full border-2 border-black px-3 py-1 text-xs font-bold">✕ Pass</span>
+                </div>
+              </div>
+            </div>
+            <div className="absolute -bottom-6 -right-6 rounded-full bg-black px-5 py-3 text-sm font-black text-[#FFC629] shadow-xl">🌍 150+ countries</div>
+          </div>
+        </div>
+      </section>
+
+      {/* EXPLORE SECTION - ONLY ON WELCOME PAGE (Bumble style) */}
+      <section id="explore" className="bg-[#111] px-6 py-20 text-white lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="text-5xl font-black leading-[0.9] tracking-tight">Explore<br/><span className="text-[#FFC629]">worldwide.</span></h2>
+            <p className="max-w-sm text-white/60">Your Explore experience lives right here on the welcome page. No separate page needed. Filter by country, interests, and who's online now - then jump into Discover.</p>
+          </div>
+          <div className="mt-12 grid gap-4 md:grid-cols-3">
+            <div className="rounded-[24px] bg-white/10 p-7">
+              <div className="text-3xl">🌍</div>
+              <h3 className="mt-4 text-xl font-black">Worldwide</h3>
+              <p className="mt-2 text-sm text-white/60 leading-5">Browse people from Kampala to Tokyo. Filter by country or city.</p>
+            </div>
+            <div className="rounded-[24px] bg-white/10 p-7">
+              <div className="text-3xl">🔍</div>
+              <h3 className="mt-4 text-xl font-black">Smart Filters</h3>
+              <p className="mt-2 text-sm text-white/60 leading-5">Find by interests, language, and what you're looking for.</p>
+            </div>
+            <div className="rounded-[24px] bg-[#FFC629] p-7 text-black">
+              <div className="text-3xl">🟢</div>
+              <h3 className="mt-4 text-xl font-black">Online Now</h3>
+              <p className="mt-2 text-sm leading-5">See who's active in Discover and start a real conversation.</p>
+              <Link href="/discover" className="mt-4 inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-black text-white">Open Discover →</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS - Bumble 3 steps */}
+      <section className="px-6 py-20 lg:px-10">
+        <div className="mx-auto max-w-7xl">
+          <h2 className="text-4xl font-black tracking-tight">How KLA MEET works</h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
+            {[
+              { n:"01", t:"Create your profile", d:"Add photos and what makes you, you." },
+              { n:"02", t:"Discover people", d:"Explore nearby and worldwide in Discover feed." },
+              { n:"03", t:"Make the first move", d:"If you like each other, start a meaningful hello." },
+            ].map(s=>(
+              <div key={s.n} className="rounded-[24px] border-2 border-black p-7">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFC629] font-black">{s.n}</span>
+                <h3 className="mt-6 text-xl font-black">{s.t}</h3>
+                <p className="mt-2 text-sm text-zinc-600">{s.d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER CTA - Yellow like Bumble */}
+      <section className="bg-[#FFC629] px-6 py-16 text-center lg:px-10">
+        <h2 className="mx-auto max-w-2xl text-5xl font-black leading-[0.9] tracking-tight">A bigger world.<br/>A more personal hello.</h2>
+        <Link href="/auth" className="mt-8 inline-flex rounded-full bg-black px-10 py-4 text-base font-black text-white hover:bg-zinc-900">Create your profile</Link>
+        <p className="mt-3 text-xs font-bold opacity-60">No explore page - everything is here on welcome + Discover</p>
+      </section>
+
+      <footer className="bg-black px-6 py-8 text-center text-xs font-bold tracking-widest text-white/40">KLA•MEET © 2026 • SAFETY • GUIDELINES • TERMS</footer>
+    </main>
+  );
 }
