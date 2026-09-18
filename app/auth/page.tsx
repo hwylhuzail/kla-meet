@@ -37,8 +37,7 @@ export default function Auth() {
       }
 
       setStatus('Success! Loading...')
-      // FIX: push to /app which you HAVE, not /profile which you DON'T have
-      router.push('/app')
+      router.push('/discover')
 
     } catch(e:any) {
       setStatus(e.message || 'Network error - check internet')

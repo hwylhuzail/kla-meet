@@ -56,7 +56,7 @@ export default function Page() {
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
         <Link href="/" className="text-xl font-black tracking-[-0.08em]">KLA<span className="text-[#FFC629]">•</span>MEET</Link>
         <nav className="flex items-center gap-2 text-sm font-semibold">
-          <a href="#explore" className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-zinc-200 hover:bg-white/10"><Compass size={16}/> Explore</a>
+          <a href="#explore" onClick={(e) => { e.preventDefault(); document.getElementById('explore')?.scrollIntoView({ behavior: 'smooth' }); }} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-4 py-2.5 text-zinc-200 hover:bg-white/10"><Compass size={16}/> Explore</a>
           <Link href="/auth" className="rounded-full bg-[#FFC629] px-5 py-3 text-zinc-950 hover:bg-yellow-300">Get Started</Link>
         </nav>
       </header>
@@ -68,7 +68,7 @@ export default function Page() {
           <p className="mt-6 max-w-xl text-base leading-7 text-zinc-400">Meet thoughtful people nearby and around the world, with safety built in.</p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link href="/auth" className="group inline-flex items-center gap-3 rounded-full bg-[#FFC629] px-7 py-3.5 font-bold text-zinc-950 hover:bg-yellow-300">Get Started <ArrowRight size={18} className="group-hover:translate-x-1 transition"/></Link>
-            <a href="#explore" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.06] px-7 py-3.5 font-bold backdrop-blur hover:bg-white/10"><Compass size={18}/> Explore</a>
+            <a href="#explore" onClick={(e) => { e.preventDefault(); document.getElementById('explore')?.scrollIntoView({ behavior: 'smooth' }); }} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/[0.06] px-7 py-3.5 font-bold backdrop-blur hover:bg-white/10"><Compass size={18}/> Explore</a>
           </div>
         </motion.div>
         <motion.div initial={{ opacity: 0, scale:.94 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration:.8, delay:.15 }}><PhonePreview/></motion.div>

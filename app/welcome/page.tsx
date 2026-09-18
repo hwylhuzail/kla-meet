@@ -31,7 +31,7 @@ export default function Welcome() {
           <h2 className="mt-3 text-[32px] font-bold leading-[34px] tracking-[-1.2px]">Your next hello starts here.</h2>
           <div className="mt-5 space-y-3">
             <input className="w-full rounded-full border border-white/20 bg-[#1E1E1E] px-5 py-3.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#FFC800]" placeholder="Email or phone number" aria-label="Email or phone number" />
-            <Link className="block w-full rounded-full bg-white py-3.5 text-center text-sm font-bold text-[#111111] transition-transform hover:scale-[1.02] active:scale-[.98]" href="/app">Continue</Link>
+            <Link className="block w-full rounded-full bg-white py-3.5 text-center text-sm font-bold text-[#111111] transition-transform hover:scale-[1.02] active:scale-[.98]" href="/auth">Continue</Link>
             <Link className="block w-full rounded-full bg-[#FFC800] py-3.5 text-center text-sm font-bold text-[#111111] transition-transform hover:scale-[1.02] active:scale-[.98]" href="/premium">PREMIUM</Link>
           </div>
           <nav className="mt-7 flex items-center justify-between text-white/55" aria-label="Quick navigation">
