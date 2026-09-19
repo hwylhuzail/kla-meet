@@ -1,6 +1,10 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: { ignoreDuringBuilds: true },
+  output: 'export',
+  distDir: 'out',
+  images: { unoptimized: true },
   typescript: { ignoreBuildErrors: true },
-  ...(process.env.EXPORT === "true" ? { output: "export", images: { unoptimized: true } } : {}),
+  eslint: { ignoreDuringBuilds: true },
+  trailingSlash: false, // FIXED - was breaking Android
 }
 module.exports = nextConfig
