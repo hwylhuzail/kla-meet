@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Header from '@/components/Header'
 import './globals.css'
 import './kla-styles.css'
