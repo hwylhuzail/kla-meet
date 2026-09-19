@@ -16,19 +16,22 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
       - name: Install deps
-        run: npm ci
+        run: npm ci --legacy-peer-deps
       - name: Build web
         run: npm run build
       - name: Sync Capacitor
-        run: npx cap sync android
+        run: npx cap copy android
       - name: Build APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace --info
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: kla-meet-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
