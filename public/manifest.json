@@ -1,15 +1,27 @@
 {
-  "name": "kla-meet - Real Connections",
-  "short_name": "kla-meet",
-  "description": "Meet verified, intentional singles worldwide",
-  "theme_color": "#FFC629",
-  "background_color": "#ffffff",
+  "name": "KLA MEET - Kampala Dating",
+  "short_name": "KLA MEET",
+  "description": "Kampala's #1 dating & meet app",
+  "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "start_url": "/discover",
+  "background_color": "#09090B",
+  "theme_color": "#FACC15",
   "scope": "/",
+  "orientation": "portrait",
+  "dir": "ltr",
+  "lang": "en",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
