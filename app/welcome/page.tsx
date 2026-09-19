@@ -1,4 +1,10 @@
-'use client'
+'use client';
+
+export const dynamic = 'force-dynamic';
+
+
+
+
 import Link from 'next/link'
 const photos = [
   'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',

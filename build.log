@@ -1,0 +1,171 @@
+
+> kla-meet@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.5
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/32) ...
+   Generating static pages (8/32) 
+⚠️ SUPABASE ENV MISSING - Add to Vercel Env Vars
+   Generating static pages (16/32) 
+n [Error]: Route /login with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.toJSON`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (/workspaces/kla-meet/.next/server/chunks/377.js:1:36892)
+    at Object.get (/workspaces/kla-meet/.next/server/chunks/283.js:2:23945)
+    at stringify (<anonymous>)
+    at eR (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142219)
+    at eE (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142698)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:65:14)
+    at Timeout._onTimeout (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:150397)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '1385287163'
+}
+n [Error]: Route /login with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.toJSON`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (/workspaces/kla-meet/.next/server/chunks/377.js:1:36892)
+    at Object.get (/workspaces/kla-meet/.next/server/chunks/283.js:2:23945)
+    at stringify (<anonymous>)
+    at eR (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142219)
+    at eE (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142698)
+    at Timeout._onTimeout (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:135475)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '3172168981'
+}
+n [Error]: Route /login with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.toJSON`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (/workspaces/kla-meet/.next/server/chunks/377.js:1:36892)
+    at Object.get (/workspaces/kla-meet/.next/server/chunks/283.js:2:23945)
+    at stringify (<anonymous>)
+    at eR (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142219)
+    at eE (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142698)
+    at Timeout._onTimeout (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:135475)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '3172168981'
+}
+ ⚠ Sending SIGTERM signal to static worker due to timeout of 60 seconds. Subsequent errors may be a result of the worker exiting.
+ ⚠ Restarted static page generation for /login because it took more than 60 seconds
+ ⚠ See more info here https://nextjs.org/docs/messages/static-page-generation-timeout
+ ⚠ Restarted static page generation for /matches because it took more than 60 seconds
+ ⚠ Restarted static page generation for /onboarding because it took more than 60 seconds
+ ⚠ Restarted static page generation for / because it took more than 60 seconds
+ ⚠ Restarted static page generation for /premium because it took more than 60 seconds
+ ⚠ Restarted static page generation for /privacy because it took more than 60 seconds
+ ⚠ Restarted static page generation for /profile/edit because it took more than 60 seconds
+ ⚠ Restarted static page generation for /profile because it took more than 60 seconds
+ ⚠ Restarted static page generation for /safety because it took more than 60 seconds
+ ⚠ Restarted static page generation for /terms because it took more than 60 seconds
+ ⚠ Restarted static page generation for /verification because it took more than 60 seconds
+ ⚠ Restarted static page generation for /verify because it took more than 60 seconds
+ ⚠ Restarted static page generation for /welcome because it took more than 60 seconds
+ ⚠ Restarted static page generation for /chat/1 because it took more than 60 seconds
+n [Error]: Route /login with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.toJSON`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (/workspaces/kla-meet/.next/server/chunks/377.js:1:36892)
+    at Object.get (/workspaces/kla-meet/.next/server/chunks/283.js:2:23945)
+    at stringify (<anonymous>)
+    at eR (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142219)
+    at eE (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142698)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:65:14)
+    at Timeout._onTimeout (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:150397)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '1385287163'
+}
+n [Error]: Route /login with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.toJSON`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (/workspaces/kla-meet/.next/server/chunks/377.js:1:36892)
+    at Object.get (/workspaces/kla-meet/.next/server/chunks/283.js:2:23945)
+    at stringify (<anonymous>)
+    at eR (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142219)
+    at eE (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142698)
+    at Timeout._onTimeout (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:135475)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '3172168981'
+}
+n [Error]: Route /login with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.toJSON`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (/workspaces/kla-meet/.next/server/chunks/377.js:1:36892)
+    at Object.get (/workspaces/kla-meet/.next/server/chunks/283.js:2:23945)
+    at stringify (<anonymous>)
+    at eR (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142219)
+    at eE (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142698)
+    at Timeout._onTimeout (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:135475)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '3172168981'
+}
+ ⚠ Sending SIGTERM signal to static worker due to timeout of 60 seconds. Subsequent errors may be a result of the worker exiting.
+ ⚠ Restarted static page generation for /login because it took more than 60 seconds
+ ⚠ Restarted static page generation for /matches because it took more than 60 seconds
+ ⚠ Restarted static page generation for /onboarding because it took more than 60 seconds
+ ⚠ Restarted static page generation for / because it took more than 60 seconds
+ ⚠ Restarted static page generation for /premium because it took more than 60 seconds
+ ⚠ Restarted static page generation for /privacy because it took more than 60 seconds
+ ⚠ Restarted static page generation for /profile/edit because it took more than 60 seconds
+ ⚠ Restarted static page generation for /profile because it took more than 60 seconds
+ ⚠ Restarted static page generation for /safety because it took more than 60 seconds
+ ⚠ Restarted static page generation for /terms because it took more than 60 seconds
+ ⚠ Restarted static page generation for /verification because it took more than 60 seconds
+ ⚠ Restarted static page generation for /verify because it took more than 60 seconds
+ ⚠ Restarted static page generation for /welcome because it took more than 60 seconds
+ ⚠ Restarted static page generation for /chat/1 because it took more than 60 seconds
+n [Error]: Route /login with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.toJSON`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (/workspaces/kla-meet/.next/server/chunks/377.js:1:36892)
+    at Object.get (/workspaces/kla-meet/.next/server/chunks/283.js:2:23945)
+    at stringify (<anonymous>)
+    at eR (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142219)
+    at eE (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142698)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:65:14)
+    at Timeout._onTimeout (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:150397)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '1385287163'
+}
+n [Error]: Route /login with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.toJSON`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (/workspaces/kla-meet/.next/server/chunks/377.js:1:36892)
+    at Object.get (/workspaces/kla-meet/.next/server/chunks/283.js:2:23945)
+    at stringify (<anonymous>)
+    at eR (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142219)
+    at eE (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142698)
+    at Timeout._onTimeout (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:135475)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '3172168981'
+}
+n [Error]: Route /login with `dynamic = "error"` couldn't be rendered statically because it used `searchParams.toJSON`. See more info here: https://nextjs.org/docs/app/building-your-application/rendering/static-and-dynamic#dynamic-rendering
+    at l (/workspaces/kla-meet/.next/server/chunks/377.js:1:36892)
+    at Object.get (/workspaces/kla-meet/.next/server/chunks/283.js:2:23945)
+    at stringify (<anonymous>)
+    at eR (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142219)
+    at eE (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:142698)
+    at Timeout._onTimeout (/workspaces/kla-meet/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:135475)
+    at listOnTimeout (node:internal/timers:685:17)
+    at process.processTimers (node:internal/timers:618:7) {
+  code: 'NEXT_STATIC_GEN_BAILOUT',
+  digest: '3172168981'
+}
+ ⚠ Sending SIGTERM signal to static worker due to timeout of 60 seconds. Subsequent errors may be a result of the worker exiting.
+
+> Build error occurred
+Error: Static page generation for /login is still timing out after 3 attempts. See more info here https://nextjs.org/docs/messages/static-page-generation-timeout
+    at onRestart (/workspaces/kla-meet/node_modules/next/dist/build/index.js:293:27)
+    at /workspaces/kla-meet/node_modules/next/dist/lib/worker.js:95:40
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async /workspaces/kla-meet/node_modules/next/dist/export/index.js:450:20
+    at async Span.traceAsyncFn (/workspaces/kla-meet/node_modules/next/dist/trace/trace.js:154:20)
+    at async /workspaces/kla-meet/node_modules/next/dist/export/index.js:448:24
+    at async Promise.all (index 18)
+    at async exportAppImpl (/workspaces/kla-meet/node_modules/next/dist/export/index.js:440:21)
+    at async /workspaces/kla-meet/node_modules/next/dist/export/index.js:623:16
+    at async Span.traceAsyncFn (/workspaces/kla-meet/node_modules/next/dist/trace/trace.js:154:20)

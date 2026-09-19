@@ -1,5 +1,10 @@
-"use client";
-"use client";
+'use client';
+
+export const dynamic = 'force-dynamic';
+
+
+
+
 import { useState } from 'react'
 import { formatDual, UGX_RATE } from '@/lib/currency'
 

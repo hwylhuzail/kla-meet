@@ -1,3 +1,7 @@
+export const dynamic = 'force-dynamic';
+
+
+
 export default function Safety() {
   return (
     <div style={{ padding: "16px", fontFamily: "system-ui", maxWidth: "600px", margin: "0 auto" }}>
