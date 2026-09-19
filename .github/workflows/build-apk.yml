@@ -1,34 +1,37 @@
-name: Build APK
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+name: Build Android APK
+on: push
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      CI: "true"
-      CAPACITOR_TELEMETRY: "0"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - uses: actions/setup-java@v5
+          node-version: 20
+          cache: 'npm'
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 21
-      - run: npm ci || npm install
-      - run: npx cap telemetry off || true
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install deps
+        run: npm ci --legacy-peer-deps
       - name: Build web
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
-      - run: ls -lh out && du -sh out && test -f out/index.html && echo "WEB BUILD OK"
-      - run: npx cap sync android
-      - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
+      - name: Sync Capacitor
+        run: npx cap copy android
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace --info
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          name: kla-meet-apk
+          name: kla-meet-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
