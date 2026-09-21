@@ -1,7 +1,7 @@
 "use client";
 export default function LiveTicker() {
   const items = [
-    "💛 Sharon from Kampala just joined",
+    "💛 Sharon from around the world just joined",
     "🌍 Kevin matched with Aisha from Paris",
     "✨ 3 people from USA are online now",
     "🔥 New: 12 people near you",
