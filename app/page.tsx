@@ -28,7 +28,7 @@ export default function Home() {
               <img src="https://i.pravatar.cc/640?img=47" className="h-[65%] w-full rounded-[36px] object-cover"/>
               <div className="p-4">
                 <h3 className="text-xl font-black">Maya, 28</h3>
-                <p className="text-sm text-zinc-500">Curious mind • Loves long walks • Kampala</p>
+                <p className="text-sm text-zinc-500">Curious mind • Loves long walks • Worldwide</p>
                 <div className="mt-3 flex gap-2">
                   <span className="rounded-full bg-black px-3 py-1 text-xs font-bold text-white">♥ Like</span>
                   <span className="rounded-full border-2 border-black px-3 py-1 text-xs font-bold">✕ Pass</span>
@@ -47,7 +47,7 @@ export default function Home() {
             <p className="max-w-sm text-white/60">Your Explore experience lives right here on the welcome page. No separate page needed.</p>
           </div>
           <div className="mt-12 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[24px] bg-white/10 p-7"><div className="text-3xl">🌍</div><h3 className="mt-4 text-xl font-black">Worldwide</h3><p className="mt-2 text-sm text-white/60 leading-5">Browse people from Kampala to Tokyo.</p></div>
+            <div className="rounded-[24px] bg-white/10 p-7"><div className="text-3xl">🌍</div><h3 className="mt-4 text-xl font-black">Worldwide</h3><p className="mt-2 text-sm text-white/60 leading-5">Browse people from New York to Tokyo.</p></div>
             <div className="rounded-[24px] bg-white/10 p-7"><div className="text-3xl">🔍</div><h3 className="mt-4 text-xl font-black">Smart Filters</h3><p className="mt-2 text-sm text-white/60 leading-5">Find by interests, language.</p></div>
             <div className="rounded-[24px] bg-[#FFC629] p-7 text-black"><div className="text-3xl">🟢</div><h3 className="mt-4 text-xl font-black">Online Now</h3><p className="mt-2 text-sm leading-5">See who's active in Discover.</p><Link href="/discover" className="mt-4 inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-black text-white">Open Discover →</Link></div>
           </div>

@@ -1,0 +1,1 @@
+export default function Contact(){return <div className="max-w-4xl mx-auto p-8"><h1 className="text-3xl font-bold mb-6">Contact</h1><p className="text-gray-600">Contact KLA-MEET international support.</p></div>}
