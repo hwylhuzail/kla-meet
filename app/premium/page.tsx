@@ -1,31 +1,47 @@
-'use client'
-import { useState } from 'react'
-export default function PremiumPage() {
-  const [email, setEmail] = useState('huzayirukalungi4@gmail.com')
-  const [plan, setPlan] = useState<'basic'|'pro'>('pro')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const prices = { basic: 5.41, pro: 13.51 }
-  const pay = async () => {
-    setLoading(true); setError('')
-    try {
-      const res = await fetch('/api/pesapal', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, plan, amount: prices[plan] }) })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      window.location.href = data.redirect_url
-    } catch(e:any){ setError(e.message) } finally{ setLoading(false) }
+"use client";
+import { useState } from "react";
+export default function PremiumPage(){
+  const [email,setEmail]=useState("huzayirukalungi4@gmail.com");
+  const [plan,setPlan]=useState<'basic'|'pro'>('pro');
+  const [error,setError]=useState("");
+  const [loading,setLoading]=useState(false);
+  
+  async function pay(){
+    setError(""); setLoading(true);
+    try{
+      const amount = plan==='basic'?5.41:13.51;
+      const res = await fetch("/api/pesapal/order",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({email, amount, plan})
+      });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error || JSON.stringify(data).slice(0,300));
+      if(data.redirect_url){
+        window.location.href = data.redirect_url;
+      }else{
+        throw new Error("No redirect_url: "+JSON.stringify(data).slice(0,300));
+      }
+    }catch(e:any){
+      setError(e.message);
+    }finally{ setLoading(false); }
   }
+  
   return (
-    <div style={{maxWidth:400, margin:'0 auto', padding:16}}>
-      <button onClick={()=>setPlan('basic')} style={{border: plan==='basic'?'2px solid gold':'1px solid #ccc', display:'block', width:'100%', padding:8, marginBottom:4}}>Basic $5.41 30 days premium</button>
-      <button onClick={()=>setPlan('pro')} style={{border: plan==='pro'?'2px solid gold':'1px solid #ccc', display:'block', width:'100%', padding:8}}>POPULAR Pro $13.51 30 days premium</button>
-      <div style={{marginTop:12, fontSize:14}}>
-        <p>⭐ Unlimited discovery</p><p>🌍 Worldwide filters</p><p>❤️ See who liked you</p><p>✨ Profile priority</p><p>🎯 Advanced matching</p><p>🔒 Incognito mode</p><p>💬 Translation-ready chats</p><p>🛡️ Safety tools</p>
+    <div style={{maxWidth:420, margin:"20px auto", padding:20, fontFamily:"system-ui"}}>
+      <div style={{display:"flex", gap:10, marginBottom:20}}>
+        <button onClick={()=>setPlan('basic')} style={{flex:1, padding:12, borderRadius:8, border: plan==='basic'?'2px solid gold':'1px solid #ccc', background: plan==='basic'?'#fffbe6':'#f5f5f5'}}>Basic $5.41 30 days premium</button>
       </div>
-      <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="email" style={{width:'100%', padding:12, borderRadius:24, marginTop:16, background:'#eef6ff'}} />
-      {error && <p style={{color:'red'}}>{error}</p>}
-      <button onClick={pay} disabled={loading} style={{width:'100%', background:'#FFD700', padding:12, borderRadius:24, fontWeight:'bold', marginTop:12}}>{loading?'...':'Pay $'+prices[plan]+' USD'}</button>
-      <p style={{marginTop:8}}>🔒 Secured by Pesapal - Cards • Bank Account • Worldwide</p>
+      <div style={{display:"flex", gap:10, marginBottom:20}}>
+        <button onClick={()=>setPlan('pro')} style={{flex:1, padding:12, borderRadius:8, border: plan==='pro'?'2px solid gold':'1px solid #ccc', background: plan==='pro'?'#fffbe6':'#f5f5f5', fontWeight:"bold"}}>POPULAR Pro $13.51 30 days premium</button>
+      </div>
+      <div style={{fontSize:14, lineHeight:"28px", marginBottom:20}}>
+        ⭐ Unlimited discovery<br/>🌍 Worldwide filters<br/>❤️ See who liked you<br/>✨ Profile priority<br/>🎯 Advanced matching<br/>🔒 Incognito mode<br/>💬 Translation-ready chats<br/>🛡️ Safety tools
+      </div>
+      <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="email" style={{width:"100%", padding:12, borderRadius:20, border:"1px solid #000", marginBottom:10}}/>
+      {error && <div style={{color:"red", marginBottom:10, fontSize:13, wordBreak:"break-all"}}>{error}</div>}
+      <button onClick={pay} disabled={loading} style={{width:"100%", padding:14, borderRadius:20, background: loading?"#ccc":"gold", border:"none", fontWeight:"bold"}}>{loading?"Processing...":`Pay $${plan==='basic'? '5.41':'13.51'} USD`}</button>
+      <div style={{marginTop:10, fontSize:12}}>🔒 Secured by Pesapal - Cards • Bank Account • Worldwide</div>
     </div>
   )
 }
