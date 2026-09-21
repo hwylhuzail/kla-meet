@@ -98,3 +98,4 @@ button { cursor: pointer; }
 @keyframes card-in { from { opacity: 0; transform: translateY(22px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes float-in { from { opacity: 0; transform: translateY(24px) rotate(3deg); } to { opacity: 1; transform: translateY(0) rotate(0); } }
 @media (max-width: 760px) {.entry-screen { display: block; }.entry-story { min-height: 56vh; padding: 26px 24px 28px; }.entry-copy { padding: 4vh 0 2vh; }.entry-copy h2 { font-size: clamp(54px, 15vw, 82px); letter-spacing: -4px; }.entry-copy p { font-size: 15px; margin-top: 20px; }.entry-collage { height: 110px; gap: 8px; }.entry-collage img { width: 82px; height: 108px; border-width: 3px; border-radius: 14px; }.entry-collage img:nth-child(2) { height: 128px; }.entry-collage img:nth-child(3) { height: 94px; }.entry-form { min-height: 44vh; padding: 34px 24px 40px; align-items: start; }.entry-form-card h1 { font-size: 30px; } }
+@import './polish.css';

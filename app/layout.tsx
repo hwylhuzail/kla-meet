@@ -1,5 +1,6 @@
 import Header from '@/components/Header'
 import './globals.css'
+import './polish.css'
 import './kla-styles.css'
 import BottomNav from '@/components/BottomNav'
 
