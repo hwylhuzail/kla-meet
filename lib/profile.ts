@@ -47,7 +47,7 @@ export function profileLocation(profile: any){
   return `${city}, ${countryName(countryCode)}`;
 }
 
-export function compatibility(){ return Math.min(96, 70 + Math.floor(Math.random()*15)); }
+export function compatibility(profile: any, _opts: any = {}){ return Math.min(96, 70 + Math.floor(Math.random()*15)); }
 
 export function uniqueFace(id: string){
   let h=0; for(let i=0;i<id.length;i++) h = id.charCodeAt(i) + ((h<<5)-h);
