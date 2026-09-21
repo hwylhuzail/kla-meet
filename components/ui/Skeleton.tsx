@@ -1,3 +1,15 @@
-export function Skeleton({className=""}:{className?:string}){return <div className={`skeleton rounded-lg ${className} animate-pulse`} />}
-export function ProfileSkeleton(){return <div className="p-4 border rounded-xl animate-fadeIn"><div className="flex gap-4"><Skeleton className="w-16 h-16 rounded-full"/><div className="flex-1 space-y-3"><Skeleton className="h-4 w-1/2"/><Skeleton className="h-3 w-3/4"/></div></div></div>}
-export function CardSkeleton(){return <div className="p-4 border rounded-xl space-y-3"><Skeleton className="h-40 w-full"/><Skeleton className="h-4 w-3/4"/><Skeleton className="h-3 w-1/2"/></div>}
+import { cn } from "@/lib/utils"
+
+function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn("animate-pulse rounded-md bg-muted", className)}
+      {...props}
+    />
+  )
+}
+
+export { Skeleton }
