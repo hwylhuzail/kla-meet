@@ -1,0 +1,61 @@
+
+> kla-meet@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.5
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/28) ...
+   Generating static pages (7/28) 
+⚠️ SUPABASE ENV MISSING - Add to Vercel Env Vars
+   Generating static pages (14/28) 
+   Generating static pages (21/28) 
+ ✓ Generating static pages (28/28)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    1.54 kB        95.4 kB
+├ ○ /_not-found                          871 B            88 kB
+├ ○ /admin                               1.91 kB         161 kB
+├ ƒ /api/ai-suggest                      0 B                0 B
+├ ƒ /api/pesapal                         0 B                0 B
+├ ƒ /api/pesapal/callback                0 B                0 B
+├ ƒ /api/pesapal/ipn                     0 B                0 B
+├ ƒ /api/pesapal/order                   0 B                0 B
+├ ○ /api/upload                          0 B                0 B
+├ ƒ /api/verify                          0 B                0 B
+├ ○ /auth                                1.85 kB         161 kB
+├ ● /chat/[id]                           2.19 kB         155 kB
+├   └ /chat/1
+├ ○ /contact                             151 B          87.3 kB
+├ ○ /discover                            5.35 kB         205 kB
+├ ○ /guidelines                          151 B          87.3 kB
+├ ○ /kyc                                 1.56 kB         201 kB
+├ ○ /login                               809 B          87.9 kB
+├ ○ /matches                             3.21 kB         203 kB
+├ ○ /onboarding                          1.9 kB          154 kB
+├ ○ /premium                             1.26 kB        88.4 kB
+├ ○ /privacy                             151 B          87.3 kB
+├ ○ /profile                             3.12 kB         207 kB
+├ ○ /profile/edit                        325 B           204 kB
+├ ○ /safety                              151 B          87.3 kB
+├ ○ /terms                               151 B          87.3 kB
+├ ○ /verification                        2.56 kB         202 kB
+├ ○ /verify                              173 B          94.1 kB
+└ ○ /welcome                             1.54 kB        95.4 kB
++ First Load JS shared by all            87.1 kB
+  ├ chunks/23-0373c92c38055c11.js        31.5 kB
+  ├ chunks/fd9d1056-41afe60f3d3c21b2.js  53.6 kB
+  └ other shared chunks (total)          1.95 kB
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses getStaticProps)
+ƒ  (Dynamic)  server-rendered on demand
+

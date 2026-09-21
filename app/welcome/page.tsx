@@ -1,21 +1,15 @@
 'use client';
-
-
-
-
-
 import Link from 'next/link'
 const photos = [
   'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=85',
   'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=85',
 ]
-export default function Welcome() {
+export default function Home() {
   return (
     <main style={{ backgroundColor: 'black', color: 'white' }} className="min-h-screen md:flex md:justify-center">
-      <div className="relative min-h-screen w-full max-w-[480px] overflow-hidden bg-[#111111] shadow-2xl">
+      <div className="relative min-h-screen w-full max-w-[480px] overflow-hidden bg-[#111111] shadow-2xl flex flex-col">
         <section style={{ backgroundColor: '#FFC629', color: 'black' }} className="relative h-[60vh] min-h-[530px] overflow-hidden px-6 pt-7">
-          <div className="absolute -right-28 -top-24 h-[360px] w-[360px] rounded-full bg-[#FFD740]/40" />
           <div className="relative z-10">
             <p className="text-[26px] font-bold leading-none tracking-[-1.5px]">KLA</p>
             <p className="mt-6 text-[14px] font-medium">Meet someone worth meeting.</p>
@@ -25,27 +19,33 @@ export default function Welcome() {
               <p className="mt-4 max-w-[280px] text-[13px] leading-[18px] text-white/90">Make space for a connection that feels easy, genuine, and close to home.</p>
             </div>
             <div className="mt-6 flex h-[160px] items-start justify-center gap-2.5">
-              <img className="mt-6 h-[140px] w-[90px] rotate-[-4deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[0]} alt="KLA Meet member" />
-              <img className="-mt-2 h-[160px] w-[100px] rotate-[1deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[1]} alt="KLA Meet member" />
-              <img className="mt-8 h-[130px] w-[90px] rotate-[5deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[2]} alt="KLA Meet member" />
+              <img className="mt-6 h-[140px] w-[90px] rotate-[-4deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[0]} alt="" />
+              <img className="-mt-2 h-[160px] w-[100px] rotate-[1deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[1]} alt="" />
+              <img className="mt-8 h-[130px] w-[90px] rotate-[5deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[2]} alt="" />
             </div>
           </div>
         </section>
-        <section style={{ backgroundColor: 'black', color: 'white' }} className="min-h-[40vh] px-6 pb-5 pt-8">
+        <section style={{ backgroundColor: 'black', color: 'white' }} className="min-h-[40vh] px-6 pb-5 pt-8 flex-1 flex flex-col">
           <p className="text-[12px] tracking-[2px] text-white/40">WELCOME IN</p>
           <h2 className="mt-3 text-[32px] font-bold leading-[34px] tracking-[-1.2px]">Your next hello starts here.</h2>
           <div className="mt-5 space-y-3">
-            <input className="w-full rounded-full border border-white/20 bg-[#1E1E1E] px-5 py-3.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#FFC800]" placeholder="Email or phone number" aria-label="Email or phone number" />
-            <Link className="block w-full rounded-full bg-white py-3.5 text-center text-sm font-bold text-[#111111] transition-transform hover:scale-[1.02] active:scale-[.98]" href="/auth">Continue</Link>
-            <Link className="block w-full rounded-full bg-[#FFC800] py-3.5 text-center text-sm font-bold text-[#111111] transition-transform hover:scale-[1.02] active:scale-[.98]" href="/premium">PREMIUM</Link>
+            <Link className="block w-full rounded-full bg-white py-3.5 text-center text-sm font-bold text-[#111111]" href="/auth">Continue</Link>
+            <Link className="block w-full rounded-full bg-[#FFC800] py-3.5 text-center text-sm font-bold text-[#111111]" href="/premium">PREMIUM</Link>
           </div>
-          <nav className="mt-7 flex items-center justify-between text-white/55" aria-label="Quick navigation">
-            <button className="text-2xl" aria-label="Back">←</button>
-            <button className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-[#67D8FF] to-[#336BFF] text-xl text-white shadow-lg" aria-label="AI assistant">✦</button>
-            <button className="text-2xl" aria-label="Dice">⚄</button>
-            <button className="text-2xl" aria-label="Home">⌂</button>
-          </nav>
-          <div className="mt-3 flex justify-center gap-1.5"><span className="h-1 w-5 rounded-full bg-[#FFC800]" /><span className="h-1 w-1 rounded-full bg-white/30" /><span className="h-1 w-1 rounded-full bg-white/30" /></div>
+          <div style={{marginTop:24, background:"#FFD60A", marginLeft:-24, marginRight:-24, padding:"14px 24px", color:"#000"}}>
+            <div style={{display:"flex", justifyContent:"center", gap:16, fontSize:12, fontWeight:800}}>
+              <Link href="/safety" style={{color:"#000"}}>SAFETY</Link><span>•</span>
+              <Link href="/guidelines" style={{color:"#000"}}>GUIDELINES</Link><span>•</span>
+              <Link href="/terms" style={{color:"#000"}}>TERMS</Link>
+            </div>
+            <p style={{marginTop:6, textAlign:"center", fontSize:10, opacity:0.6}}>KLA-MEET © 2026</p>
+          </div>
+          <div style={{marginTop:16, background:"#1E1E1E", borderRadius:32, padding:"8px", display:"flex", gap:6}}>
+            <Link href="/discover" style={{flex:1, background:"#fff", borderRadius:24, padding:"10px", textAlign:"center", color:"#000", textDecoration:"none", fontSize:11, fontWeight:800}}>⌂ Discover</Link>
+            <Link href="/matches" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>♥ Match</Link>
+            <Link href="/messages" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>◍ Msgs</Link>
+            <Link href="/profile" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>○ Profile</Link>
+          </div>
         </section>
       </div>
     </main>

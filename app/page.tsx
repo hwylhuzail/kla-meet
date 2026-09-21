@@ -1,76 +1,53 @@
-"use client";
-import Link from "next/link";
-
+'use client';
+import Link from 'next/link'
+const photos = [
+  'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',
+  'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=85',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=85',
+]
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white text-[#111]">
-      <header className="sticky top-0 z-50 flex items-center justify-between bg-white px-6 py-4 lg:px-10 border-b border-black/5">
-        <Link href="/" className="text-2xl font-black tracking-tight">KLA<span className="text-[#FFC629]">•</span>MEET</Link>
-        <div className="flex items-center gap-3">
-          <a href="#explore" className="hidden md:inline-flex text-sm font-bold">Explore</a>
-          <Link href="/auth" className="rounded-full border-2 border-black px-6 py-2.5 text-sm font-black hover:bg-black hover:text-white transition">Sign In</Link>
-        </div>
-      </header>
-
-      <section className="bg-[#FFC629] px-6 py-16 lg:px-10 lg:py-24">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-2">
-          <div>
-            <h1 className="text-[52px] md:text-[84px] font-black leading-[0.85] tracking-[-0.05em]">Make the<br/>first move.</h1>
-            <p className="mt-6 max-w-md text-lg font-medium leading-6">Meet new people nearby and worldwide. Real connections start with a thoughtful hello.</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/auth" className="rounded-full bg-black px-8 py-4 text-base font-black text-white hover:bg-zinc-800 transition">Create Account</Link>
-              <Link href="/discover" className="rounded-full bg-white px-8 py-4 text-base font-black text-black border-2 border-black hover:bg-black hover:text-white transition">Start Meeting</Link>
+    <main style={{ backgroundColor: 'black', color: 'white' }} className="min-h-screen md:flex md:justify-center">
+      <div className="relative min-h-screen w-full max-w-[480px] overflow-hidden bg-[#111111] shadow-2xl flex flex-col">
+        <section style={{ backgroundColor: '#FFC629', color: 'black' }} className="relative h-[60vh] min-h-[530px] overflow-hidden px-6 pt-7">
+          <div className="relative z-10">
+            <p className="text-[26px] font-bold leading-none tracking-[-1.5px]">KLA</p>
+            <p className="mt-6 text-[14px] font-medium">Meet someone worth meeting.</p>
+            <div className="mt-14">
+              <p className="text-[13px] font-medium tracking-[2px] text-black/45">MADE FOR REAL CONNECTIONS</p>
+              <h1 className="mt-3 max-w-[330px] text-[42px] font-bold leading-[38px] tracking-[-2px]">Good people. Better dates.</h1>
+              <p className="mt-4 max-w-[280px] text-[13px] leading-[18px] text-white/90">Make space for a connection that feels easy, genuine, and close to home.</p>
             </div>
-            <p className="mt-4 text-xs font-bold opacity-60">18+ • Safety first • Free to start</p>
-          </div>
-          <div className="relative mx-auto">
-            <div className="relative h-[520px] w-[340px] rounded-[48px] bg-white p-3 shadow-[0_30px_80px_rgba(0,0,0,0.2)] rotate-[-2deg]">
-              <img src="https://i.pravatar.cc/640?img=47" className="h-[65%] w-full rounded-[36px] object-cover"/>
-              <div className="p-4">
-                <h3 className="text-xl font-black">Maya, 28</h3>
-                <p className="text-sm text-zinc-500">Curious mind • Loves long walks • Worldwide</p>
-                <div className="mt-3 flex gap-2">
-                  <span className="rounded-full bg-black px-3 py-1 text-xs font-bold text-white">♥ Like</span>
-                  <span className="rounded-full border-2 border-black px-3 py-1 text-xs font-bold">✕ Pass</span>
-                </div>
-              </div>
+            <div className="mt-6 flex h-[160px] items-start justify-center gap-2.5">
+              <img className="mt-6 h-[140px] w-[90px] rotate-[-4deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[0]} alt="" />
+              <img className="-mt-2 h-[160px] w-[100px] rotate-[1deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[1]} alt="" />
+              <img className="mt-8 h-[130px] w-[90px] rotate-[5deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[2]} alt="" />
             </div>
-            <div className="absolute -bottom-6 -right-6 rounded-full bg-black px-5 py-3 text-sm font-black text-[#FFC629] shadow-xl">🌍 150+ countries</div>
           </div>
-        </div>
-      </section>
-
-      <section id="explore" className="bg-[#111] px-6 py-20 text-white lg:px-10">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="text-5xl font-black leading-[0.9] tracking-tight">Explore<br/><span className="text-[#FFC629]">worldwide.</span></h2>
-            <p className="max-w-sm text-white/60">Your Explore experience lives right here on the welcome page. No separate page needed.</p>
+        </section>
+        <section style={{ backgroundColor: 'black', color: 'white' }} className="min-h-[40vh] px-6 pb-5 pt-8 flex-1 flex flex-col">
+          <p className="text-[12px] tracking-[2px] text-white/40">WELCOME IN</p>
+          <h2 className="mt-3 text-[32px] font-bold leading-[34px] tracking-[-1.2px]">Your next hello starts here.</h2>
+          <div className="mt-5 space-y-3">
+            <Link className="block w-full rounded-full bg-white py-3.5 text-center text-sm font-bold text-[#111111]" href="/auth">Continue</Link>
+            <Link className="block w-full rounded-full bg-[#FFC800] py-3.5 text-center text-sm font-bold text-[#111111]" href="/premium">PREMIUM</Link>
           </div>
-          <div className="mt-12 grid gap-4 md:grid-cols-3">
-            <div className="rounded-[24px] bg-white/10 p-7"><div className="text-3xl">🌍</div><h3 className="mt-4 text-xl font-black">Worldwide</h3><p className="mt-2 text-sm text-white/60 leading-5">Browse people from New York to Tokyo.</p></div>
-            <div className="rounded-[24px] bg-white/10 p-7"><div className="text-3xl">🔍</div><h3 className="mt-4 text-xl font-black">Smart Filters</h3><p className="mt-2 text-sm text-white/60 leading-5">Find by interests, language.</p></div>
-            <div className="rounded-[24px] bg-[#FFC629] p-7 text-black"><div className="text-3xl">🟢</div><h3 className="mt-4 text-xl font-black">Online Now</h3><p className="mt-2 text-sm leading-5">See who's active in Discover.</p><Link href="/discover" className="mt-4 inline-flex rounded-full bg-black px-5 py-2.5 text-sm font-black text-white">Open Discover →</Link></div>
+          <div style={{marginTop:24, background:"#FFD60A", marginLeft:-24, marginRight:-24, padding:"14px 24px", color:"#000"}}>
+            <div style={{display:"flex", justifyContent:"center", gap:16, fontSize:12, fontWeight:800}}>
+              <Link href="/safety" style={{color:"#000"}}>SAFETY</Link><span>•</span>
+              <Link href="/guidelines" style={{color:"#000"}}>GUIDELINES</Link><span>•</span>
+              <Link href="/terms" style={{color:"#000"}}>TERMS</Link>
+            </div>
+            <p style={{marginTop:6, textAlign:"center", fontSize:10, opacity:0.6}}>KLA-MEET © 2026</p>
           </div>
-        </div>
-      </section>
-
-      <section className="px-6 py-20 lg:px-10">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-4xl font-black tracking-tight">How KLA MEET works</h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
-            <div className="rounded-[24px] border-2 border-black p-7"><span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFC629] font-black">01</span><h3 className="mt-6 text-xl font-black">Create your profile</h3><p className="mt-2 text-sm text-zinc-600">Add photos and what makes you, you.</p></div>
-            <div className="rounded-[24px] border-2 border-black p-7"><span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFC629] font-black">02</span><h3 className="mt-6 text-xl font-black">Discover people</h3><p className="mt-2 text-sm text-zinc-600">Explore nearby and worldwide in Discover feed.</p></div>
-            <div className="rounded-[24px] border-2 border-black p-7"><span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#FFC629] font-black">03</span><h3 className="mt-6 text-xl font-black">Make the first move</h3><p className="mt-2 text-sm text-zinc-600">If you like each other, start a meaningful hello.</p></div>
+          <div style={{marginTop:16, background:"#1E1E1E", borderRadius:32, padding:"8px", display:"flex", gap:6}}>
+            <Link href="/discover" style={{flex:1, background:"#fff", borderRadius:24, padding:"10px", textAlign:"center", color:"#000", textDecoration:"none", fontSize:11, fontWeight:800}}>⌂ Discover</Link>
+            <Link href="/matches" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>♥ Match</Link>
+            <Link href="/messages" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>◍ Msgs</Link>
+            <Link href="/profile" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>○ Profile</Link>
           </div>
-        </div>
-      </section>
-
-      <section className="bg-[#FFC629] px-6 py-16 text-center lg:px-10">
-        <h2 className="mx-auto max-w-2xl text-5xl font-black leading-[0.9] tracking-tight">A bigger world.<br/>A more personal hello.</h2>
-        <Link href="/auth" className="mt-8 inline-flex rounded-full bg-black px-10 py-4 text-base font-black text-white hover:bg-zinc-900">Create your profile</Link>
-      </section>
-
-      <footer className="bg-black px-6 py-8 text-center text-xs font-bold tracking-widest text-white/40">KLA•MEET © 2026 • SAFETY • GUIDELINES • TERMS</footer>
+        </section>
+      </div>
     </main>
-  );
+  )
 }
