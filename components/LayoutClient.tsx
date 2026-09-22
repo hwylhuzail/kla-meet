@@ -5,15 +5,14 @@ import BottomNav from '@/components/BottomNav';
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const hideNav = pathname === '/'; // hide on landing page
-
+  const isHome = pathname === '/'; // hide global nav on home only
   return (
     <>
-      {!hideNav && <Header />}
-      <main className={hideNav? "" : "pb-[80px] max-w-md mx-auto"}>
+      {!isHome && <Header />}
+      <main className={isHome? "" : "pb-[80px] max-w-md mx-auto"}>
         {children}
       </main>
-      {!hideNav && <BottomNav />}
+      {!isHome && <BottomNav />}
     </>
   );
 }
