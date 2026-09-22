@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import BottomNav from '@/components/BottomNav'
 import { supabase } from '@/lib/supabase'
 import { COUNTRIES, countryFlag } from '@/lib/countries'
 
@@ -104,13 +103,13 @@ export default function ProfileEditor() {
   }
 
   return (
-    <div className="app-shell min-h-screen bg-zinc-50 dark:bg-black">
+    <div className="min-h-screen bg-[#fbf9ff] dark:bg-black">
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b flex items-center justify-between p-4">
         <div><p className="text-[10px] font-black tracking-widest text-[#a07800]">YOUR IDENTITY</p><h1 className="text-xl font-black dark:text-white">Edit profile</h1></div>
         <div className="h-10 w-10 rounded-full bg-[#FFC629] grid place-items-center font-black">✦</div>
       </header>
 
-      <main className="content animate-page pb-[90px] max-w-md mx-auto p-3 space-y-4">
+      <main className="p-3 space-y-4">
         <motion.section className="rounded-[20px] bg-white dark:bg-zinc-900 p-4 shadow-sm" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between"><div><p className="text-xs font-bold text-[#a07800]">PROFILE COMPLETE</p><p className="mt-1 text-sm text-stone-500">Complete to get better matches</p></div><strong className="text-2xl dark:text-white">{completion}%</strong></div>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-stone-200 dark:bg-zinc-800"><motion.div className="h-full rounded-full bg-[#FFC629]" initial={{ width: 0 }} animate={{ width: `${completion}%` }} /></div>
@@ -165,7 +164,6 @@ export default function ProfileEditor() {
           {status && <p className="text-center text-xs text-stone-500">{status}</p>}
         </section>
       </main>
-      <BottomNav />
     </div>
   )
 }
