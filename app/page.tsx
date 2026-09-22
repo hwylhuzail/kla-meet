@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link'
-import LiveTicker from '@/components/LiveTicker'
 
 const photos = [
   'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',
@@ -8,12 +7,23 @@ const photos = [
   'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=85',
 ]
 
+function LiveTicker(){
+  return (
+    <div className="w-full bg-black text-[#FFC629] py-2.5 overflow-hidden border-y border-white/10">
+      <div className="flex whitespace-nowrap gap-10" style={{animation: 'marquee 18s linear infinite'}}>
+        <span className="text-[12px] font-bold">💛 Sharon from around the world just joined • </span>
+        <span className="text-[12px] font-bold">✨ James from New York just connected • </span>
+        <span className="text-[12px] font-bold">🌍 Aisha from London is online • </span>
+      </div>
+      <style>{`@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}`}</style>
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <main style={{ backgroundColor: 'black', color: 'white' }} className="min-h-screen md:flex md:justify-center">
       <div className="relative min-h-screen w-full max-w-[480px] overflow-hidden bg-[#111111] shadow-2xl flex flex-col">
-
-        {/* YELLOW HERO */}
         <section style={{ backgroundColor: '#FFC629', color: 'black' }} className="relative h-[60vh] min-h-[530px] overflow-hidden px-6 pt-7">
           <div className="relative z-10">
             <p className="text-[26px] font-bold leading-none tracking-[-1.5px]">KLA</p>
@@ -31,10 +41,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* LIVE TICKER - THIS WAS MISSING */}
         <LiveTicker />
 
-        {/* HOW IT WORKS */}
         <section className="bg-white text-black px-6 py-10">
           <p className="text-[11px] tracking-[2px] text-black/40 font-bold">HOW IT WORKS</p>
           <div className="mt-5 grid grid-cols-1 gap-4">
@@ -44,7 +52,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* WELCOME / CTA */}
         <section style={{ backgroundColor: 'black', color: 'white' }} className="min-h-[40vh] px-6 pb-5 pt-8 flex-1 flex flex-col">
           <p className="text-[12px] tracking-[2px] text-white/40">WELCOME IN</p>
           <h2 className="mt-3 text-[32px] font-bold leading-[34px] tracking-[-1.2px]">Your next hello starts here.</h2>
@@ -52,7 +59,6 @@ export default function Home() {
             <Link className="block w-full rounded-full bg-white py-3.5 text-center text-sm font-bold text-[#111111]" href="/auth">Continue</Link>
             <Link className="block w-full rounded-full bg-[#FFC800] py-3.5 text-center text-sm font-bold text-[#111111]" href="/premium">PREMIUM</Link>
           </div>
-
           <div style={{marginTop:24, background:"#FFD60A", marginLeft:-24, marginRight:-24, padding:"14px 24px", color:"#000"}}>
             <div style={{display:"flex", justifyContent:"center", gap:16, fontSize:12, fontWeight:800}}>
               <Link href="/safety" style={{color:"#000"}}>SAFETY</Link><span>•</span>
@@ -61,7 +67,6 @@ export default function Home() {
             </div>
             <p style={{marginTop:6, textAlign:"center", fontSize:10, opacity:0.6}}>KLA-MEET © 2026 - Made for real connections</p>
           </div>
-
           <div style={{marginTop:16, background:"#1E1E1E", borderRadius:32, padding:"8px", display:"flex", gap:6}}>
             <Link href="/discover" style={{flex:1, background:"#fff", borderRadius:24, padding:"10px", textAlign:"center", color:"#000", textDecoration:"none", fontSize:11, fontWeight:800}}>⌂ Discover</Link>
             <Link href="/matches" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>♥ Match</Link>
