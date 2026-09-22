@@ -61,13 +61,13 @@ export default function ChatClient() {
   }
 
   return (
-    <div className="app-shell min-h-screen bg-[#fbf9ff]">
-      <header className="topbar sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-black/5 px-4 py-3 flex items-center gap-3">
+    <div className="min-h-screen bg-[#fbf9ff]">
+      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-black/5 px-4 py-3 flex items-center gap-3">
         <button className="h-9 w-9 grid place-items-center rounded-full bg-black text-white" onClick={() => router.back()}>←</button>
         <div className="flex-1"><p className="font-black text-[14px]">Messages</p><p className="text-[11px] text-zinc-500">Private • end-to-end safe</p></div>
         <button className="h-9 w-9 rounded-full bg-zinc-100 grid place-items-center">⋯</button>
       </header>
-      <main className="content px-4 pt-4 pb-24">
+      <main className="px-4 pt-4 pb-[88px]">
         <div className="mt-2 mb-4 rounded-[16px] bg-[#fff9e8] border border-[#ffe9a8] p-3 text-center"><p className="text-[12px] font-bold">Start with curiosity ✨</p><p className="mt-1 text-[11px] text-zinc-500">Never send money to someone you just met.</p></div>
         {status && <p className="py-8 text-center text-xs text-zinc-500">{status}</p>}
         <div className="space-y-2">
