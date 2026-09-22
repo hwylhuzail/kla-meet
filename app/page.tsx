@@ -1,5 +1,8 @@
 'use client';
 import Link from 'next/link'
+import HowItWorks from '@/components/HowItWorks'
+import AnimatedWorldPeek from '@/components/AnimatedWorldPeek'
+
 const photos = [
   'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=85',
@@ -26,6 +29,13 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* YOU WERE MISSING THESE - NOW VISIBLE */}
+        <div className="bg-white">
+          <AnimatedWorldPeek />
+          <HowItWorks />
+        </div>
+
         <section style={{ backgroundColor: 'black', color: 'white' }} className="px-6 pb-5 pt-8 flex-1 flex flex-col">
           <p className="text-[11px] tracking-[2px] text-white/40">WELCOME IN</p>
           <h2 className="mt-3 text-[32px] font-bold leading-[34px] tracking-[-1.2px]">Your next hello starts here.</h2>
