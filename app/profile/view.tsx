@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import BottomNav from '@/components/BottomNav'
 import { supabase } from '@/lib/supabase'
 import { normalizeProfile, profileLocation, countryFlag, compatibility, Profile } from '@/lib/profile'
 
@@ -30,28 +29,27 @@ export default function ProfileView() {
   }, [params])
 
   if (!profile) return (
-    <div className="app-shell">
-      <main className="content pt-20 text-center">
+    <div className="min-h-screen bg-[#fbf9ff] dark:bg-black">
+      <main className="pt-20 text-center">
         <div className="animate-pulse space-y-3 p-4">
           <div className="h-[390px] bg-zinc-200 dark:bg-zinc-800 rounded-[28px]" />
           <div className="h-6 bg-zinc-200 dark:bg-zinc-800 rounded w-3/4 mx-auto" />
         </div>
         <p className="text-stone-500 mt-4">{status}</p>
       </main>
-      <BottomNav />
     </div>
   )
 
   return (
-    <div className="app-shell bg-white dark:bg-black min-h-screen">
+    <div className="bg-[#fbf9ff] dark:bg-black min-h-screen">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b border-zinc-100 dark:border-zinc-900 flex items-center justify-between p-4">
         <button className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 grid place-items-center" onClick={() => history.back()}>←</button>
         <p className="font-bold dark:text-white">Profile</p>
         <button className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 grid place-items-center">⋯</button>
       </header>
 
-      <main className="content animate-page pb-[90px] max-w-md mx-auto">
-        <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} className="overflow-hidden rounded-[28px] bg-white dark:bg-zinc-900 shadow-xl m-3">
+      <main className="p-3">
+        <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} className="overflow-hidden rounded-[28px] bg-white dark:bg-zinc-900 shadow-xl">
           {/* MAIN PHOTO with yellow border */}
           <div className="relative">
             <div className="h-[420px] bg-gradient-to-br from-[#FFC629]/20 to-violet-200">
@@ -116,7 +114,6 @@ export default function ProfileView() {
           </div>
         </motion.div>
       </main>
-      <BottomNav />
     </div>
   )
 }
