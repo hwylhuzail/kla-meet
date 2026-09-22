@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link'
+import { useState } from 'react'
 
 const photos = [
   'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',
@@ -8,41 +9,64 @@ const photos = [
 ]
 
 export default function Home() {
+  const [loaded, setLoaded] = useState([false, false, false])
+
   return (
-    <main style={{ backgroundColor: 'black', color: 'white' }} className="min-h-screen md:flex md:justify-center">
+    <main className="min-h-screen md:flex md:justify-center bg-black animate-fadeIn">
       <div className="relative min-h-screen w-full max-w-[480px] overflow-hidden bg-[#111111] shadow-2xl flex flex-col">
-        <section style={{ backgroundColor: '#FFC629', color: 'black' }} className="relative h-[60vh] min-h-[530px] overflow-hidden px-6 pt-7">
+
+        <section style={{ backgroundColor: '#FFC629' }} className="relative h-[60vh] min-h-[530px] overflow-hidden px-6 pt-7 animate-slideUp">
           <div className="relative z-10">
             <p className="text-[26px] font-bold leading-none tracking-[-1.5px]">KLA</p>
-            <p className="mt-6 text-[14px] font-medium">Meet someone worth meeting.</p>
-            <div className="mt-14">
+            <p className="mt-6 text-[14px] font-medium smooth-transition">Meet someone worth meeting.</p>
+
+            <div className="mt-14 animate-fadeIn" style={{animationDelay:'0.1s'}}>
               <p className="text-[13px] font-medium tracking-[2px] text-black/45">MADE FOR REAL CONNECTIONS</p>
               <h1 className="mt-3 max-w-[330px] text-[42px] font-bold leading-[38px] tracking-[-2px]">Good people. Better dates.</h1>
               <p className="mt-4 max-w-[280px] text-[13px] leading-[18px] text-white/90">Make space for a connection that feels easy, genuine, and close to home.</p>
             </div>
+
             <div className="mt-6 flex h-[160px] items-start justify-center gap-2.5">
-              <img className="mt-6 h-[140px] w-[90px] rotate-[-4deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[0]} alt="" />
-              <img className="-mt-2 h-[160px] w-[100px] rotate-[1deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[1]} alt="" />
-              <img className="mt-8 h-[130px] w-[90px] rotate-[5deg] rounded-[18px] border border-white/20 object-cover shadow-xl" src={photos[2]} alt="" />
+              <img
+                onLoad={() => setLoaded(s => { const n=[...s]; n[0]=true; return n })}
+                className={`mt-6 h-[140px] w-[90px] rotate-[-4deg] rounded-[18px] border border-white/20 object-cover shadow-xl card-hover float-1 ${loaded[0]? 'img-loaded' : 'img-loading skeleton'}`}
+                src={photos[0]} alt=""
+              />
+              <img
+                onLoad={() => setLoaded(s => { const n=[...s]; n[1]=true; return n })}
+                className={`-mt-2 h-[160px] w-[100px] rotate-[1deg] rounded-[18px] border border-white/20 object-cover shadow-xl card-hover float-2 ${loaded[1]? 'img-loaded' : 'img-loading skeleton'}`}
+                src={photos[1]} alt=""
+              />
+              <img
+                onLoad={() => setLoaded(s => { const n=[...s]; n[2]=true; return n })}
+                className={`mt-8 h-[130px] w-[90px] rotate-[5deg] rounded-[18px] border border-white/20 object-cover shadow-xl card-hover float-3 ${loaded[2]? 'img-loaded' : 'img-loading skeleton'}`}
+                src={photos[2]} alt=""
+              />
             </div>
           </div>
         </section>
-        <section style={{ backgroundColor: 'black', color: 'white' }} className="min-h-[40vh] px-6 pb-5 pt-8 flex-1 flex flex-col">
+
+        <section className="min-h-[40vh] px-6 pb-5 pt-8 flex-1 flex flex-col bg-black text-white animate-fadeIn" style={{animationDelay:'0.2s'}}>
           <p className="text-[12px] tracking-[2px] text-white/40">WELCOME IN</p>
-          <h2 className="mt-3 text-[32px] font-bold leading-[34px] tracking-[-1.2px]">Your next hello starts here.</h2>
-          <div className="mt-5 space-y-3">
-            <Link className="block w-full rounded-full bg-white py-3.5 text-center text-sm font-bold text-[#111111]" href="/auth">Continue</Link>
-            <Link className="block w-full rounded-full bg-[#FFC800] py-3.5 text-center text-sm font-bold text-[#111111]" href="/premium">PREMIUM</Link>
+          <h2 className="mt-3 text-[32px] font-bold leading-[34px] tracking-[-1.2px] animate-slideUp" style={{animationDelay:'0.3s'}}>Your next hello starts here.</h2>
+
+          <div className="mt-5 space-y-3 animate-slideUp" style={{animationDelay:'0.4s'}}>
+            <Link className="block w-full rounded-full bg-white py-3.5 text-center text-sm font-bold text-[#111111] btn-premium" href="/auth">
+              Continue
+            </Link>
+            <Link className="block w-full rounded-full bg-[#FFC800] py-3.5 text-center text-sm font-bold text-[#111111] btn-premium" href="/premium">
+              PREMIUM
+            </Link>
           </div>
-          <div style={{marginTop:24, background:"#FFD60A", marginLeft:-24, marginRight:-24, padding:"14px 24px", color:"#000"}}>
+
+          <div style={{marginTop:24, background:"#FFD60A", marginLeft:-24, marginRight:-24, padding:"14px 24px", color:"#000"}} className="animate-fadeIn" >
             <div style={{display:"flex", justifyContent:"center", gap:16, fontSize:12, fontWeight:800}}>
-              <Link href="/safety" style={{color:"#000"}}>SAFETY</Link><span>•</span>
-              <Link href="/guidelines" style={{color:"#000"}}>GUIDELINES</Link><span>•</span>
-              <Link href="/terms" style={{color:"#000"}}>TERMS</Link>
+              <Link href="/safety" style={{color:"#000"}} className="smooth-transition hover:opacity-60">SAFETY</Link><span>•</span>
+              <Link href="/guidelines" style={{color:"#000"}} className="smooth-transition hover:opacity-60">GUIDELINES</Link><span>•</span>
+              <Link href="/terms" style={{color:"#000"}} className="smooth-transition hover:opacity-60">TERMS</Link>
             </div>
             <p style={{marginTop:6, textAlign:"center", fontSize:10, opacity:0.6}}>KLA-MEET © 2026</p>
           </div>
-          {/* REMOVED duplicate bottom nav - RootLayout already renders <BottomNav /> */}
         </section>
       </div>
     </main>
