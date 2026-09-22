@@ -3,6 +3,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import ProfileCard from '@/components/ProfileCard'
 import SectionRow from '@/components/SectionRow'
+import AnimatedWorldPeek from '@/components/AnimatedWorldPeek' // <-- ADD THIS
 import { supabase } from '@/lib/supabase'
 import { normalizeProfile, Profile, uniqueFace } from '@/lib/profile'
 import { COUNTRIES, countryFlag } from '@/lib/countries'
@@ -86,6 +87,9 @@ function DiscoverClient() {
           <a href="/premium" className="rounded-full bg-black px-4 py-2 text-[11px] font-black text-[#FFC629] shadow-sm">Premium</a>
         </div>
       </header>
+
+      {/* THIS WAS MISSING */}
+      <AnimatedWorldPeek />
 
       <main className="px-4">
         <section className="relative mt-4 rounded-[28px] bg-[#111] p-6 text-white shadow-xl overflow-hidden">
