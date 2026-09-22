@@ -1,10 +1,12 @@
 'use client';
 import Link from 'next/link'
+
 const photos = [
   'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=85',
   'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=85',
 ]
+
 export default function Home() {
   return (
     <main style={{ backgroundColor: 'black', color: 'white' }} className="min-h-screen md:flex md:justify-center">
@@ -40,12 +42,7 @@ export default function Home() {
             </div>
             <p style={{marginTop:6, textAlign:"center", fontSize:10, opacity:0.6}}>KLA-MEET © 2026</p>
           </div>
-          <div style={{marginTop:16, background:"#1E1E1E", borderRadius:32, padding:"8px", display:"flex", gap:6}}>
-            <Link href="/discover" style={{flex:1, background:"#fff", borderRadius:24, padding:"10px", textAlign:"center", color:"#000", textDecoration:"none", fontSize:11, fontWeight:800}}>⌂ Discover</Link>
-            <Link href="/matches" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>♥ Match</Link>
-            <Link href="/messages" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>◍ Msgs</Link>
-            <Link href="/profile" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>○ Profile</Link>
-          </div>
+          {/* REMOVED duplicate bottom nav - RootLayout already renders <BottomNav /> */}
         </section>
       </div>
     </main>
