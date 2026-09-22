@@ -1,6 +1,10 @@
 "use client";
 export default function LiveTicker(){
+<<<<<<< Updated upstream
   const messages = ["💛 Sharon from around the world just joined", "✨ James from New York just connected", "🌍 Aisha from London is online", "💛 Sharon from around the world just joined", "✨ James from New York just connected"];
+=======
+  const messages = ["💛 Sharon from around the world just joined", "✨ James from New York just connected", "🌍 Aisha from London is online", "💛 Sharon from around the world just joined"];
+>>>>>>> Stashed changes
   return (
     <div className="w-full bg-black text-[#FFC629] py-2.5 overflow-hidden border-y border-white/10">
       <div className="flex animate-marquee whitespace-nowrap gap-10">
@@ -9,4 +13,8 @@ export default function LiveTicker(){
       <style>{`@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}.animate-marquee{animation: marquee 18s linear infinite}`}</style>
     </div>
   )
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

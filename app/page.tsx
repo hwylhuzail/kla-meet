@@ -5,7 +5,10 @@ import AnimatedWorldPeek from '@/components/AnimatedWorldPeek'
 import LiveTicker from '@/components/LiveTicker'
 import TrustBar from '@/components/TrustBar'
 import FinalCTA from '@/components/FinalCTA'
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 const photos = [
   'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=85',
@@ -15,7 +18,10 @@ export default function Home() {
   return (
     <main style={{ backgroundColor: 'black' }} className="min-h-screen md:flex md:justify-center">
       <div className="relative min-h-screen w-full max-w-[480px] overflow-hidden bg-white shadow-2xl flex flex-col">
+<<<<<<< Updated upstream
         {/* YELLOW HERO */}
+=======
+>>>>>>> Stashed changes
         <section style={{ backgroundColor: '#FFC629', color: 'black' }} className="relative px-6 pt-7 pb-8">
           <div className="relative z-10">
             <p className="text-[26px] font-bold leading-none tracking-[-1.5px]">KLA</p>
@@ -23,7 +29,10 @@ export default function Home() {
             <div className="mt-12">
               <p className="text-[11px] font-bold tracking-[2px] text-black/45">MADE FOR REAL CONNECTIONS</p>
               <h1 className="mt-3 max-w-[330px] text-[42px] font-bold leading-[38px] tracking-[-2px]">Good people. Better dates.</h1>
+<<<<<<< Updated upstream
               <p className="mt-4 max-w-[280px] text-[13px] leading-[18px] text-black/70">Make space for a connection that feels easy, genuine, and close to home.</p>
+=======
+>>>>>>> Stashed changes
             </div>
             <div className="mt-8 flex h-[110px] items-end justify-center gap-3">
               <img className="h-[86px] w-[64px] rotate-[-4deg] rounded-[14px] border border-white/20 object-cover shadow-xl" src={photos[0]} alt="" />
@@ -32,6 +41,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+<<<<<<< Updated upstream
 
         {/* TICKER - WAS INVISIBLE */}
         <LiveTicker />
@@ -61,11 +71,21 @@ export default function Home() {
             </div>
             <p style={{marginTop:6, textAlign:"center", fontSize:10, opacity:0.6}}>KLA-MEET © 2026</p>
           </div>
+=======
+        <LiveTicker />
+        <AnimatedWorldPeek />
+        <HowItWorks />
+        <TrustBar />
+        <FinalCTA />
+        <section style={{ backgroundColor: 'black', color: 'white' }} className="px-6 pb-5 pt-8 flex flex-col">
+          <Link className="block w-full rounded-full bg-white py-3.5 text-center text-sm font-bold text-[#111111]" href="/auth">Continue</Link>
+          <Link className="block w-full rounded-full bg-[#FFC800] mt-3 py-3.5 text-center text-sm font-bold text-[#111111]" href="/premium">PREMIUM</Link>
+>>>>>>> Stashed changes
           <div style={{marginTop:16, background:"#1E1E1E", borderRadius:32, padding:"8px", display:"flex", gap:6}}>
-            <Link href="/discover" style={{flex:1, background:"#fff", borderRadius:24, padding:"10px", textAlign:"center", color:"#000", textDecoration:"none", fontSize:11, fontWeight:800}}>⌂ Discover</Link>
-            <Link href="/matches" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>♥ Match</Link>
-            <Link href="/messages" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>◍ Msgs</Link>
-            <Link href="/profile" style={{flex:1, background:"transparent", borderRadius:24, padding:"10px", textAlign:"center", color:"#fff", textDecoration:"none", fontSize:11}}>○ Profile</Link>
+            <Link href="/discover" style={{flex:1, background:"#fff", borderRadius:24, padding:"10px", textAlign:"center", color:"#000", fontSize:11, fontWeight:800, textDecoration:"none"}}>⌂ Discover</Link>
+            <Link href="/matches" style={{flex:1, padding:"10px", textAlign:"center", color:"#fff", fontSize:11, textDecoration:"none"}}>♥ Match</Link>
+            <Link href="/messages" style={{flex:1, padding:"10px", textAlign:"center", color:"#fff", fontSize:11, textDecoration:"none"}}>◍ Msgs</Link>
+            <Link href="/profile" style={{flex:1, padding:"10px", textAlign:"center", color:"#fff", fontSize:11, textDecoration:"none"}}>○ Profile</Link>
           </div>
         </section>
       </div>
