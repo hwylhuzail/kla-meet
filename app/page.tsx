@@ -1,17 +1,15 @@
 'use client';
 import Link from 'next/link'
-
 const photos = [
   'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=400&q=85',
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=85',
   'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=85',
 ]
-
 function LiveTicker(){
   return (
     <div className="w-full bg-black text-[#FFC629] py-2.5 overflow-hidden border-y border-white/10">
       <div className="flex whitespace-nowrap gap-10" style={{animation: 'marquee 18s linear infinite'}}>
-        <span className="text-[12px] font-bold">💛 Sharon from around the world just joined • </span>
+        <span className="text-[12px] font-bold">💛 Sharon just joined • </span>
         <span className="text-[12px] font-bold">✨ James from New York just connected • </span>
         <span className="text-[12px] font-bold">🌍 Aisha from London is online • </span>
       </div>
@@ -19,7 +17,6 @@ function LiveTicker(){
     </div>
   )
 }
-
 export default function Home() {
   return (
     <main style={{ backgroundColor: 'black', color: 'white' }} className="min-h-screen md:flex md:justify-center">
@@ -40,18 +37,15 @@ export default function Home() {
             </div>
           </div>
         </section>
-
         <LiveTicker />
-
         <section className="bg-white text-black px-6 py-10">
           <p className="text-[11px] tracking-[2px] text-black/40 font-bold">HOW IT WORKS</p>
           <div className="mt-5 grid grid-cols-1 gap-4">
-            <div className="rounded-[20px] bg-[#F5F5F5] p-5"><p className="font-bold">1. Create Profile</p><p className="text-[13px] opacity-70 mt-1">Show your real self, not just perfect photos.</p></div>
-            <div className="rounded-[20px] bg-[#F5F5F5] p-5"><p className="font-bold">2. Discover</p><p className="text-[13px] opacity-70 mt-1">Meet verified people near Mubende & Kampala.</p></div>
+            <div className="rounded-[20px] bg-[#F5F5F5] p-5"><p className="font-bold">1. Create Profile</p><p className="text-[13px] opacity-70 mt-1">Show your real self.</p></div>
+            <div className="rounded-[20px] bg-[#F5F5F5] p-5"><p className="font-bold">2. Discover</p><p className="text-[13px] opacity-70 mt-1">Meet verified people near you.</p></div>
             <div className="rounded-[20px] bg-[#F5F5F5] p-5"><p className="font-bold">3. Connect Real</p><p className="text-[13px] opacity-70 mt-1">Chat, match, and meet safely.</p></div>
           </div>
         </section>
-
         <section style={{ backgroundColor: 'black', color: 'white' }} className="min-h-[40vh] px-6 pb-5 pt-8 flex-1 flex flex-col">
           <p className="text-[12px] tracking-[2px] text-white/40">WELCOME IN</p>
           <h2 className="mt-3 text-[32px] font-bold leading-[34px] tracking-[-1.2px]">Your next hello starts here.</h2>
@@ -65,7 +59,7 @@ export default function Home() {
               <Link href="/guidelines" style={{color:"#000"}}>GUIDELINES</Link><span>•</span>
               <Link href="/terms" style={{color:"#000"}}>TERMS</Link>
             </div>
-            <p style={{marginTop:6, textAlign:"center", fontSize:10, opacity:0.6}}>KLA-MEET © 2026 - Made for real connections</p>
+            <p style={{marginTop:6, textAlign:"center", fontSize:10, opacity:0.6}}>KLA-MEET © 2026</p>
           </div>
           <div style={{marginTop:16, background:"#1E1E1E", borderRadius:32, padding:"8px", display:"flex", gap:6}}>
             <Link href="/discover" style={{flex:1, background:"#fff", borderRadius:24, padding:"10px", textAlign:"center", color:"#000", textDecoration:"none", fontSize:11, fontWeight:800}}>⌂ Discover</Link>
