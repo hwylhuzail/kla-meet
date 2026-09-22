@@ -1,7 +1,8 @@
+import Header from '@/components/Header'
 import './globals.css'
 import './polish.css'
 import './kla-styles.css'
-import LayoutClient from '@/components/LayoutClient'
+import BottomNav from '@/components/BottomNav'
 
 export const metadata = {
   title: 'KLA MEET - Real Connections Worldwide',
@@ -21,7 +22,11 @@ export default function RootLayout({children}:{children:React.ReactNode}){
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="bg-white dark:bg-black text-black dark:text-white min-h-screen">
-        <LayoutClient>{children}</LayoutClient>
+        <Header />
+        <main className="pb-[80px] max-w-md mx-auto">
+          {children}
+        </main>
+        <BottomNav />
       </body>
     </html>
   )
