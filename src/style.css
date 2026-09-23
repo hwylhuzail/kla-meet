@@ -1,5 +1,2 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-body{font-family:Inter,system-ui,sans-serif;background:#fff}
-.phone{border:3px solid #000;border-radius:28px;overflow:hidden;background:#fff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui;background:#fff}
