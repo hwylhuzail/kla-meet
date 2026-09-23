@@ -1,0 +1,4 @@
+import './style.css'
+const demo=[{name:"Maya, 24 🇺🇸",city:"2km away"},{name:"Alex, 26 🇬🇧",city:"5km away"},{name:"Chloe, 23 🇨🇦",city:"1km away"},{name:"Jordan, 29 🇦🇺",city:"3km away"},{name:"Luna, 25 🇩🇪",city:"4km away"},{name:"Sam, 27 🇿🇦",city:"2km away"}]
+const grid=document.getElementById('grid')
+grid.innerHTML=demo.map(p=>`<div class="bg-zinc-900 rounded-[26px] p-2 border border-zinc-800"><div class="w-full h-[130px] bg-zinc-800 rounded-[20px] flex items-center justify-center text-3xl">👤</div><p class="font-bold mt-2 text-center text-[14px]">${p.name}</p><p class="text-[11px] text-center text-zinc-400">📍 ${p.city}</p></div>`).join('')
