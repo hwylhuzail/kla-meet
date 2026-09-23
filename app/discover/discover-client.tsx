@@ -5,59 +5,37 @@ import { createClient } from '@/lib/supabase/client'
 export default function DiscoverClient({ initialProfiles }: any) {
   const supabase = createClient()
   const [profiles, setProfiles] = useState(initialProfiles || [])
-  const [filter, setFilter] = useState({ advanced: false, worldwide: false })
-
-  useEffect(() => {
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-      const { data: me } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-
-      // If I am in snooze mode, don't show me to others (handled server side)
-      // If I have travel_mode, use travel_location
-      // If I don't have premium, limit advanced filters
-      let query = supabase.from('profiles').select('*').neq('id', user.id).eq('snooze_mode', false)
-
-      if (me?.travel_mode && me?.travel_location) {
-        query = query.ilike('current_location', `%${me.travel_location}%`)
-      } else if (!me?.is_premium &&!filter.worldwide) {
-        // Free users: only nearby (Katabi, UG) - premium gets worldwide
-        query = query.ilike('current_location', '%UG%')
-      }
-
-      if (filter.advanced &&!me?.is_premium) {
-        alert('Advanced filters require Premium - upgrade!')
-        return
-      }
-
-      const { data } = await query.limit(50)
-      if (data) setProfiles(data)
-    })()
-  }, [filter])
 
   return (
-    <div>
-      <div className="p-4 flex gap-2">
-        <button onClick={()=>setFilter({...filter, worldwide:!filter.worldwide})} className={`px-3 py-1 rounded-full border text-sm ${filter.worldwide? 'bg-black text-white' : ''}`}>🌍 Worldwide {filter.worldwide? 'ON' : ''}</button>
-        <button onClick={()=>setFilter({...filter, advanced:!filter.advanced})} className={`px-3 py-1 rounded-full border text-sm ${filter.advanced? 'bg-black text-white' : ''}`}>🎯 Advanced Filters</button>
+    <div className="max-w-md mx-auto">
+      <div className="p-4 border-b flex justify-between">
+        <h1 className="font-bold">Discover</h1>
+        <a href="/settings" className="text-sm border px-3 py-1 rounded-full">Settings</a>
       </div>
 
-      {profiles.length === 0? (
+      {profiles.length === 0 ? (
         <div className="text-center p-10">
-          <div className="text-4xl mb-4">🏳️</div>
-          <h2 className="font-bold">Why not adjust those filters?</h2>
-          <p className="text-sm text-gray-500 mt-2">You've seen everyone nearby. But, never fear, someone great could be just outside your filters.</p>
-          <button onClick={()=>setFilter({advanced:false, worldwide:true})} className="bg-black text-white rounded-full px-6 py-3 mt-4">Adjust your filters</button>
+          <div className="text-4xl mb-4">💫</div>
+          <h2 className="font-bold">Adjust your filters</h2>
+          <p className="text-sm text-gray-500 mt-2">You've seen everyone nearby. Try worldwide in settings.</p>
+          <a href="/premium" className="inline-block bg-black text-white rounded-full px-6 py-3 mt-4 text-sm">Get Premium for Worldwide</a>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2 p-2">
+        <div className="grid grid-cols-1 gap-3 p-3">
           {profiles.map((p:any) => (
-            <div key={p.id} className="rounded-xl overflow-hidden border">
-              <img src={p.avatar_url || '/placeholder.jpg'} className="w-full h-48 object-cover" />
-              <div className="p-2">
-                <p className="font-bold">{p.full_name || 'User'}, {p.age || 25}</p>
+            <div key={p.id} className="rounded-xl overflow-hidden border bg-white">
+              {/* SINGLE PHOTO ONLY - NO GALLERY ON TAP */}
+              <div className="w-full h-96 bg-gray-100 overflow-hidden">
+                <img 
+                  src={p.avatar_url || p.photo_url || 'https://via.placeholder.com/400x600?text=KLA'} 
+                  alt={p.full_name}
+                  className="w-full h-full object-cover"
+                  onError={(e:any)=>e.target.src='https://via.placeholder.com/400x600?text=KLA'}
+                />
+              </div>
+              <div className="p-3">
+                <p className="font-bold">{p.full_name || 'User'} {p.age? `, ${p.age}` : ''}</p>
                 <p className="text-xs text-gray-500">{p.current_location || 'Katabi, UG'}</p>
-                {p.incognito_mode && <span className="text-xs bg-gray-100 px-2 rounded">Incognito</span>}
               </div>
             </div>
           ))}
