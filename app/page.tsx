@@ -4,18 +4,23 @@ import DiscoverClient from './discover/discover-client'
 export default async function Page() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  let profiles = []
+  let profiles: any[] = []
+  let isPremium = false
+
   if (user) {
     const { data: me } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-    let query = supabase.from('profiles').select('*').neq('id', user.id).eq('snooze_mode', false).eq('incognito_mode', false)
-    if (!me?.is_premium) {
-      query = query.ilike('current_location', '%UG%')
+    isPremium = !!me?.is_premium
+    let query = supabase.from('profiles').select('*').neq('id', user.id).eq('snooze_mode', false)
+    if (!isPremium) {
+      query = query.eq('incognito_mode', false).ilike('current_location', '%UG%')
     }
     const { data } = await query.limit(50)
     profiles = data || []
   } else {
-    const { data } = await supabase.from('profiles').select('*').limit(20)
+    // Logged out - show 20 profiles + premium upsell
+    const { data } = await supabase.from('profiles').select('*').eq('snooze_mode', false).eq('incognito_mode', false).limit(20)
     profiles = data || []
   }
-  return <DiscoverClient initialProfiles={profiles} />
+
+  return <DiscoverClient initialProfiles={profiles} isPremium={isPremium} />
 }
