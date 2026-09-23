@@ -1,16 +1,11 @@
 export default async function handler(req, res){
-  // Pesapal will call this automatically - IPN
-  try{
-    const { OrderTrackingId, OrderMerchantReference } = req.query
-    console.log('IPN Received:', OrderTrackingId, OrderMerchantReference)
-    
-    // Here you can verify transaction status and unlock premium in your DB
-    // For now just log - you can add Supabase/Firebase later
-    
-    res.status(200).json({ status: 'received', OrderTrackingId })
-  }catch(e){
-    res.status(200).json({ status:'error', error:e.message })
+  const { OrderTrackingId } = req.query
+  if(OrderTrackingId){
+    try{
+      const authRes = await fetch('https://pay.pesapal.com/v3/api/Auth/RequestToken',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({consumer_key:process.env.PESAPAL_CONSUMER_KEY,consumer_secret:process.env.PESAPAL_CONSUMER_SECRET})})
+      const auth = await authRes.json()
+      await fetch(`https://pay.pesapal.com/v3/api/Transactions/GetTransactionStatus?orderTrackingId=${OrderTrackingId}`,{headers:{'Authorization':`Bearer ${auth.token}`}})
+    }catch(e){}
   }
+  return res.status(200).send('IPN OK')
 }
-
-export const config = { api: { bodyParser: false } }

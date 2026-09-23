@@ -1,3 +1,4 @@
 export default function handler(req,res){
-  res.redirect(302, '/?payment=success')
+  const { order } = req.query
+  return res.redirect(302, `/?premium=success&order=${order}`)
 }
