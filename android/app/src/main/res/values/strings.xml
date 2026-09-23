@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">KLA MEET</string>
-    <string name="title_activity_main">KLA MEET</string>
-    <string name="package_name">com.klameet.app</string>
-    <string name="custom_url_scheme">com.klameet.app</string>
-</resources>

@@ -1,1 +1,0 @@
-export default function Page(){return(<div className='max-w-md mx-auto p-4'><a href='/' className='w-9 h-9 border rounded-full flex items-center justify-center'>←</a><h1 className='font-bold mt-4'>Terms</h1><a href='/' className='block bg-black text-white text-center rounded-full py-3 mt-6'>← Back to Site</a></div>)}
