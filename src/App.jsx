@@ -150,7 +150,7 @@ export default function App(){
                 <img src={u.img} className="h-40 w-full object-cover" onError={e=>e.target.src='https://randomuser.me/api/portraits/women/44.jpg'}/>
                 <div className="p-3">
                   <p className="font-bold text-xs">{u.name}, 24 • {u.city}</p>
-                  <p className="text-[10px] text-white/60">{u.country} • {u.city!== 'Bushenyi'? 'Worldwide' : ''}</p>
+                  <p className="text-[10px] text-white/60">{u.country} • {u.city!== 'Paris • Tokyo • New York • London • Sydney • Rio'? 'Worldwide' : ''}</p>
                   <p className="text-[9px] bg-[#FFC300] text-black inline-block px-2 py-0.5 rounded-full mt-1">{u.city} • Keep Love Alive</p>
                 </div>
               </div>
