@@ -1,3 +1,4 @@
 export default function handler(req,res){
-  res.send(`<html><body style="background:#121212;color:white;text-align:center;padding:40px;font-family:sans-serif"><h1>Payment Received! 🎉</h1><p>Welcome to KLA Premium - Keep Love Alive</p><a href="/" style="background:#00D8A0;color:black;padding:12px 24px;border-radius:30px;text-decoration:none;display:inline-block;margin-top:20px">Back to App</a></body></html>`)
+  res.setHeader('Content-Type','text/html')
+  res.send(`<html><head><meta name="viewport" content="width=device-width"><style>body{background:#000;color:white;font-family:sans-serif;text-align:center;padding:40px} a{background:#FFD400;color:black;padding:14px 28px;border-radius:30px;text-decoration:none;font-weight:bold;display:inline-block;margin-top:20px}</style></head><body><h1>Payment Successful! 🎉</h1><p>Welcome to KLA Premium - Keep Love Alive 💛</p><p>Plan activated - You can now chat worldwide!</p><a href="/">Back to KLA-MEET</a></body></html>`)
 }
