@@ -1,1 +1,17 @@
-@tailwind base; @tailwind components; @tailwind utilities; body{background:#121212;color:white}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: #ffffff;
+  color: #000000;
+  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Make sure cards stay visible */
+#app {
+  background: #ffffff;
+  min-height: 100vh;
+}
