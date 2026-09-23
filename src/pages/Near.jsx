@@ -1,1 +1,0 @@
-export default function Near(){ return <div className="p-10 text-center pb-24"><h2 className="text-2xl font-black">Near You 📍</h2><p className="mt-2 text-white/50">Upgraded map view coming — API kept intact</p></div> }
