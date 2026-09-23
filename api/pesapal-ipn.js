@@ -1,5 +1,4 @@
-export default async function handler(req,res){
-  console.log('IPN received', req.body)
-  // TODO: mark user premium in Supabase
-  return res.status(200).json({status:'ok'})
+export default function handler(req,res){
+  console.log('IPN:', req.body)
+  return res.json({ok:true})
 }
