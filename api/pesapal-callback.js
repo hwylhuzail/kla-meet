@@ -1,4 +1,3 @@
 export default function handler(req,res){
-  res.setHeader('Content-Type','text/html')
-  res.send(`<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{background:#000;color:white;font-family:sans-serif;text-align:center;padding:40px} h1{font-size:28px} a{background:#FFD400;color:black;padding:14px 28px;border-radius:30px;text-decoration:none;font-weight:bold;display:inline-block;margin-top:20px}</style></head><body><h1>Payment Successful! 🎉</h1><p>Welcome to KLA Premium - Keep Love Alive 💛</p><p>Plan activated - You can now chat worldwide!</p><p style="font-size:11px;color:#777;margin-top:15px">ID: ${req.query.OrderTrackingId || ''}</p><a href="/discover">Go to Discover →</a><br><br><a href="/" style="background:#222;color:white">Back to Home</a></body></html>`)
+  res.redirect(302, '/?payment=success')
 }
