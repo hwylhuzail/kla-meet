@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "baseUrl": ".",
+    "paths": { "@/*": ["./*"] },
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -13,8 +14,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "plugins": [{"name": "next"}],
-    "paths": {"@/*": ["./*"]}
+    "plugins": [{ "name": "next" }]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
