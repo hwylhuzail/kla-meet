@@ -1,3 +1,1 @@
-export default {
-  server: { historyApiFallback: true }
-}
+export default { server:{historyApiFallback:true} }
