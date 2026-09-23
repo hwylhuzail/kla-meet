@@ -1,14 +1,1 @@
-export function home(){
-return `
-<header class="flex justify-between items-center px-6 lg:px-12 py-4 border-b sticky top-0 bg-white z-10">
-  <div class="flex items-center gap-2 font-black text-xl"><span class="bg-[#FFC700] w-8 h-8 grid place-items-center rounded-full">📍</span> KLA-MEET</div>
-  <nav class="hidden md:flex gap-6 font-bold text-sm"><a href="/about/">About</a><a href="/safety/">Safety</a><a href="/guidelines/">Community</a><a href="/how-it-works/">Stories</a></nav>
-  <div class="flex gap-2"><a href="/login/" class="px-4 py-2 rounded-full border-2 border-black font-bold text-sm">Log in</a><a href="/signin/" class="px-4 py-2 rounded-full bg-[#FFC700] border-2 border-black font-black text-sm">Sign up</a></div>
-</header>
-<section class="px-6 lg:px-12 py-12 grid lg:grid-cols-2 gap-10 items-center">
-  <div><h1 class="text-[44px] lg:text-[56px] font-black leading-[0.9]">Date. Meet. Connect.<br/>In Kampala.</h1><p class="mt-4 text-zinc-600">The modern way for Kampala to meet real people, nearby. Join thousands of singles building meaningful relationships — safely, locally, authentically.</p><div class="mt-6 flex gap-3"><a href="/signup/?step=1" class="px-6 py-3 rounded-full bg-[#FFC700] font-black border-2 border-black">Get Started — It's Free →</a><a href="#" class="px-6 py-3 rounded-full border-2 border-black font-bold">📞 Download the app</a></div><div class="mt-4 text-[11px] flex gap-2 text-zinc-600"><span>💚 Verified</span>•<span>Privacy-first</span>•<span>Made for Kampala</span></div></div>
-  <div class="relative"><div class="absolute -z-10 right-0 top-10 w-[120%] h-[80%] bg-[#FFC700] rounded-l-[60px]"></div><img src="https://images.unsplash.com/photo-1525134479668-1bee5c7c6845?q=80&w=800" class="rounded-[24px] kla-shadow w-full object-cover h-[420px]"/></div>
-</section>
-<section class="bg-zinc-50 py-12 px-6"><h2 class="text-center text-3xl font-black">How KLA-MEET Works</h2><p class="text-center text-zinc-600 mt-2">Get started in 5 simple steps.</p><div class="mt-8 grid grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">${[['Step 1','What should we call you?','1. Name & Birthday'],['Step 2','Your gender','2. Gender'],['Step 3','What are you looking for?','3. Relationship'],['Step 4','Pick your interests','4. Interests'],['Step 5','Where are you located?','5. Location']].map(([s,t,b])=>`<div class="text-center"><div class="bg-black text-white rounded-[24px] p-4 h-[300px] border-4 border-zinc-200"><div class="text-[10px] text-[#FFC700]">${s}</div><div class="mt-3 font-bold text-sm">${t}</div><div class="mt-6 bg-[#FFC700] text-black py-2 rounded-full font-black text-xs">Continue</div></div><div class="mt-3 font-bold text-xs">${b}</div></div>`).join('')}</div></section>
-<footer class="bg-black text-white text-[10px] flex justify-between px-6 py-3"><span>Built with Vite • Fast • Secure • Local to Kampala</span><span>© 2024 KLA-MEET</span></footer>`
-}
+export function home(){return `<div class="p-12 font-black text-2xl">KLA-MEET - Ready to build</div>`}

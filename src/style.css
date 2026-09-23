@@ -1,4 +1,3 @@
 @tailwind base; @tailwind components; @tailwind utilities;
-body{background:#fff;color:#000;font-family:system-ui,sans-serif}
+body{background:#fff;color:#000}
 #app{min-height:100vh;background:#fff}
-.kla-shadow{box-shadow:0 20px 60px rgba(0,0,0,.12)}
