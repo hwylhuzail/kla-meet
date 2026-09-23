@@ -7,12 +7,14 @@ export default async function Page() {
   let profiles = []
   if (user) {
     const { data: me } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-    let query = supabase.from('profiles').select('*').neq('id', user.id).eq('snooze_mode', false)
-    // Incognito: don't show incognito users unless they liked you
+    let query = supabase.from('profiles').select('*').neq('id', user.id).eq('snooze_mode', false).eq('incognito_mode', false)
     if (!me?.is_premium) {
-      query = query.eq('incognito_mode', false)
+      query = query.ilike('current_location', '%UG%')
     }
     const { data } = await query.limit(50)
+    profiles = data || []
+  } else {
+    const { data } = await supabase.from('profiles').select('*').limit(20)
     profiles = data || []
   }
   return <DiscoverClient initialProfiles={profiles} />
