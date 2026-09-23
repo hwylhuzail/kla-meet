@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 export default function App(){
-  const [page,setPage]=useState('landing') // landing, onboarding, app
+  const [page,setPage]=useState('landing')
   const [step,setStep]=useState(1)
   const [form,setForm]=useState({name:'',birthday:'',gender:'Woman',looking:'Dating',interests:[],location:''})
   const [appTab,setAppTab]=useState('discover')
@@ -14,20 +14,20 @@ export default function App(){
     return (
       <div className="bg-white min-h-screen">
         <header className="max-w-6xl mx-auto flex justify-between items-center p-4">
-          <div className="flex items-center gap-2 font-black text-xl"><span className="bg-brand rounded-full p-1">📍</span>KLA-MEET</div>
+          <div className="flex items-center gap-2 font-black text-xl"><span className="bg-brand rounded-full p-1">📍</span>KLA-MEET <span className="text-[9px] font-bold bg-black text-white px-2 py-0.5 rounded-full ml-1">KEEP LOVE ALIVE</span></div>
           <div className="hidden md:flex gap-6 text-sm font-medium"><span>About</span><span>Safety</span><span>Community</span><span>Success Stories</span></div>
           <div className="flex gap-2"><button className="border border-black rounded-full px-4 py-1.5 text-sm font-bold">Log in</button><button onClick={()=>setPage('onboarding')} className="bg-brand rounded-full px-4 py-1.5 text-sm font-bold">Sign up</button></div>
         </header>
 
         <section className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 p-6 items-center">
           <div>
-            <h1 className="text-5xl font-black leading-[0.95]">Date. Meet. Connect.<br/>In Kampala.</h1>
-            <p className="mt-4 text-zinc-600">The modern way for Kampala to meet real people, nearby. Join thousands of singles building meaningful relationships — safely, locally, authentically.</p>
+            <h1 className="text-5xl font-black leading-[0.95]">Date. Meet. Connect.<br/>Worldwide.</h1>
+            <p className="mt-4 text-zinc-600">The modern way to meet real people, nearby and worldwide. Join thousands building meaningful relationships — safely, globally, authentically. Keep Love Alive.</p>
             <div className="mt-6 flex gap-3">
               <button onClick={()=>setPage('onboarding')} className="bg-brand rounded-full px-6 py-3 font-bold text-sm">Get Started — It's Free →</button>
               <button className="border border-black rounded-full px-6 py-3 font-bold text-sm">◐ Download the app</button>
             </div>
-            <p className="mt-4 text-[11px] text-zinc-500">✅ Verified profiles • Privacy-first • Made for Kampala, Uganda</p>
+            <p className="mt-4 text-[11px] text-zinc-500">✅ Verified profiles • Privacy-first • Made for Everyone, Everywhere</p>
           </div>
           <div className="relative"><div className="absolute -z-10 top-10 right-10 w-32 h-32 bg-brand/50 rounded-full blur-2xl"/><img src="https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?w=600" className="rounded-[24px] object-cover w-full h-[380px]"/><div className="absolute bottom-0 -left-4 w-24 h-24 bg-brand rounded-full blur-xl"/></div>
         </section>
@@ -48,7 +48,7 @@ export default function App(){
           </div>
         </section>
 
-        <footer className="bg-black text-white text-[11px] p-3 flex justify-between"><span>Built with Next.js 14 • Fast • Secure • Local to Kampala</span><span>© 2024 KLA-MEET • Privacy • Terms • Help • Made in Kampala, Uganda</span></footer>
+        <footer className="bg-black text-white text-[11px] p-3 flex justify-between"><span>Built with Next.js 14 • Fast • Secure • KLA - Keep Love Alive</span><span>© 2024 KLA-MEET • Privacy • Terms • Help • International • Keep Love Alive</span></footer>
       </div>
     )
   }
@@ -58,7 +58,7 @@ export default function App(){
       <div className="min-h-screen bg-[#f6f6f6] flex items-center justify-center p-4">
         <div className="bg-white w-full max-w-[340px] rounded-[32px] shadow-xl p-6 border">
           {step===1 && (
-            <><div className="text-center"><div className="font-black">♡ KLA-MEET</div><div className="mt-10 text-4xl">💬💛</div><h2 className="mt-6 font-black text-xl">Welcome to KLA-MEET</h2><p className="text-xs text-zinc-500">Date. Meet. Connect. Worldwide.</p><button onClick={()=>setStep(2)} className="w-full mt-8 bg-brand rounded-full py-3 font-bold text-sm">Get Started</button><div className="flex justify-center gap-1 mt-4"><span className="w-2 h-2 bg-brand rounded-full"/><span className="w-1.5 h-1.5 bg-zinc-200 rounded-full"/><span className="w-1.5 h-1.5 bg-zinc-200 rounded-full"/><span className="w-1.5 h-1.5 bg-zinc-200 rounded-full"/><span className="w-1.5 h-1.5 bg-zinc-200 rounded-full"/></div></div></>
+            <><div className="text-center"><div className="font-black">♡ KLA-MEET <span className="text-[8px]">KEEP LOVE ALIVE</span></div><div className="mt-10 text-4xl">💬💛</div><h2 className="mt-6 font-black text-xl">Welcome to KLA-MEET</h2><p className="text-xs text-zinc-500">Date. Meet. Connect. Worldwide.</p><button onClick={()=>setStep(2)} className="w-full mt-8 bg-brand rounded-full py-3 font-bold text-sm">Get Started</button><div className="flex justify-center gap-1 mt-4"><span className="w-2 h-2 bg-brand rounded-full"/><span className="w-1.5 h-1.5 bg-zinc-200 rounded-full"/><span className="w-1.5 h-1.5 bg-zinc-200 rounded-full"/><span className="w-1.5 h-1.5 bg-zinc-200 rounded-full"/><span className="w-1.5 h-1.5 bg-zinc-200 rounded-full"/></div></div></>
           )}
           {step===2 && (
             <><p className="font-black text-center">Create your profile</p><p className="text-[11px] text-center text-zinc-500">Let's get to know you</p>
@@ -88,13 +88,12 @@ export default function App(){
     )
   }
 
-  // MAIN APP - Discover / Near / Chat
   return (
     <div className="min-h-screen bg-black text-white pb-20">
-      <header className="p-4 flex justify-between items-center border-b border-white/10 sticky top-0 bg-black/80 backdrop-blur z-50"><span className="font-black tracking-widest">KLA-MEET</span><span className="text-xs bg-white text-black px-2 py-1 rounded-full font-bold">{form.name||'Guest'}</span></header>
-      {appTab==='discover' && <div className="p-4 grid grid-cols-2 gap-3 max-w-xl mx-auto">{[1,2,3,4,5,6].map(i=><div key={i} className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10"><div className="h-40 bg-gradient-to-br from-zinc-700 to-black"/><div className="p-3"><p className="font-bold text-sm">Amina {i} 🌍</p><p className="text-[11px] text-white/50">Kampala • {i*200}m away</p></div></div>)}</div>}
-      {appTab==='near' && <div className="p-8 text-center max-w-xl mx-auto"><h2 className="text-2xl font-black">Near You 📍</h2><p className="text-white/50 text-sm mt-2">Using your location to find matches - API kept</p><div className="mt-6 h-64 bg-zinc-900 rounded-2xl grid place-items-center border border-white/10">Map View</div></div>}
-      {appTab==='chat' && <div className="p-6 max-w-xl mx-auto"><div className="bg-white text-black rounded-[24px] p-6 text-center"><h2 className="font-black text-xl">Random Chat 🎲</h2><p className="text-sm opacity-60 mt-1">Connect instantly with someone new in Kampala</p><button className="mt-6 w-full bg-black text-white py-3 rounded-full font-bold">Start Random Match</button></div></div>}
+      <header className="p-4 flex justify-between items-center border-b border-white/10 sticky top-0 bg-black/80 backdrop-blur z-50"><span className="font-black tracking-widest">KLA-MEET <span className="text-[8px] bg-white text-black px-1 rounded">KEEP LOVE ALIVE</span></span><span className="text-xs bg-white text-black px-2 py-1 rounded-full font-bold">{form.name||'Guest'}</span></header>
+      {appTab==='discover' && <div className="p-4 grid grid-cols-2 gap-3 max-w-xl mx-auto">{[1,2,3,4,5,6].map(i=><div key={i} className="rounded-2xl overflow-hidden bg-zinc-900 border border-white/10"><div className="h-40 bg-gradient-to-br from-zinc-700 to-black"/><div className="p-3"><p className="font-bold text-sm">Alex {i} 🌍</p><p className="text-[11px] text-white/50">Worldwide • Online now</p></div></div>)}</div>}
+      {appTab==='near' && <div className="p-8 text-center max-w-xl mx-auto"><h2 className="text-2xl font-black">Near You 📍</h2><p className="text-white/50 text-sm mt-2">Discover people around the world</p><div className="mt-6 h-64 bg-zinc-900 rounded-2xl grid place-items-center border border-white/10">Global Map View</div></div>}
+      {appTab==='chat' && <div className="p-6 max-w-xl mx-auto"><div className="bg-white text-black rounded-[24px] p-6 text-center"><h2 className="font-black text-xl">Random Chat 🎲</h2><p className="text-sm opacity-60 mt-1">Connect instantly - Keep Love Alive</p><button className="mt-6 w-full bg-black text-white py-3 rounded-full font-bold">Start Random Match</button></div></div>}
       <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 flex justify-around p-2">
         {['discover','near','chat'].map(t=><button key={t} onClick={()=>setAppTab(t)} className={`px-5 py-2 rounded-full text-sm capitalize ${appTab===t?'bg-white text-black font-bold':'text-white/60'}`}>{t}</button>)}
         <button onClick={()=>setPage('landing')} className="px-5 py-2 rounded-full text-sm text-white/60">Home</button>
