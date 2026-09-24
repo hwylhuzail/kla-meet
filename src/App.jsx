@@ -71,40 +71,61 @@ export default function App(){
   const openCrypto = (pkg) => window.open(OXA, '_blank')
   const openPesapal = async (pkg) => { try{ const r=await fetch('/api/pesapal',{method:'POST', body:JSON.stringify({package:pkg})}); const j=await r.json(); if(j.redirect_url) window.open(j.redirect_url,'_blank'); else window.open(OXA,'_blank') }catch{ window.open(OXA,'_blank') } }
   const handleTab = (t) => { if(t==='admin' &&!isAdmin) return; if((t==='nearby' || t==='chat' || t==='liked' || t==='profile') &&!isPremium &&!isAdmin){ setTab('premium'); return } setTab(t) }
-  const handleSignup = async () => { if(!agreed){ alert('Check box to agree Terms & Privacy'); return } try{ const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'}); if(error) throw error; await supabase.from('profiles').insert([{id:data.user?.id, name:form.name, email:form.email.trim(), bio:form.bio, interests:form.interests, gender:form.gender, age:form.age}]); if(isAdminEmail(form.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', form.email.toLowerCase()) } setUser(data.user); setView('app'); setTab('profile') }catch(e){ alert(e.message) } }
-  const handleSignin = async () => { try{ const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password}); if(error) throw error; setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', data.user.email.toLowerCase()); setView('app'); setTab('admin') } else { setIsAdmin(false); setView('app'); setTab('discover') } }catch(e){ alert(e.message) } }  const getLocation = async () => {
-    setPostForm(f=>({...f, city:'Locating...'}))
-    const setPos = async (lat,lng) => {
-      let cityName = `${lat.toFixed(2)}, ${lng.toFixed(2)}`
-      try{
-        const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
-        const j = await r.json()
-        cityName = j.city || j.locality || j.principalSubdivision || cityName
-      }catch{}
-      setPostForm(f=>({...f, lat, lng, city: cityName}))
-    }
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(
-        (pos)=>{ setPos(pos.coords.latitude, pos.coords.longitude) },
-        async ()=>{
-          try{
-            const r = await fetch('https://ipapi.co/json/')
-            const j = await r.json()
-            if(j.latitude && j.longitude){
-              setPostForm(f=>({...f, lat:j.latitude, lng:j.longitude, city: j.city || 'Nearby' }))
-            } else {
-              setPostForm(f=>({...f, city:'Worldwide'}))
-            }
-          }catch{
-            setPostForm(f=>({...f, city:'Worldwide'}))
-          }
-        },
-        { enableHighAccuracy:false, timeout:8000, maximumAge:60000 }
-      )
-    } else {
-      setPostForm(f=>({...f, city:'Worldwide'}))
-    }
+  const handleSignup = async () => {
+    if(!agreed){ alert('Check box to agree Terms & Privacy'); return }
+    try{
+      const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'});
+      if(error) throw error;
+      await supabase.from('profiles').insert([{id:data.user?.id, name:form.name, email:form.email.trim(), bio:form.bio, interests:form.interests, gender:form.gender, age:form.age}]);
+      if(isAdminEmail(form.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', form.email.toLowerCase()) }
+      setUser(data.user); setView('app'); setTab('profile')
+    }catch(e){ alert(e.message) }
   }
+
+  const handleSignin = async () => {
+    try{
+      const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password});
+      if(error) throw error;
+      setUser(data.user);
+      if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', data.user.email.toLowerCase()); setView('app'); setTab('admin') }
+      else { setIsAdmin(false); setView('app'); setTab('discover') }
+    }catch(e){ alert(e.message) }
+  }
+
+  const getLocation = async () => {
+    setPostForm(f=>({...f, city:'Locating...'}))
+    const setCity = (cityName, lat, lng) => {
+      setPostForm(f=>({...f, lat:lat||f.lat, lng:lng||f.lng, city: cityName || 'Worldwide'}))
+    }
+    const tryIP = async () => {
+      try{
+        const r = await fetch('https://ipapi.co/json/')
+        const j = await r.json()
+        if(j.city) setCity(j.city, j.latitude, j.longitude)
+        else setCity('Worldwide',0,0)
+      }catch{
+        setCity('Worldwide',0,0)
+      }
+    }
+    if(!navigator.geolocation){ tryIP(); return }
+    navigator.geolocation.getCurrentPosition(
+      async (pos)=>{
+        const lat=pos.coords.latitude
+        const lng=pos.coords.longitude
+        try{
+          const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
+          const j = await r.json()
+          const cityName = j.city || j.locality || j.principalSubdivision || `${lat.toFixed(2)}, ${lng.toFixed(2)}`
+          setCity(cityName, lat, lng)
+        }catch{
+          setCity(`${lat.toFixed(2)}, ${lng.toFixed(2)}`, lat, lng)
+        }
+      },
+      ()=>{ tryIP() },
+      { enableHighAccuracy:false, timeout:7000, maximumAge:60000 }
+    )
+  }
+
   const handleImage = (e) => { const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=(ev)=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); let w=img.width,h=img.height,max=500; if(w>max){h=Math.round(h*max/w);w=max} c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); let q=0.5,d=c.toDataURL('image/jpeg',q); while(d.length>150000&&q>0.1){q-=0.1;d=c.toDataURL('image/jpeg',q)} setPostForm(f=>({...f,preview:d})) }; img.src=ev.target.result }; reader.readAsDataURL(file) }
   const handleCreatePost = async () => { if(!user){ alert('Sign in'); return } if(!postForm.bio){ alert('Add bio'); return } if(posting) return; setPosting(true); try{ const imgUrl=postForm.preview||WORLD[0].img; await supabase.from('posts').insert([{user_id:user.id,name:form.name||user.email.split('@')[0],type:postForm.type,bio:postForm.bio,interests:postForm.interests||'music',age:form.age||'22',gender:form.gender||'Female',city:postForm.city||'Worldwide',lat:postForm.lat||0,lng:postForm.lng||0,image_url:imgUrl}]); setShowPostModal(false); await fetchPosts(); setTab('discover') }catch(e){ alert(e.message) } finally{ setPosting(false) } }
   const handleLike = async (post) => { if(!isPremium&&!isAdmin){ setTab('premium'); return } try{ await supabase.from('likes').insert([{from_user:user.id,to_user:post.user_id,post_id:post.id}]); await supabase.from('notifications').insert([{to_user:post.user_id,from_user:user.id,from_name:form.name||user.email.split('@')[0],type:'like',post_id:post.id}]); setLikedIds([...likedIds,post.id]); setChatWith(post); setTab('chat'); fetchMessages(post.user_id) }catch(e){ alert(e.message) } }
@@ -150,7 +171,8 @@ export default function App(){
         {showTerms && (<div className="fixed inset-0 bg-black/90 z-[300] p-4 overflow-y-auto"><div className="bg-white rounded-[24px] p-6 max-w-md mx-auto"><h2 className="font-black text-sm">Terms of Service</h2><div className="mt-4 text-[11px] space-y-2 leading-relaxed"><p>1. You must be 18+ with true info.</p><p>2. No nudity, spam, hate, money requests.</p><p>3. Photos must be yours.</p><p>4. Premium $2.99 non-refundable after activation.</p><p>5. We may warn, suspend or ban violating accounts. 3 warnings = suspension.</p><p>6. By checking box you agree.</p></div><button onClick={()=>{setAgreed(true); setShowTerms(false)}} className="mt-4 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">I Agree ✓</button></div></div>)}
       </div>
     )
-  } return (
+  }
+  return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pb-28">
       <header className="p-3 bg-black border-b border-white/10 flex justify-between items-center"><h1 className="font-black text-xs">KLA-MEET {isPremium && '• PREMIUM'} {isAdmin && '• ADMIN'}</h1><div className="flex gap-1"><button onClick={()=>handleTab('profile')} className="text-[11px] bg-white text-black px-3 py-1.5 rounded-full font-black">Profile</button>{isAdmin && <button onClick={()=>handleTab('admin')} className="text-[11px] bg-[#FFC300] text-black px-3 py-1.5 rounded-full font-black">Admin</button>}<button onClick={()=>setView('landing')} className="text-[10px] bg-zinc-800 px-2 py-1 rounded-full">Landing</button></div></header>
       {tab==='discover' && (
