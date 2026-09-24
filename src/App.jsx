@@ -17,7 +17,8 @@ export default function App(){
   const [allProfiles,setAllProfiles]=useState([])
   const [posts,setPosts]=useState([])
   const [showPostModal,setShowPostModal]=useState(false)
-  const [postForm,setPostForm]=useState({type:'dating', bio:'', interests:'', city:'Arua', lat:3.03, lng:30.91, imageFile:null, preview:''})
+  const [posting,setPosting]=useState(false)
+  const [postForm,setPostForm]=useState({type:'dating', bio:'', interests:'', city:'Arua', lat:3.0307, lng:30.907, imageFile:null, preview:''})
   const [form,setForm]=useState({name:'',email:'',password:'',bio:'',interests:'',gender:'Female',age:'22'})
   const [user,setUser]=useState(null)
   const [editData,setEditData]=useState(null)
@@ -37,65 +38,59 @@ export default function App(){
   const handleSignup = async () => { try{ const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'}); if(error) throw error; await supabase.from('profiles').insert([{id:data.user?.id, name:form.name, email:form.email.trim(), bio:form.bio, interests:form.interests, gender:form.gender, age:form.age}]); if(isAdminEmail(form.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes') } alert('Account created!'); setView('app'); setTab('profile'); setUser(data.user) }catch(e){ alert(e.message) } }
   const handleSignin = async () => { try{ const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password}); if(error) throw error; setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes') } setView('app'); setTab(isAdminEmail(data.user.email)?'admin':'profile') }catch(e){ alert(e.message) } }
 
-  // ACTIVE LOCATION - FIXED FOR ARUA
   const getLocation = () => {
-    // Instant active for UX
     setPostForm(f=>({...f, city:'Arua - Locating...'}))
-    if(!navigator.geolocation){
-      setPostForm(f=>({...f, lat:3.0307, lng:30.907, city:'Arua'}))
-      alert('✅ Location Activated: Arua')
-      return
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos)=>{
-        setPostForm(f=>({...f, lat:pos.coords.latitude, lng:pos.coords.longitude, city:`Arua • ${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)} Live`}))
-        alert('✅ Location Activated!')
-      },
-      ()=>{
-        setPostForm(f=>({...f, lat:3.0307, lng:30.907, city:'Arua'}))
-        alert('✅ Location Activated: Arua (fallback)')
-      },
-      {enableHighAccuracy:false, timeout:8000, maximumAge:60000}
-    )
+    if(!navigator.geolocation){ setPostForm(f=>({...f, lat:3.0307, lng:30.907, city:'Arua'})); return }
+    navigator.geolocation.getCurrentPosition((pos)=>{
+      setPostForm(f=>({...f, lat:pos.coords.latitude, lng:pos.coords.longitude, city:`Arua • ${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)} Live`}))
+    },()=>{ setPostForm(f=>({...f, lat:3.0307, lng:30.907, city:'Arua'})) },{timeout:5000})
   }
 
-  const handleImage = (e) => { const file = e.target.files[0]; if(file){ setPostForm({...postForm, imageFile:file, preview:URL.createObjectURL(file)}) } }
+  // FIXED: Convert image to base64 so it saves
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    setPostForm(f=>({...f, imageFile:file}))
+    const reader = new FileReader();
+    reader.onloadend = () => { setPostForm(f=>({...f, preview:reader.result})) }
+    reader.readAsDataURL(file);
+  }
 
-  // POST NOW - ACTIVE + FALLBACK IF NO BUCKET
+  // FIXED: Post Now works now - no bucket needed
   const handleCreatePost = async () => {
     if(!user){ alert('Sign in first'); setView('landing'); return }
-    if(!isPremium &&!isAdmin){ setTab('premium'); setShowPostModal(false); return }
-    if(!postForm.bio &&!postForm.preview){ alert('Add photo or bio - Looking for serious marriage partner'); return }
+    if(!isPremium &&!isAdmin){ alert('Premium required - pay $2.99'); setTab('premium'); return }
+    if(!postForm.bio){ alert('Add bio'); return }
+    if(posting) return
+    setPosting(true)
     try{
-      let imageUrl = postForm.preview || `https://picsum.photos/seed/${Date.now()}/400/600`
-      if(postForm.imageFile){
-        try{
-          const fileName = `${user.id}_${Date.now()}.jpg`
-          const { error } = await supabase.storage.from('post-images').upload(fileName, postForm.imageFile, {upsert:true})
-          if(!error){
-            const { data } = supabase.storage.from('post-images').getPublicUrl(fileName)
-            imageUrl = data.publicUrl
-          }
-        }catch{}
+      // Use base64 preview directly - works even if bucket missing
+      let imageUrl = postForm.preview
+      if(!imageUrl || imageUrl.startsWith('blob:')){
+        imageUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600"
       }
+
       const { error } = await supabase.from('posts').insert([{
         user_id:user.id,
         name:form.name || user.email.split('@')[0],
         type:postForm.type,
-        bio:postForm.bio || 'Looking for a serious marriage partner. Here to spread love.',
-        interests:postForm.interests || form.interests || 'Music',
-        age:form.age, gender:form.gender,
+        bio:postForm.bio,
+        interests:postForm.interests || 'music',
+        age:form.age || '22',
+        gender:form.gender || 'Female',
         city:postForm.city || 'Arua',
-        lat:postForm.lat || 3.0307, lng:postForm.lng || 30.907,
+        lat:postForm.lat || 3.0307,
+        lng:postForm.lng || 30.907,
         image_url:imageUrl
       }])
       if(error) throw error
-      alert('✅ Posted! Keep Love Alive')
+      alert('✅ Posted!')
       setShowPostModal(false)
       setPostForm({type:'dating', bio:'', interests:'', city:'Arua', lat:3.03, lng:30.91, imageFile:null, preview:''})
       fetchPosts()
       setTab('discover')
-    }catch(e){ alert('Post failed: '+e.message) }
+    }catch(e){ alert('Post failed: '+e.message + '\nRun posts SQL in Supabase') }
+    finally{ setPosting(false) }
   }
 
   const PremiumWall = () => (
@@ -112,13 +107,7 @@ export default function App(){
             <div className="bg-black text-white rounded-[20px] p-4 w-[160px]"><p className="text-[10px] text-[#FFC300]">Basic $2.99</p><button onClick={openCrypto} className="mt-3 w-full bg-white text-black rounded-full py-2 font-bold text-[10px]">Crypto ALONE</button><button onClick={openPesapal} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Pesapal ALONE</button></div>
             <div className="bg-black text-white rounded-[20px] p-4 w-[160px]"><p className="text-[10px] text-[#FFC300]">Standard $5.99</p><button onClick={openCrypto} className="mt-3 w-full bg-white text-black rounded-full py-2 font-bold text-[10px]">Crypto ALONE</button><button onClick={openPesapal} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Pesapal ALONE</button></div>
           </div>
-          <div className="mt-10 space-y-6">
-            <div className="bg-zinc-100 rounded-[24px] p-5"><h3 className="font-black">About</h3><p className="text-[11px] mt-2">KLA-MEET connects Arua to Paris, Tokyo, New York, London.</p></div>
-            <div className="bg-black text-white rounded-[24px] p-5"><h3 className="font-black text-[#FFC300]">How It Works</h3><p className="text-[11px] mt-2">1. Discover 2. Pay $2.99/$5.99 3. Unlock</p></div>
-            <div className="border rounded-[24px] p-5"><h3 className="font-black">FAQs</h3><p className="text-[11px] mt-2">Q: How to unlock? A: Premium tab.</p></div>
-            <div className="bg-zinc-900 text-white rounded-[24px] p-5"><h3 className="font-black">Sign In</h3><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-3 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} placeholder="Password" type="password" className="mt-2 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><button onClick={handleSignin} className="mt-3 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Sign In</button></div>
-            <div className="bg-[#FFC300] rounded-[24px] p-5"><h3 className="font-black">Sign Up</h3><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Name" className="mt-3 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} placeholder="Password" type="password" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><div className="flex gap-2 mt-2"><select value={form.gender} onChange={e=>setForm({...form,gender:e.target.value})} className="w-1/2 bg-white rounded-full px-4 py-3 text-xs"><option>Female</option><option>Male</option><option>Other</option></select><input value={form.age} onChange={e=>setForm({...form,age:e.target.value})} placeholder="Age" className="w-1/2 bg-white rounded-full px-4 py-3 text-xs" /></div><input value={form.interests} onChange={e=>setForm({...form,interests:e.target.value})} placeholder="Interests" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><textarea value={form.bio} onChange={e=>setForm({...form,bio:e.target.value})} placeholder="Bio" className="mt-2 w-full bg-white rounded-2xl px-4 py-3 text-xs h-20" /><button onClick={handleSignup} className="mt-3 w-full bg-black text-white rounded-full py-3 font-black text-xs">Sign Up</button></div>
-          </div>
+          <div className="mt-10 space-y-6"><div className="bg-zinc-100 rounded-[24px] p-5"><h3 className="font-black">About</h3><p className="text-[11px] mt-2">KLA-MEET connects Arua to Paris, Tokyo, New York, London.</p></div><div className="bg-black text-white rounded-[24px] p-5"><h3 className="font-black text-[#FFC300]">How It Works</h3><p className="text-[11px] mt-2">1. Discover 2. Pay $2.99/$5.99 3. Unlock</p></div><div className="border rounded-[24px] p-5"><h3 className="font-black">FAQs</h3><p className="text-[11px] mt-2">Q: How to unlock? A: Premium tab.</p></div><div className="bg-zinc-900 text-white rounded-[24px] p-5"><h3 className="font-black">Sign In</h3><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-3 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} placeholder="Password" type="password" className="mt-2 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><button onClick={handleSignin} className="mt-3 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Sign In</button></div><div className="bg-[#FFC300] rounded-[24px] p-5"><h3 className="font-black">Sign Up</h3><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Name" className="mt-3 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} placeholder="Password" type="password" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><div className="flex gap-2 mt-2"><select value={form.gender} onChange={e=>setForm({...form,gender:e.target.value})} className="w-1/2 bg-white rounded-full px-4 py-3 text-xs"><option>Female</option><option>Male</option><option>Other</option></select><input value={form.age} onChange={e=>setForm({...form,age:e.target.value})} placeholder="Age" className="w-1/2 bg-white rounded-full px-4 py-3 text-xs" /></div><input value={form.interests} onChange={e=>setForm({...form,interests:e.target.value})} placeholder="Interests" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><textarea value={form.bio} onChange={e=>setForm({...form,bio:e.target.value})} placeholder="Bio" className="mt-2 w-full bg-white rounded-2xl px-4 py-3 text-xs h-20" /><button onClick={handleSignup} className="mt-3 w-full bg-black text-white rounded-full py-3 font-black text-xs">Sign Up</button></div></div>
         </div>
       </div>
     )
@@ -140,7 +129,7 @@ export default function App(){
           {posts.length>0 && <div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(
             <div key={p.id} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-[#FFC300]/20">
               <img src={p.image_url} className="h-48 w-full object-cover" />
-              <div className="p-2"><p className="text-xs font-bold">{p.type==='dating'?'❤️':'🤝'} {p.name}</p><p className="text-[9px] text-white/50">{p.city}</p><p className="text-[10px] mt-1">{p.bio?.slice(0,50)}</p></div>
+              <div className="p-2"><p className="text-xs font-bold">{p.type==='dating'?'❤️':'🤝'} {p.name}</p><p className="text-[9px] text-white/50">{p.city}</p><p className="text-[10px] mt-1">{p.bio?.slice(0,60)}</p></div>
             </div>
           ))}</div>}
           <div className="grid grid-cols-2 gap-3 mt-6">{WORLD.map(w=>(<div key={w.city} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={w.img} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs font-bold">{w.flag} {w.city}</p></div></div>))}</div>
@@ -151,7 +140,15 @@ export default function App(){
       {tab==='chat' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Chat</h2></div> : <PremiumWall />)}
       {tab==='liked' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Liked</h2></div> : <PremiumWall />)}
       {tab==='profile' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Profile — {user?.email}</h2><div className="mt-4 bg-zinc-900 rounded-[24px] p-5"><p className="text-xs">Name: {form.name} • {form.gender} • {form.age}</p></div></div> : <PremiumWall />)}
-      {tab==='premium' && <div className="max-w-md mx-auto p-4 space-y-4"><h2 className="font-black">Premium</h2>{isAdmin && <div className="bg-green-500 text-black rounded-xl p-3 text-xs font-black">Admin FREE</div>}<div className="bg-[#FFC300] text-black rounded-2xl p-4"><button onClick={openCrypto} className="w-full bg-black text-white rounded-full py-3 font-bold text-xs">Crypto ALONE $2.99 / $5.99</button></div><div className="bg-zinc-900 rounded-2xl p-4"><button onClick={openPesapal} className="w-full bg-[#FF6A00] text-white rounded-full py-3 font-bold text-xs">Pesapal ALONE</button></div><button onClick={()=>{localStorage.setItem('kla_premium','yes'); setIsPremium(true)}} className="w-full bg-zinc-800 rounded-full py-3 text-xs">TEST PREMIUM FREE</button></div>}
+
+      {/* PREMIUM TAB - TEST BUTTON REMOVED */}
+      {tab==='premium' && <div className="max-w-md mx-auto p-4 space-y-4">
+        <h2 className="font-black">Premium</h2>
+        {isAdmin && <div className="bg-green-500 text-black rounded-xl p-3 text-xs font-black">Admin FREE Premium Active</div>}
+        <div className="bg-[#FFC300] text-black rounded-2xl p-4"><button onClick={openCrypto} className="w-full bg-black text-white rounded-full py-3 font-bold text-xs">Crypto ALONE $2.99 / $5.99</button><p className="text-[7px] mt-1 break-all">{WALLET}</p></div>
+        <div className="bg-zinc-900 rounded-2xl p-4"><button onClick={openPesapal} className="w-full bg-[#FF6A00] text-white rounded-full py-3 font-bold text-xs">Pesapal ALONE</button></div>
+      </div>}
+
       {tab==='admin' && <div className="max-w-md mx-auto p-4"><h2 className="font-black">Admin Panel</h2><p className="text-[10px]">{ADMIN_EMAILS.join(', ')}</p><div className="mt-4 space-y-2">{allProfiles.map(p=>(<div key={p.id} className="bg-zinc-900 rounded-xl p-3"><p className="text-xs">{p.name} • {p.email}</p><div className="flex gap-2 mt-2"><button onClick={()=>setEditData(p)} className="bg-white text-black px-3 py-1 rounded-full text-[10px]">Edit</button><button onClick={async()=>{await supabase.from('profiles').delete().eq('id',p.id); fetchProfiles()}} className="bg-red-600 px-3 py-1 rounded-full text-[10px]">Delete</button></div></div>))}</div></div>}
 
       {showPostModal && (
@@ -167,18 +164,13 @@ export default function App(){
               <input type="file" accept="image/*" onChange={handleImage} className="mt-2 w-full text-xs file:bg-white file:text-black file:rounded-full file:px-4 file:py-2 file:text-xs file:font-bold" />
               {postForm.preview && <img src={postForm.preview} className="mt-3 w-full h-64 object-cover rounded-[20px] border-2 border-[#FFC300]/30" />}
             </div>
-            <textarea value={postForm.bio} onChange={e=>setPostForm({...postForm,bio:e.target.value})} placeholder="Looking for a serious marriage partner. Here to spread love." className="mt-4 w-full bg-black border border-white/20 rounded-2xl px-4 py-3 text-xs h-20 focus:border-[#FFC300] outline-none" />
-            <input value={postForm.interests} onChange={e=>setPostForm({...postForm,interests:e.target.value})} placeholder="Music" className="mt-2 w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs focus:border-[#FFC300] outline-none" />
-
+            <textarea value={postForm.bio} onChange={e=>setPostForm({...postForm,bio:e.target.value})} placeholder="Here looking for a serious marriage partner" className="mt-4 w-full bg-black border border-white/20 rounded-2xl px-4 py-3 text-xs h-20 focus:border-[#FFC300] outline-none" />
+            <input value={postForm.interests} onChange={e=>setPostForm({...postForm,interests:e.target.value})} placeholder="music" className="mt-2 w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs focus:border-[#FFC300] outline-none" />
             <div className="mt-3 bg-black rounded-2xl p-4 border border-white/10">
-              <div className="flex justify-between items-center">
-                <p className="text-xs font-bold">📍 Location {postForm.lat? <span className="text-green-400">• Active</span> : null}</p>
-                <button onClick={getLocation} className="bg-[#FFC300] text-black px-5 py-2.5 rounded-full text-[11px] font-black">Activate Location</button>
-              </div>
+              <div className="flex justify-between items-center"><p className="text-xs font-bold">📍 Location {postForm.lat? <span className="text-green-400">• Active</span> : null}</p><button onClick={getLocation} className="bg-[#FFC300] text-black px-5 py-2.5 rounded-full text-[11px] font-black">Activate Location</button></div>
               <p className="text-[10px] text-white/60 mt-2">City: {postForm.city}</p>
             </div>
-
-            <button onClick={handleCreatePost} className="mt-5 w-full bg-[#FFC300] text-black rounded-full py-4 font-black text-[15px] shadow-xl">Post Now • Keep Love Alive</button>
+            <button onClick={handleCreatePost} disabled={posting} className="mt-5 w-full bg-[#FFC300] text-black rounded-full py-4 font-black text-[15px] disabled:opacity-50">{posting? 'Posting...' : 'Post Now • Keep Love Alive'}</button>
           </div>
         </div>
       )}
