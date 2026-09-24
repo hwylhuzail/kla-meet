@@ -56,8 +56,40 @@ export default function App(){
   const openPesapal = async () => { try{ const r=await fetch('/api/pesapal',{method:'POST'}); const j=await r.json(); if(j.redirect_url) window.open(j.redirect_url,'_blank'); else window.open(OXA,'_blank') }catch{ window.open(OXA,'_blank') } }
   const handleTab = (t) => { if(t==='admin' &&!isAdmin) return; if((t==='nearby' || t==='chat' || t==='liked' || t==='profile') &&!isPremium &&!isAdmin){ setTab('premium'); return } setTab(t) }
   const handleSignup = async () => { if(!agreed){ alert('Check box to agree Terms & Privacy'); return } try{ const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'}); if(error) throw error; await supabase.from('profiles').insert([{id:data.user?.id, name:form.name, email:form.email.trim(), bio:form.bio, interests:form.interests, gender:form.gender, age:form.age}]); if(isAdminEmail(form.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', form.email.toLowerCase()) } setUser(data.user); setView('app'); setTab('profile') }catch(e){ alert(e.message) } }
-  const handleSignin = async () => { try{ const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password}); if(error) throw error; setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', data.user.email.toLowerCase()); setView('app'); setTab('admin') } else { setIsAdmin(false); setView('app'); setTab('discover') } }catch(e){ alert(e.message) } }
-  const getLocation = () => { setPostForm(f=>({...f, city:'Locating...'})); navigator.geolocation.getCurrentPosition((pos)=>{ setPostForm(f=>({...f, lat:pos.coords.latitude, lng:pos.coords.longitude, city:`Nearby • ${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)}`})) }) }
+  const handleSignin = async () => { try{ const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password}); if(error) throw error; setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', data.user.email.toLowerCase()); setView('app'); setTab('admin') } else { setIsAdmin(false); setView('app'); setTab('discover') } }catch(e){ alert(e.message) } }  // FIXED LOCATION - FAST, REAL CITY, NEVER STUCK
+  const getLocation = async () => {
+    setPostForm(f=>({...f, city:'Locating...'}))
+    const setPos = async (lat,lng) => {
+      let cityName = `${lat.toFixed(2)}, ${lng.toFixed(2)}`
+      try{
+        const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`)
+        const j = await r.json()
+        cityName = j.city || j.locality || j.principalSubdivision || cityName
+      }catch{}
+      setPostForm(f=>({...f, lat, lng, city: cityName}))
+    }
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        (pos)=>{ setPos(pos.coords.latitude, pos.coords.longitude) },
+        async ()=>{
+          try{
+            const r = await fetch('https://ipapi.co/json/')
+            const j = await r.json()
+            if(j.latitude && j.longitude){
+              setPostForm(f=>({...f, lat:j.latitude, lng:j.longitude, city: j.city || 'Nearby' }))
+            } else {
+              setPostForm(f=>({...f, city:'Worldwide'}))
+            }
+          }catch{
+            setPostForm(f=>({...f, city:'Worldwide'}))
+          }
+        },
+        { enableHighAccuracy:false, timeout:8000, maximumAge:60000 }
+      )
+    } else {
+      setPostForm(f=>({...f, city:'Worldwide'}))
+    }
+  }
   const handleImage = (e) => { const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=(ev)=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); let w=img.width,h=img.height,max=500; if(w>max){h=Math.round(h*max/w);w=max} c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); let q=0.5,d=c.toDataURL('image/jpeg',q); while(d.length>150000&&q>0.1){q-=0.1;d=c.toDataURL('image/jpeg',q)} setPostForm(f=>({...f,preview:d})) }; img.src=ev.target.result }; reader.readAsDataURL(file) }
   const handleCreatePost = async () => { if(!user){ alert('Sign in'); return } if(!postForm.bio){ alert('Add bio'); return } if(posting) return; setPosting(true); try{ const imgUrl=postForm.preview||WORLD[0].img; await supabase.from('posts').insert([{user_id:user.id,name:form.name||user.email.split('@')[0],type:postForm.type,bio:postForm.bio,interests:postForm.interests||'music',age:form.age||'22',gender:form.gender||'Female',city:postForm.city||'Worldwide',lat:postForm.lat||0,lng:postForm.lng||0,image_url:imgUrl}]); setShowPostModal(false); await fetchPosts(); setTab('discover') }catch(e){ alert(e.message) } finally{ setPosting(false) } }
   const handleLike = async (post) => { if(!isPremium&&!isAdmin){ setTab('premium'); return } try{ await supabase.from('likes').insert([{from_user:user.id,to_user:post.user_id,post_id:post.id}]); await supabase.from('notifications').insert([{to_user:post.user_id,from_user:user.id,from_name:form.name||user.email.split('@')[0],type:'like',post_id:post.id}]); setLikedIds([...likedIds,post.id]); setChatWith(post); setTab('chat'); fetchMessages(post.user_id) }catch(e){ alert(e.message) } }
@@ -67,7 +99,6 @@ export default function App(){
   const adminUnban = async (id) => { await supabase.from('banned_users').delete().eq('id',id); fetchBanned() }
   const adminWarnUser = async (p) => { const m=prompt('Warning?'); if(!m) return; await supabase.from('warnings').insert([{user_id:p.user_id||p.id,message:m,by_admin:user.email}]); await supabase.from('notifications').insert([{to_user:p.user_id||p.id,from_user:user.id,from_name:'ADMIN',type:'warn'}]) }
   const adminDeleteProfile = async (p) => { if(!confirm('Delete '+p.email)) return; await supabase.from('profiles').delete().eq('id',p.id); fetchProfiles() }
-
   if(view==='landing'){
     return (
       <div className="min-h-screen bg-white text-black">
@@ -78,8 +109,7 @@ export default function App(){
           <div className="bg-zinc-100 rounded-[24px] p-5"><h3 className="font-black text-sm">📖 About KLA-MEET</h3><p className="text-[11px] mt-2 leading-relaxed">KLA-MEET is a global dating platform built to connect people worldwide for meaningful relationships, friendship and love. Secure profiles, verified photos, real-time discovery and premium chat. Our mission is to Keep Love Alive in a safe and respectful community.</p></div>
           <div className="bg-black text-white rounded-[24px] p-5"><h3 className="font-black text-[#FFC300] text-sm">⚙️ How It Works</h3><p className="text-[11px] mt-2 leading-relaxed">1. Create account & agree to Terms 2. Create a post with photo & bio 3. Discover people worldwide 4. Like to send notification 5. Chat when matched 6. Upgrade to Premium for unlimited access.</p></div>
           <div className="bg-red-50 border border-red-200 rounded-[24px] p-5"><h3 className="font-black text-sm text-red-700">🛡️ Safety Center</h3><p className="text-[11px] mt-2">18+ only. Never send money to someone you haven't met. Meet in public places. Report suspicious or fake profiles. 3 warnings may result in suspension.</p></div>
-          <div className="border rounded-[24px] p-5"><h3 className="font-black text-sm">❓ FAQs</h3><div className="mt-2 space-y-2">{[{q:"How to unlock chat?",a:"Go to Premium tab and pay $2.99 via Crypto or Pesapal."},{q:"Is my data safe?",a:"Yes. Encrypted, GDPR compliant, never sold."},{q:"How is location used?",a:"Approximate city-level only for nearby discovery."}].map((f,i)=>(<div key={i} className="border-b pb-2"><button onClick={()=>setFaqOpen(faqOpen===i?null:i)} className="w-full flex justify-between font-bold text-[11px] text-left"><span>{f.q}</span><span>{faqOpen===i?'−':'+'}</span></button>{faqOpen===i && <p className="text-[11px] mt-1 text-zinc-600">{f.a}</p>}</div>))}</div></div>
-          <div className="grid grid-cols-2 gap-3"><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">🔒 Privacy</h4><button onClick={()=>setShowPrivacy(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">📄 Terms</h4><button onClick={()=>setShowTerms(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div></div>
+          <div className="border rounded-[24px] p-5"><h3 className="font-black text-sm">❓ FAQs</h3><div className="mt-2 space-y-2">{[{q:"How to unlock chat?",a:"Go to Premium tab and pay $2.99 via Crypto or Pesapal."},{q:"Is my data safe?",a:"Yes. Encrypted, GDPR compliant, never sold."},{q:"How is location used?",a:"Approximate city-level only for nearby discovery."}].map((f,i)=>(<div key={i} className="border-b pb-2"><button onClick={()=>setFaqOpen(faqOpen===i?null:i)} className="w-full flex justify-between font-bold text-[11px] text-left"><span>{f.q}</span><span>{faqOpen===i?'−':'+'}</span></button>{faqOpen===i && <p className="text-[11px] mt-1 text-zinc-600">{f.a}</p>}</div>))}</div></div>          <div className="grid grid-cols-2 gap-3"><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">🔒 Privacy</h4><button onClick={()=>setShowPrivacy(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">📄 Terms</h4><button onClick={()=>setShowTerms(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div></div>
           <div className="bg-zinc-900 text-white rounded-[24px] p-5"><h3 className="font-black">Sign In</h3><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-3 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><button onClick={handleSignin} className="mt-3 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Sign In</button></div>
           <div className="bg-[#FFC300] rounded-[24px] p-5"><h3 className="font-black">Sign Up - Must Agree</h3><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Name" className="mt-3 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><div className="flex gap-2 mt-2"><select value={form.gender} onChange={e=>setForm({...form,gender:e.target.value})} className="w-1/2 bg-white rounded-full px-4 py-3 text-xs"><option>Female</option><option>Male</option><option>Other</option></select><input value={form.age} onChange={e=>setForm({...form,age:e.target.value})} placeholder="Age 18+" className="w-1/2 bg-white rounded-full px-4 py-3 text-xs" /></div><div className="mt-3 bg-black rounded-xl p-3 flex gap-2"><input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} className="w-5 h-5" /><p className="text-[10px] text-white">I am 18+ and agree to <button onClick={()=>setShowTerms(true)} className="underline text-[#FFC300]">Terms</button> & <button onClick={()=>setShowPrivacy(true)} className="underline text-[#FFC300]">Privacy</button></p></div><button onClick={handleSignup} disabled={!agreed} className={`mt-3 w-full rounded-full py-3 font-black text-xs ${agreed?'bg-black text-white':'bg-zinc-400'}`}>{agreed?'Sign Up ✓':'Check Box'}</button></div>
           <p className="text-center text-[9px] text-zinc-400">© 2026 KLA-MEET • Secure • Global Dating Platform</p>
@@ -88,7 +118,7 @@ export default function App(){
         {showTerms && (<div className="fixed inset-0 bg-black/90 z-[300] p-4 overflow-y-auto"><div className="bg-white rounded-[24px] p-6 max-w-md mx-auto"><h2 className="font-black text-sm">Terms of Service</h2><div className="mt-4 text-[11px] space-y-2 leading-relaxed"><p>1. You must be 18+ with true info.</p><p>2. No nudity, spam, hate, money requests.</p><p>3. Photos must be yours.</p><p>4. Premium $2.99 non-refundable after activation.</p><p>5. We may warn, suspend or ban violating accounts. 3 warnings = suspension.</p><p>6. By checking box you agree.</p></div><button onClick={()=>{setAgreed(true); setShowTerms(false)}} className="mt-4 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">I Agree ✓</button></div></div>)}
       </div>
     )
-  }  return (
+  } return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pb-28">
       <header className="p-3 bg-black border-b border-white/10 flex justify-between items-center"><h1 className="font-black text-xs">KLA-MEET {isPremium && '• PREMIUM'} {isAdmin && '• ADMIN'}</h1><div className="flex gap-1"><button onClick={()=>handleTab('profile')} className="text-[11px] bg-white text-black px-3 py-1.5 rounded-full font-black">Profile</button>{isAdmin && <button onClick={()=>handleTab('admin')} className="text-[11px] bg-[#FFC300] text-black px-3 py-1.5 rounded-full font-black">Admin</button>}<button onClick={()=>setView('landing')} className="text-[10px] bg-zinc-800 px-2 py-1 rounded-full">Landing</button></div></header>
       {tab==='discover' && (
