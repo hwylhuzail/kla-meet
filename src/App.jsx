@@ -21,6 +21,11 @@ export default function App(){
       setView('app')
       setTab('chat')
     }
+    const pg = new URLSearchParams(window.location.search).get('page')
+    if(pg){
+      setView('app')
+      setTab(pg==='chats'?'chat':pg)
+    }
   },[])
 
   const openCrypto = () => window.open(OXA, '_blank')
@@ -31,11 +36,12 @@ export default function App(){
   }
 
   const handleTab = (t) => {
-    if((t==='nearby' || t==='chat') &&!isPremium){
+    if((t==='nearby' || t==='chat' || t==='liked') &&!isPremium){
       setTab('premium')
       return
     }
     setTab(t)
+    window.history.pushState({},'',`/?page=${t}`)
   }
 
   const PremiumWall = () => (
@@ -43,9 +49,17 @@ export default function App(){
       <div className="bg-zinc-900 rounded-[24px] p-6 border border-[#FFC300]/30">
         <p className="text-4xl">🔒</p>
         <h2 className="font-black text-lg mt-3">Premium Required</h2>
-        <p className="text-[11px] text-white/60 mt-2">Unlock Near Me & Chat after payment. Keep Love Alive.</p>
+        <p className="text-[11px] text-white/60 mt-2">Unlock Near Me, Chat & Liked after payment. Keep Love Alive.</p>
         <button onClick={()=>setTab('premium')} className="mt-4 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Unlock Premium</button>
       </div>
+    </div>
+  )
+
+  const Static = ({title, children}) => (
+    <div className="max-w-md mx-auto p-6">
+      <h2 className="font-black text-xl">{title}</h2>
+      <div className="text-[12px] text-white/70 mt-4 leading-relaxed space-y-3">{children}</div>
+      <button onClick={()=>handleTab('discover')} className="mt-6 bg-zinc-800 px-4 py-2 rounded-full text-xs">Back to Discover</button>
     </div>
   )
 
@@ -54,7 +68,7 @@ export default function App(){
       <div className="min-h-screen bg-white text-black">
         <header className="bg-black text-white px-4 py-3 flex justify-between">
           <h1 className="font-black text-xs">KLA-MEET • Keep Love Alive {isPremium && '• PREMIUM'}</h1>
-          <button onClick={()=>setView('app')} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-xs">Enter App</button>
+          <button onClick={()=>{setView('app'); setTab('discover')}} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-xs">Enter App</button>
         </header>
         <div className="p-6">
           <h2 className="text-[32px] font-black leading-none">Date. Meet.<br/>Worldwide.</h2>
@@ -73,13 +87,18 @@ export default function App(){
             </div>
           </div>
           {isPremium && <p className="mt-6 text-xs font-black text-green-600">✓ Premium Active - Chat & Near Me unlocked</p>}
+          <div className="mt-8 flex flex-wrap gap-2 text-[10px]">
+            {['about','how-it-works','safety','privacy','terms','faqs','guidelines'].map(p=>(
+              <button key={p} onClick={()=>{setView('app'); handleTab(p)}} className="underline">{p}</button>
+            ))}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white pb-20">
+    <div className="min-h-screen bg-[#0a0a0a] text-white pb-24">
       <header className="p-3 bg-black border-b border-white/10 flex justify-between">
         <h1 className="font-black text-xs">KLA-MEET {isPremium && '• PREMIUM'}</h1>
         <button onClick={()=>setView('landing')} className="text-[10px] bg-zinc-800 px-3 py-1 rounded-full">Landing</button>
@@ -99,37 +118,9 @@ export default function App(){
         </div>
       )}
 
-      {tab==='nearby' && (
-        isPremium? (
-          <div className="max-w-md mx-auto p-4">
-            <h2 className="font-black">Near Me • Arua</h2>
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              {WORLD.map(w=>(
-                <div key={w.city} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-green-500/20">
-                  <img src={w.img} className="h-32 w-full object-cover" alt="" />
-                  <div className="p-2"><p className="text-xs font-bold">{w.city} • 2km</p><p className="text-[9px] text-green-400">Online now</p></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : <PremiumWall />
-      )}
-
-      {tab==='chat' && (
-        isPremium? (
-          <div className="max-w-md mx-auto p-4">
-            <h2 className="font-black">Chat • Premium</h2>
-            <div className="mt-4 space-y-3">
-              {WORLD.map(w=>(
-                <div key={w.city} className="bg-zinc-900 rounded-2xl p-3 flex gap-3 items-center">
-                  <img src={w.img} className="w-10 h-10 rounded-full object-cover" alt="" />
-                  <div><p className="text-xs font-bold">{w.city}</p><p className="text-[10px] text-white/50">Hey, Keep Love Alive! ❤️</p></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : <PremiumWall />
-      )}
+      {tab==='nearby' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Near Me • Arua</h2><div className="grid grid-cols-2 gap-3 mt-4">{WORLD.map(w=>(<div key={w.city} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-green-500/20"><img src={w.img} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs font-bold">{w.city} • 2km</p><p className="text-[9px] text-green-400">Online now</p></div></div>))}</div></div> : <PremiumWall />)}
+      {tab==='chat' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Chat • Premium</h2><div className="mt-4 space-y-3">{WORLD.map(w=>(<div key={w.city} className="bg-zinc-900 rounded-2xl p-3 flex gap-3 items-center"><img src={w.img} className="w-10 h-10 rounded-full object-cover"/><div><p className="text-xs font-bold">{w.city}</p><p className="text-[10px] text-white/50">Hey, Keep Love Alive! ❤️</p></div></div>))}</div></div> : <PremiumWall />)}
+      {tab==='liked' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Liked</h2><p className="text-xs text-white/60 mt-3">People you liked will appear here.</p></div> : <PremiumWall />)}
 
       {tab==='premium' && (
         <div className="max-w-md mx-auto p-4 space-y-4">
@@ -157,6 +148,27 @@ export default function App(){
           </div>
         </div>
       )}
+
+      {tab==='about' && <Static title="About"><p>KLA-MEET • Keep Love Alive. Date worldwide, meet near you in Arua & worldwide.</p></Static>}
+      {tab==='how-it-works' && <Static title="How It Works"><p>1. Discover profiles<br/>2. Pay Basic $2.99 or Standard $5.99 via Crypto ALONE or Pesapal ALONE<br/>3. Unlock Chat, Near Me, Liked<br/>4. Keep Love Alive.</p></Static>}
+      {tab==='safety' && <Static title="Safety"><p>Never send money to anyone. Report suspicious profiles. Premium required to chat.</p></Static>}
+      {tab==='privacy' && <Static title="Privacy Policy"><p>We don't share your data. Payments via Pesapal & Oxapay. Premium status stored locally.</p></Static>}
+      {tab==='terms' && <Static title="Terms"><p>By using KLA-MEET you agree to be 18+, respect others, premium payments non-refundable.</p></Static>}
+      {tab==='faqs' && <Static title="FAQs"><p>Q: How to unlock chat?<br/>A: Pay via Premium tab (Crypto ALONE or Pesapal ALONE).<br/><br/>Q: Why Near Me locked?<br/>A: Premium needed.</p></Static>}
+      {tab==='guidelines' && <Static title="Guidelines"><p>Be respectful, no nudity, no spam, Keep Love Alive.</p></Static>}
+      {tab==='login' && <Static title="Login"><p>Login is premium-gated. Unlock premium to access chat and messaging.</p><button onClick={()=>handleTab('premium')} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-xs">Go Premium</button></Static>}
+      {tab==='signin' && <Static title="Sign In"><p>Sign In is same as Login - premium required.</p><button onClick={()=>handleTab('premium')} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-xs">Go Premium</button></Static>}
+      {tab==='signup' && <Static title="Sign Up"><p>Create account to discover worldwide profiles. Premium unlocks chat.</p><button onClick={()=>handleTab('discover')} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-xs">Start Discover</button></Static>}
+      {tab==='profile' && <Static title="Profile"><p>Your profile — Keep Love Alive. Premium shows verified badge.</p></Static>}
+
+      {/* Footer with all links */}
+      <div className="max-w-md mx-auto p-4 mt-6 border-t border-white/10">
+        <div className="flex flex-wrap gap-3 text-[10px] text-white/50">
+          {['about','how-it-works','safety','privacy','terms','faqs','guidelines','profile','login','signin','signup','liked'].map(p=>(
+            <button key={p} onClick={()=>handleTab(p)} className="underline hover:text-white">{p}</button>
+          ))}
+        </div>
+      </div>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 flex justify-around py-3">
         <button onClick={()=>handleTab('discover')} className={`text-[11px] ${tab==='discover'?'text-[#FFC300] font-black':''}`}>♡ Discover</button>
