@@ -23,7 +23,6 @@ export default function App(){
   const [user,setUser]=useState(null)
   const [editData,setEditData]=useState(null)
   const isAdminEmail = (e) => ADMIN_EMAILS.includes((e||'').toLowerCase().trim())
-
   useEffect(()=>{
     supabase.auth.getUser().then(({data})=>{ if(data?.user){ setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes') } } })
     if(localStorage.getItem('kla_premium')==='yes') setIsPremium(true)
@@ -37,7 +36,6 @@ export default function App(){
   const handleTab = (t) => { if(t==='admin' &&!isAdmin) return; if((t==='nearby' || t==='chat' || t==='liked' || t==='profile') &&!isPremium &&!isAdmin){ setTab('premium'); return } setTab(t) }
   const handleSignup = async () => { try{ const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'}); if(error) throw error; await supabase.from('profiles').insert([{id:data.user?.id, name:form.name, email:form.email.trim(), bio:form.bio, interests:form.interests, gender:form.gender, age:form.age}]); if(isAdminEmail(form.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes') } alert('Account created!'); setView('app'); setTab('profile'); setUser(data.user) }catch(e){ alert(e.message) } }
   const handleSignin = async () => { try{ const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password}); if(error) throw error; setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes') } setView('app'); setTab(isAdminEmail(data.user.email)?'admin':'profile') }catch(e){ alert(e.message) } }
-
   const getLocation = () => {
     setPostForm(f=>({...f, city:'Arua - Locating...'}))
     if(!navigator.geolocation){ setPostForm(f=>({...f, lat:3.0307, lng:30.907, city:'Arua'})); return }
@@ -45,58 +43,62 @@ export default function App(){
       setPostForm(f=>({...f, lat:pos.coords.latitude, lng:pos.coords.longitude, city:`Arua • ${pos.coords.latitude.toFixed(2)}, ${pos.coords.longitude.toFixed(2)} Live`}))
     },()=>{ setPostForm(f=>({...f, lat:3.0307, lng:30.907, city:'Arua'})) },{timeout:5000})
   }
-
-  // FIXED: Convert image to base64 so it saves
   const handleImage = (e) => {
     const file = e.target.files[0];
     if(!file) return;
-    setPostForm(f=>({...f, imageFile:file}))
     const reader = new FileReader();
-    reader.onloadend = () => { setPostForm(f=>({...f, preview:reader.result})) }
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        const max = 500;
+        if(w > h){ if(w > max){ h = Math.round(h*max/w); w = max } }
+        else { if(h > max){ w = Math.round(w*max/h); h = max } }
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        let quality = 0.5;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while(dataUrl.length > 150000 && quality > 0.1){ quality -= 0.1; dataUrl = canvas.toDataURL('image/jpeg', quality); }
+        setPostForm(f=>({...f, preview: dataUrl, imageFile: file}));
+      };
+      img.src = ev.target.result;
+    };
     reader.readAsDataURL(file);
   }
-
-  // FIXED: Post Now works now - no bucket needed
   const handleCreatePost = async () => {
     if(!user){ alert('Sign in first'); setView('landing'); return }
-    if(!isPremium &&!isAdmin){ alert('Premium required - pay $2.99'); setTab('premium'); return }
     if(!postForm.bio){ alert('Add bio'); return }
-    if(posting) return
-    setPosting(true)
+    if(posting) return;
+    setPosting(true);
     try{
-      // Use base64 preview directly - works even if bucket missing
-      let imageUrl = postForm.preview
-      if(!imageUrl || imageUrl.startsWith('blob:')){
-        imageUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600"
-      }
-
+      const imgUrl = postForm.preview || WORLD[0].img;
       const { error } = await supabase.from('posts').insert([{
-        user_id:user.id,
-        name:form.name || user.email.split('@')[0],
-        type:postForm.type,
-        bio:postForm.bio,
-        interests:postForm.interests || 'music',
-        age:form.age || '22',
-        gender:form.gender || 'Female',
-        city:postForm.city || 'Arua',
-        lat:postForm.lat || 3.0307,
-        lng:postForm.lng || 30.907,
-        image_url:imageUrl
-      }])
-      if(error) throw error
-      alert('✅ Posted!')
-      setShowPostModal(false)
-      setPostForm({type:'dating', bio:'', interests:'', city:'Arua', lat:3.03, lng:30.91, imageFile:null, preview:''})
-      fetchPosts()
-      setTab('discover')
-    }catch(e){ alert('Post failed: '+e.message + '\nRun posts SQL in Supabase') }
+        user_id: user.id,
+        name: form.name || user.email.split('@')[0] || 'Arua',
+        type: postForm.type,
+        bio: postForm.bio,
+        interests: postForm.interests || 'music',
+        age: form.age || '22',
+        gender: form.gender || 'Female',
+        city: postForm.city || 'Arua',
+        lat: postForm.lat || 3.0307,
+        lng: postForm.lng || 30.907,
+        image_url: imgUrl
+      }]);
+      if(error) throw error;
+      alert('✅ Posted to Discover!');
+      setShowPostModal(false);
+      setPostForm({type:'dating', bio:'', interests:'', city:'Arua', lat:3.0307, lng:30.907, imageFile:null, preview:''});
+      await fetchPosts();
+      setTab('discover');
+    }catch(e){ alert('Post failed: ' + e.message) }
     finally{ setPosting(false) }
   }
-
   const PremiumWall = () => (
     <div className="max-w-md mx-auto p-6 text-center"><div className="bg-zinc-900 rounded-[24px] p-6 border border-[#FFC300]/30"><p className="text-4xl">🔒</p><h2 className="font-black text-lg mt-3">Premium Required</h2><p className="text-[11px] text-white/60 mt-2">Unlock {tab}</p><button onClick={()=>setTab('premium')} className="mt-4 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Unlock Premium</button></div></div>
   )
-
   if(view==='landing'){
     return (
       <div className="min-h-screen bg-white text-black">
@@ -122,7 +124,6 @@ export default function App(){
           <button onClick={()=>setView('landing')} className="text-[10px] bg-zinc-800 px-2 py-1 rounded-full">Landing</button>
         </div>
       </header>
-
       {tab==='discover' && (
         <div className="max-w-md mx-auto p-4">
           <h2 className="font-black">Discover • Worldwide</h2>
@@ -135,22 +136,17 @@ export default function App(){
           <div className="grid grid-cols-2 gap-3 mt-6">{WORLD.map(w=>(<div key={w.city} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={w.img} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs font-bold">{w.flag} {w.city}</p></div></div>))}</div>
         </div>
       )}
-
       {tab==='nearby' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Near Me • Arua</h2><div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(<div key={p.id} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={p.image_url} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs">{p.name} • {p.city}</p></div></div>))}</div></div> : <PremiumWall />)}
       {tab==='chat' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Chat</h2></div> : <PremiumWall />)}
       {tab==='liked' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Liked</h2></div> : <PremiumWall />)}
       {tab==='profile' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Profile — {user?.email}</h2><div className="mt-4 bg-zinc-900 rounded-[24px] p-5"><p className="text-xs">Name: {form.name} • {form.gender} • {form.age}</p></div></div> : <PremiumWall />)}
-
-      {/* PREMIUM TAB - TEST BUTTON REMOVED */}
       {tab==='premium' && <div className="max-w-md mx-auto p-4 space-y-4">
         <h2 className="font-black">Premium</h2>
         {isAdmin && <div className="bg-green-500 text-black rounded-xl p-3 text-xs font-black">Admin FREE Premium Active</div>}
         <div className="bg-[#FFC300] text-black rounded-2xl p-4"><button onClick={openCrypto} className="w-full bg-black text-white rounded-full py-3 font-bold text-xs">Crypto ALONE $2.99 / $5.99</button><p className="text-[7px] mt-1 break-all">{WALLET}</p></div>
         <div className="bg-zinc-900 rounded-2xl p-4"><button onClick={openPesapal} className="w-full bg-[#FF6A00] text-white rounded-full py-3 font-bold text-xs">Pesapal ALONE</button></div>
       </div>}
-
       {tab==='admin' && <div className="max-w-md mx-auto p-4"><h2 className="font-black">Admin Panel</h2><p className="text-[10px]">{ADMIN_EMAILS.join(', ')}</p><div className="mt-4 space-y-2">{allProfiles.map(p=>(<div key={p.id} className="bg-zinc-900 rounded-xl p-3"><p className="text-xs">{p.name} • {p.email}</p><div className="flex gap-2 mt-2"><button onClick={()=>setEditData(p)} className="bg-white text-black px-3 py-1 rounded-full text-[10px]">Edit</button><button onClick={async()=>{await supabase.from('profiles').delete().eq('id',p.id); fetchProfiles()}} className="bg-red-600 px-3 py-1 rounded-full text-[10px]">Delete</button></div></div>))}</div></div>}
-
       {showPostModal && (
         <div className="fixed inset-0 bg-black/95 p-0 flex items-end justify-center z-[100]">
           <div className="bg-zinc-900 rounded-t-[32px] p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border-t border-[#FFC300]/20">
@@ -174,7 +170,6 @@ export default function App(){
           </div>
         </div>
       )}
-
       <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 flex justify-around items-center py-2">
         <button onClick={()=>handleTab('discover')} className="text-[11px]">♡<br/><span className="text-[8px]">Discover</span></button>
         <button onClick={()=>handleTab('nearby')} className="text-[11px]">◎<br/><span className="text-[8px]">Near Me</span></button>
