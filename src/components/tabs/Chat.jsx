@@ -1,10 +1,10 @@
-export default function Discover({posts,WORLD,onSelect,isAdmin}){
+export default function Chat({notifications,chatWith,messages,newMsg,setNewMsg,onSend,onFetchMessages,setChatWith,posts,isPremium}){
+  if(!isPremium) return <div className="max-w-md mx-auto p-6 text-center">🔒 Premium Required</div>
   return (
     <div className="max-w-md mx-auto p-4">
-      <h2 className="font-black">Discover • Tap to Like {isAdmin && '(Admin)'}</h2>
-      {posts.length>0 && <div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(<div key={p.id} onClick={()=>onSelect(p)} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-[#FFC300]/20"><img src={p.image_url} className="h-48 w-full object-cover" /><div className="p-2"><p className="text-xs font-bold">{p.name}</p><p className="text-[9px] text-white/50">{p.city}</p></div></div>))}</div>}
-      <h3 className="mt-6 font-bold text-xs text-white/60">🌍 Worldwide Examples - Always</h3>
-      <div className="grid grid-cols-2 gap-3 mt-2">{WORLD.map(w=>(<div key={w.city} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={w.img} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs font-bold">{w.flag} {w.city}</p></div></div>))}</div>
+      <h2 className="font-black">Chats + Notifications</h2>
+      <div className="mt-3 space-y-2">{notifications.map(n=>(<div key={n.id} className="bg-zinc-900 rounded-xl p-3 flex justify-between"><p className="text-xs">🔔 {n.from_name} {n.type}</p><button onClick={()=>{ const post=posts.find(pp=>pp.id===n.post_id); if(post){ setChatWith(post); onFetchMessages(post.user_id) } }} className="text-[10px] bg-[#FFC300] text-black px-3 py-1 rounded-full">Chat</button></div>))}</div>
+      {chatWith && <div className="mt-6 bg-black border border-white/10 rounded-2xl p-3"><p className="font-black text-xs text-white">Chat with {chatWith.name}</p><div className="mt-3 h-64 overflow-y-auto space-y-2 bg-zinc-900 rounded-xl p-2">{messages.map(m=>(<div key={m.id} className="text-xs p-2 rounded-full max-w-[80%] bg-zinc-800 text-white">{m.text}</div>))}</div><div className="flex gap-2 mt-3"><input value={newMsg} onChange={e=>setNewMsg(e.target.value)} placeholder="Type..." className="flex-1 bg-zinc-800 rounded-full px-4 py-2 text-xs text-white" /><button onClick={onSend} className="bg-[#FFC300] text-black px-5 py-2 rounded-full text-xs font-black">Send</button></div></div>}
     </div>
   )
 }
