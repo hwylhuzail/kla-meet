@@ -1,5 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
-export const supabase = createClient(
-  'https://YOUR_PROJECT.supabase.co', // <-- replace with your URL
-  'YOUR_ANON_KEY' // <-- replace with your anon key
-)
+
+const url = import.meta.env.VITE_SUPABASE_URL
+const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+if (!url || !key) {
+  console.error('Missing Vercel env:', { url, key: key ? 'set' : 'missing' })
+}
+
+export const supabase = createClient(url, key)
