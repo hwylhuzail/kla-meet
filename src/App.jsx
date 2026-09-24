@@ -28,18 +28,38 @@ export default function App(){
   const [chatWith,setChatWith]=useState(null)
   const [messages,setMessages]=useState([])
   const [newMsg,setNewMsg]=useState('')
-  // ADMIN
   const [adminTab,setAdminTab]=useState('posts')
   const [banned,setBanned]=useState([])
   const [adminSearch,setAdminSearch]=useState('')
-  const isAdminEmail = (e) => ADMIN_EMAILS.includes((e||'').toLowerCase().trim())
+  // STRICT ADMIN CHECK - exact match only
+  const isAdminEmail = (e) => {
+    if(!e) return false
+    return ADMIN_EMAILS.includes(e.toLowerCase().trim())
+  }
 
   useEffect(()=>{
-    supabase.auth.getUser().then(({data})=>{ if(data?.user){ setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes') } } })
-    if(localStorage.getItem('kla_premium')==='yes') setIsPremium(true)
+    supabase.auth.getUser().then(({data})=>{
+      if(data?.user){
+        setUser(data.user)
+        if(isAdminEmail(data.user.email)){
+          setIsAdmin(true)
+          setIsPremium(true)
+          localStorage.setItem('kla_premium','yes')
+          localStorage.setItem('kla_email', data.user.email.toLowerCase())
+        } else {
+          setIsAdmin(false)
+          const savedEmail = localStorage.getItem('kla_email')
+          if(localStorage.getItem('kla_premium')==='yes' && savedEmail===data.user.email.toLowerCase()){
+            setIsPremium(true)
+          } else {
+            setIsPremium(false)
+          }
+        }
+      }
+    })
     fetchPosts()
   },[])
-  useEffect(()=>{ if(user) { fetchLikes(); fetchNotifs(); const i=setInterval(fetchNotifs,5000); return ()=>clearInterval(i) } },[user])
+  useEffect(()=>{ if(user){ fetchLikes(); fetchNotifs(); const i=setInterval(fetchNotifs,5000); return ()=>clearInterval(i) } },[user])
   useEffect(()=>{ if(tab==='admin' && isAdmin){ fetchProfiles(); fetchBanned() } },[tab])
 
   const fetchProfiles = async () => { const { data } = await supabase.from('profiles').select('*').order('created_at',{ascending:false}); if(data) setAllProfiles(data) }
@@ -52,8 +72,8 @@ export default function App(){
   const openCrypto = () => window.open(OXA, '_blank')
   const openPesapal = async () => { try{ const r=await fetch('/api/pesapal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})}); const j=await r.json(); if(j.redirect_url) window.open(j.redirect_url,'_blank'); else window.open(OXA,'_blank') }catch{ window.open(OXA,'_blank') } }
   const handleTab = (t) => { if(t==='admin' &&!isAdmin) return; if((t==='nearby' || t==='chat' || t==='liked' || t==='profile') &&!isPremium &&!isAdmin){ setTab('premium'); return } setTab(t) }
-  const handleSignup = async () => { try{ const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'}); if(error) throw error; await supabase.from('profiles').insert([{id:data.user?.id, name:form.name, email:form.email.trim(), bio:form.bio, interests:form.interests, gender:form.gender, age:form.age}]); if(isAdminEmail(form.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes') } alert('Account created!'); setView('app'); setTab('profile'); setUser(data.user) }catch(e){ alert(e.message) } }
-  const handleSignin = async () => { try{ const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password}); if(error) throw error; setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes') } setView('app'); setTab(isAdminEmail(data.user.email)?'admin':'profile') }catch(e){ alert(e.message) } }
+  const handleSignup = async () => { try{ const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'}); if(error) throw error; await supabase.from('profiles').insert([{id:data.user?.id, name:form.name, email:form.email.trim(), bio:form.bio, interests:form.interests, gender:form.gender, age:form.age}]); if(isAdminEmail(form.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', form.email.toLowerCase()) } alert('Account created!'); setView('app'); setTab('profile'); setUser(data.user) }catch(e){ alert(e.message) } }
+  const handleSignin = async () => { try{ const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password}); if(error) throw error; setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', data.user.email.toLowerCase()); setView('app'); setTab('admin') } else { setIsAdmin(false); const saved = localStorage.getItem('kla_email'); if(saved!==data.user.email.toLowerCase()){ setIsPremium(false) } else if(localStorage.getItem('kla_premium')==='yes'){ setIsPremium(true) } setView('app'); setTab('profile') } }catch(e){ alert(e.message) } }
 
   const getLocation = () => {
     setPostForm(f=>({...f, city:'Arua - True GPS locating...'}))
@@ -104,30 +124,19 @@ export default function App(){
     if(!user){ alert('Sign in to like'); return }
     if(!isPremium &&!isAdmin){ setTab('premium'); return }
     if(likedIds.includes(post.id)) return;
-    try{
-      await supabase.from('likes').insert([{from_user:user.id, to_user:post.user_id, post_id:post.id}])
-      await supabase.from('notifications').insert([{ to_user: post.user_id, from_user: user.id, from_name: form.name || user.email.split('@')[0], type: 'like', post_id: post.id }])
-      setLikedIds([...likedIds, post.id])
-      alert(`❤️ You liked ${post.name}! They got notified.`)
-      setChatWith(post); setTab('chat'); fetchMessages(post.user_id)
-    }catch(e){ alert(e.message) }
+    try{ await supabase.from('likes').insert([{from_user:user.id, to_user:post.user_id, post_id:post.id}]); await supabase.from('notifications').insert([{ to_user: post.user_id, from_user: user.id, from_name: form.name || user.email.split('@')[0], type: 'like', post_id: post.id }]); setLikedIds([...likedIds, post.id]); setChatWith(post); setTab('chat'); fetchMessages(post.user_id) }catch(e){ alert(e.message) }
   }
   const handleSendMsg = async () => {
     if(!newMsg.trim() ||!chatWith) return;
-    try{
-      await supabase.from('messages').insert([{from_user:user.id, to_user:chatWith.user_id, text:newMsg}])
-      await supabase.from('notifications').insert([{to_user:chatWith.user_id, from_user:user.id, from_name:form.name || user.email.split('@')[0], type:'message', post_id:chatWith.id}])
-      setNewMsg(''); fetchMessages(chatWith.user_id)
-    }catch(e){ alert(e.message) }
+    try{ await supabase.from('messages').insert([{from_user:user.id, to_user:chatWith.user_id, text:newMsg}]); await supabase.from('notifications').insert([{to_user:chatWith.user_id, from_user:user.id, from_name:form.name || user.email.split('@')[0], type:'message', post_id:chatWith.id}]); setNewMsg(''); fetchMessages(chatWith.user_id) }catch(e){ alert(e.message) }
   }
 
-  // ADMIN ACTIONS
   const adminDeletePost = async (id) => { if(!confirm('Delete this post photo?')) return; const { error } = await supabase.from('posts').delete().eq('id',id); if(!error){ setPosts(posts.filter(p=>p.id!==id)); alert('Post deleted') } }
   const adminBanUser = async (p) => { const reason = prompt('Ban reason?','Spam / Fake'); if(reason===null) return; await supabase.from('banned_users').insert([{user_id:p.user_id||p.id, email:p.email||'', reason}]); await supabase.from('posts').delete().eq('user_id',p.user_id||p.id); alert('User banned + posts removed'); fetchPosts(); fetchBanned() }
   const adminUnban = async (id) => { await supabase.from('banned_users').delete().eq('id',id); fetchBanned(); alert('Unbanned') }
   const adminWarnUser = async (p) => { const msg = prompt('Warning message','Your post violates rules. Please be respectful.'); if(!msg) return; await supabase.from('warnings').insert([{user_id:p.user_id||p.id, message:msg, by_admin:user.email}]); await supabase.from('notifications').insert([{to_user:p.user_id||p.id, from_user:user.id, from_name:'ADMIN', type:'warn', post_id:null}]); alert('Warned: '+p.name) }
-  const adminDeleteProfile = async (p) => { if(!confirm('Delete user '+p.email+' and ALL his posts?')) return; await supabase.from('profiles').delete().eq('id',p.id); await supabase.from('posts').delete().eq('user_id',p.id); await supabase.from('messages').delete().or(`from_user.eq.${p.id},to_user.eq.${p.id}`); fetchProfiles(); fetchPosts(); alert('User deleted') }
-  const adminClearChats = async (p) => { if(!confirm('Clear all chats for '+p.email+'?')) return; await supabase.from('messages').delete().or(`from_user.eq.${p.id},to_user.eq.${p.id}`); alert('Chats cleared') }
+  const adminDeleteProfile = async (p) => { if(!confirm('Delete user '+p.email+'?')) return; await supabase.from('profiles').delete().eq('id',p.id); await supabase.from('posts').delete().eq('user_id',p.id); fetchProfiles(); fetchPosts(); alert('User deleted') }
+  const adminClearChats = async (p) => { if(!confirm('Clear chats for '+p.email+'?')) return; await supabase.from('messages').delete().or(`from_user.eq.${p.id},to_user.eq.${p.id}`); alert('Chats cleared') }
 
   const PremiumWall = () => (
     <div className="max-w-md mx-auto p-6 text-center"><div className="bg-zinc-900 rounded-[24px] p-6 border border-[#FFC300]/30"><p className="text-4xl">🔒</p><h2 className="font-black text-lg mt-3">Premium Required</h2><p className="text-[11px] text-white/60 mt-2">Unlock {tab}</p><button onClick={()=>setTab('premium')} className="mt-4 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Unlock Premium</button></div></div>
@@ -160,97 +169,61 @@ export default function App(){
 
       {tab==='discover' && (
         <div className="max-w-md mx-auto p-4">
-          <h2 className="font-black">Discover • Tap to Like</h2>
+          <h2 className="font-black">Discover • Tap to Like {isAdmin && '(Admin)'}</h2>
+          {/* USER POSTS */}
           {posts.length>0 && <div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(
             <div key={p.id} onClick={()=>setSelectedPost(p)} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-[#FFC300]/20 cursor-pointer">
               <img src={p.image_url} className="h-48 w-full object-cover" />
               <div className="p-2"><p className="text-xs font-bold">{p.type==='dating'?'❤️':'🤝'} {p.name}</p><p className="text-[9px] text-white/50">{p.city}</p><p className="text-[10px] mt-1">{p.bio?.slice(0,60)}</p></div>
             </div>
           ))}</div>}
+          {/* WORLD EXAMPLES - ALWAYS SHOW FIX */}
+          <h3 className="mt-6 font-bold text-xs text-white/60">🌍 Worldwide Examples</h3>
+          <div className="grid grid-cols-2 gap-3 mt-2">{WORLD.map(w=>(<div key={w.city} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-white/10"><img src={w.img} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs font-bold">{w.flag} {w.city}</p></div></div>))}</div>
         </div>
       )}
       {tab==='nearby' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Near Me • True GPS</h2><div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(<div key={p.id} onClick={()=>setSelectedPost(p)} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={p.image_url} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs">{p.name} • {p.city}</p></div></div>))}</div></div> : <PremiumWall />)}
-      {tab==='chat' && (isPremium?
-        <div className="max-w-md mx-auto p-4">
-          <h2 className="font-black">Chats + Notifications</h2>
-          <div className="mt-3 space-y-2">{notifications.map(n=>(<div key={n.id} className="bg-zinc-900 rounded-xl p-3 flex justify-between"><p className="text-xs">🔔 {n.from_name} {n.type}</p><button onClick={async()=>{ const post = posts.find(pp=>pp.id===n.post_id); if(post){ setChatWith(post); fetchMessages(post.user_id); await supabase.from('notifications').update({read:true}).eq('id',n.id) } }} className="text-[10px] bg-[#FFC300] text-black px-3 py-1 rounded-full">Chat</button></div>))}</div>
-          {chatWith && (
-            <div className="mt-6 bg-black border border-white/10 rounded-2xl p-3">
-              <p className="font-black text-xs">Chat with {chatWith.name}</p>
-              <div className="mt-3 h-64 overflow-y-auto space-y-2 bg-zinc-900 rounded-xl p-2">{messages.map(m=>(<div key={m.id} className={`text-xs p-2 rounded-full max-w-[80%] ${m.from_user===user.id?'bg-[#FFC300] text-black ml-auto':'bg-zinc-800'}`}>{m.text}</div>))}</div>
-              <div className="flex gap-2 mt-3"><input value={newMsg} onChange={e=>setNewMsg(e.target.value)} placeholder="Type..." className="flex-1 bg-zinc-800 rounded-full px-4 py-2 text-xs" /><button onClick={handleSendMsg} className="bg-[#FFC300] text-black px-5 py-2 rounded-full text-xs font-black">Send</button></div>
-            </div>
-          )}
-        </div>
-      : <PremiumWall />)}
+      {tab==='chat' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Chats + Notifications</h2><div className="mt-3 space-y-2">{notifications.map(n=>(<div key={n.id} className="bg-zinc-900 rounded-xl p-3 flex justify-between"><p className="text-xs">🔔 {n.from_name} {n.type}</p><button onClick={async()=>{ const post = posts.find(pp=>pp.id===n.post_id); if(post){ setChatWith(post); fetchMessages(post.user_id); await supabase.from('notifications').update({read:true}).eq('id',n.id) } }} className="text-[10px] bg-[#FFC300] text-black px-3 py-1 rounded-full">Chat</button></div>))}</div>{chatWith && (<div className="mt-6 bg-black border border-white/10 rounded-2xl p-3"><p className="font-black text-xs">Chat with {chatWith.name}</p><div className="mt-3 h-64 overflow-y-auto space-y-2 bg-zinc-900 rounded-xl p-2">{messages.map(m=>(<div key={m.id} className={`text-xs p-2 rounded-full max-w-[80%] ${m.from_user===user.id?'bg-[#FFC300] text-black ml-auto':'bg-zinc-800'}`}>{m.text}</div>))}</div><div className="flex gap-2 mt-3"><input value={newMsg} onChange={e=>setNewMsg(e.target.value)} placeholder="Type..." className="flex-1 bg-zinc-800 rounded-full px-4 py-2 text-xs" /><button onClick={handleSendMsg} className="bg-[#FFC300] text-black px-5 py-2 rounded-full text-xs font-black">Send</button></div></div>)}</div> : <PremiumWall />)}
       {tab==='liked' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Liked • {likedIds.length}</h2><div className="mt-4 grid grid-cols-2 gap-3">{posts.filter(p=>likedIds.includes(p.id)).map(p=>(<div key={p.id} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={p.image_url} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs">{p.name}</p></div></div>))}</div></div> : <PremiumWall />)}
-      {tab==='profile' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Profile — {user?.email}</h2></div> : <PremiumWall />)}
+      {tab==='profile' && (isPremium? <div className="max-w-md mx-auto p-4"><h2 className="font-black">Profile — {user?.email}</h2><div className="mt-2 text-[10px] text-white/50">{isAdmin? 'You are ADMIN - full access' : 'Normal user - premium only'} • {ADMIN_EMAILS.includes(user?.email?.toLowerCase())?'Admin verified':'Not admin'}</div><button onClick={async()=>{await supabase.auth.signOut(); localStorage.clear(); location.reload()}} className="mt-4 bg-red-600 px-4 py-2 rounded-full text-xs">Logout + Clear</button></div> : <PremiumWall />)}
       {tab==='premium' && <div className="max-w-md mx-auto p-4 space-y-4"><h2 className="font-black">Premium</h2>{isAdmin && <div className="bg-green-500 text-black rounded-xl p-3 text-xs font-black">Admin FREE</div>}<div className="bg-[#FFC300] text-black rounded-2xl p-4"><button onClick={openCrypto} className="w-full bg-black text-white rounded-full py-3 font-bold text-xs">Crypto ALONE $2.99 / $5.99</button></div><div className="bg-zinc-900 rounded-2xl p-4"><button onClick={openPesapal} className="w-full bg-[#FF6A00] text-white rounded-full py-3 font-bold text-xs">Pesapal ALONE</button></div></div>}
 
-      {/* ADMIN PANEL - IMPROVED - OLD LAYOUT KEPT */}
       {tab==='admin' && <div className="max-w-md mx-auto p-3">
-        <h2 className="font-black">Admin Panel</h2>
+        <h2 className="font-black">Admin Panel - SECURE</h2>
         <p className="text-[9px] text-white/60">{ADMIN_EMAILS.join(', ')}</p>
+        <p className="text-[9px] text-green-400">Logged as: {user?.email} {isAdmin? '✓ ADMIN':'✗ NOT ADMIN'}</p>
         <div className="mt-3 flex gap-2">
           <button onClick={()=>setAdminTab('posts')} className={`px-4 py-2 rounded-full text-[11px] font-black ${adminTab==='posts'?'bg-[#FFC300] text-black':'bg-zinc-800'}`}>Posts {posts.length}</button>
           <button onClick={()=>setAdminTab('users')} className={`px-4 py-2 rounded-full text-[11px] font-black ${adminTab==='users'?'bg-[#FFC300] text-black':'bg-zinc-800'}`}>Users {allProfiles.length}</button>
           <button onClick={()=>setAdminTab('banned')} className={`px-4 py-2 rounded-full text-[11px] font-black ${adminTab==='banned'?'bg-red-600 text-white':'bg-zinc-800'}`}>Banned {banned.length}</button>
         </div>
-        <input value={adminSearch} onChange={e=>setAdminSearch(e.target.value)} placeholder="Search name / email / city / bio" className="mt-3 w-full bg-zinc-900 border border-white/10 rounded-full px-4 py-2 text-xs" />
-
-        {adminTab==='posts' && <div className="mt-4 space-y-3">
-          {posts.filter(p=>!adminSearch || p.name?.toLowerCase().includes(adminSearch.toLowerCase()) || p.city?.toLowerCase().includes(adminSearch.toLowerCase()) ).map(p=>(
+        <input value={adminSearch} onChange={e=>setAdminSearch(e.target.value)} placeholder="Search name / email / city" className="mt-3 w-full bg-zinc-900 border border-white/10 rounded-full px-4 py-2 text-xs" />
+        {adminTab==='posts' && <div className="mt-4 space-y-3">{posts.filter(p=>!adminSearch || p.name?.toLowerCase().includes(adminSearch.toLowerCase())).map(p=>(
             <div key={p.id} className="bg-zinc-900 rounded-[16px] overflow-hidden border border-white/10 flex">
               <img src={p.image_url} className="w-24 h-24 object-cover" />
               <div className="p-2 flex-1">
-                <p className="text-[11px] font-bold">{p.name} • {p.city} • {p.type}</p>
-                <p className="text-[9px] text-white/50 truncate">{p.bio}</p>
-                <p className="text-[8px] text-white/30">{p.user_id?.slice(0,8)} • {new Date(p.created_at).toLocaleDateString()}</p>
+                <p className="text-[11px] font-bold">{p.name} • {p.city}</p>
+                <p className="text-[8px] text-white/30">{p.user_id?.slice(0,8)}</p>
                 <div className="flex gap-1 mt-2 flex-wrap">
                   <button onClick={()=>adminDeletePost(p.id)} className="bg-red-600 px-2 py-1 rounded-full text-[9px] font-bold">🗑️ Delete Photo</button>
-                  <button onClick={()=>adminBanUser(p)} className="bg-black border border-red-500 px-2 py-1 rounded-full text-[9px]">🚫 Ban User</button>
+                  <button onClick={()=>adminBanUser(p)} className="bg-black border border-red-500 px-2 py-1 rounded-full text-[9px]">🚫 Ban</button>
                   <button onClick={()=>adminWarnUser(p)} className="bg-yellow-600 px-2 py-1 rounded-full text-[9px]">⚠️ Warn</button>
-                  <button onClick={()=>{setSelectedPost(p)}} className="bg-zinc-800 px-2 py-1 rounded-full text-[9px]">👁️ View</button>
                 </div>
               </div>
             </div>
-          ))}
-        </div>}
-
-        {adminTab==='users' && <div className="mt-4 space-y-2">
-          {allProfiles.filter(pr=>!adminSearch || pr.email?.toLowerCase().includes(adminSearch.toLowerCase()) || pr.name?.toLowerCase().includes(adminSearch.toLowerCase())).map(p=>(
+          ))}</div>}
+        {adminTab==='users' && <div className="mt-4 space-y-2">{allProfiles.filter(pr=>!adminSearch || pr.email?.toLowerCase().includes(adminSearch.toLowerCase())).map(p=>(
             <div key={p.id} className="bg-zinc-900 rounded-xl p-3 border border-white/5">
-              <p className="text-xs font-bold">{p.name} • {p.gender} • {p.age}</p>
-              <p className="text-[10px] text-white/50">{p.email} • {p.bio?.slice(0,40)}</p>
+              <p className="text-xs font-bold">{p.name} • {p.email}</p>
               <div className="flex gap-1 mt-2 flex-wrap">
-                <button onClick={()=>adminWarnUser(p)} className="bg-yellow-600 px-3 py-1 rounded-full text-[9px] font-bold">⚠️ Warn</button>
-                <button onClick={()=>adminBanUser(p)} className="bg-red-600 px-3 py-1 rounded-full text-[9px] font-bold">🚫 Ban</button>
-                <button onClick={()=>adminDeleteProfile(p)} className="bg-black border border-white/20 px-3 py-1 rounded-full text-[9px]">🗑️ Delete Account</button>
+                <button onClick={()=>adminWarnUser(p)} className="bg-yellow-600 px-3 py-1 rounded-full text-[9px]">⚠️ Warn</button>
+                <button onClick={()=>adminBanUser(p)} className="bg-red-600 px-3 py-1 rounded-full text-[9px]">🚫 Ban</button>
+                <button onClick={()=>adminDeleteProfile(p)} className="bg-black border border-white/20 px-3 py-1 rounded-full text-[9px]">🗑️ Delete</button>
                 <button onClick={()=>adminClearChats(p)} className="bg-zinc-800 px-3 py-1 rounded-full text-[9px]">🧹 Clear Chats</button>
               </div>
             </div>
-          ))}
-        </div>}
-
-        {adminTab==='banned' && <div className="mt-4 space-y-2">
-          {banned.map(b=>(
-            <div key={b.id} className="bg-red-900/20 border border-red-500/30 rounded-xl p-3">
-              <p className="text-xs">{b.email || b.user_id?.slice(0,8)} • {b.reason}</p>
-              <p className="text-[9px] text-white/40">{new Date(b.created_at).toLocaleString()}</p>
-              <button onClick={()=>adminUnban(b.id)} className="mt-2 bg-white text-black px-3 py-1 rounded-full text-[9px] font-bold">Unban</button>
-            </div>
-          ))}
-          {banned.length===0 && <p className="text-xs text-white/40">No banned users</p>}
-        </div>}
-
-        <div className="mt-6 bg-black rounded-xl p-3 border border-[#FFC300]/20">
-          <p className="text-[10px] font-black">Quick Stats</p>
-          <p className="text-[10px] text-white/60 mt-1">Total Posts: {posts.length} • Users: {allProfiles.length} • Banned: {banned.length} • Notifs: {notifications.length}</p>
-          <div className="flex gap-2 mt-2">
-            <button onClick={()=>{fetchPosts(); fetchProfiles(); fetchBanned(); alert('Refreshed')}} className="bg-zinc-800 px-3 py-1 rounded-full text-[10px]">🔄 Refresh All</button>
-            <button onClick={async()=>{ if(!confirm('Delete ALL posts?')) return; await supabase.from('posts').delete().neq('id','00000000-0000-0000-0000-000000000000'); fetchPosts(); }} className="bg-red-600 px-3 py-1 rounded-full text-[10px]">⚠️ Purge All Posts</button>
-          </div>
-        </div>
+          ))}</div>}
+        {adminTab==='banned' && <div className="mt-4 space-y-2">{banned.map(b=>(<div key={b.id} className="bg-red-900/20 border border-red-500/30 rounded-xl p-3"><p className="text-xs">{b.email} • {b.reason}</p><button onClick={()=>adminUnban(b.id)} className="mt-2 bg-white text-black px-3 py-1 rounded-full text-[9px]">Unban</button></div>))}</div>}
       </div>}
 
       {selectedPost && (
@@ -265,7 +238,7 @@ export default function App(){
                 <button onClick={()=>handleLike(selectedPost)} className="flex-1 bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">❤️ Like</button>
                 <button onClick={()=>{setChatWith(selectedPost); setSelectedPost(null); setTab('chat'); fetchMessages(selectedPost.user_id)}} className="flex-1 bg-white text-black rounded-full py-3 font-black text-xs">💬 Chat</button>
               </div>
-              {isAdmin && <div className="flex gap-2 mt-2"><button onClick={()=>adminDeletePost(selectedPost.id)} className="flex-1 bg-red-600 rounded-full py-2 text-[10px]">🗑️ Delete This Photo</button><button onClick={()=>adminBanUser(selectedPost)} className="flex-1 bg-black border border-red-500 rounded-full py-2 text-[10px]">🚫 Ban User</button></div>}
+              {isAdmin && <div className="flex gap-2 mt-2"><button onClick={()=>adminDeletePost(selectedPost.id)} className="flex-1 bg-red-600 rounded-full py-2 text-[10px]">🗑️ Delete Photo</button><button onClick={()=>adminBanUser(selectedPost)} className="flex-1 bg-black border border-red-500 rounded-full py-2 text-[10px]">🚫 Ban User</button></div>}
               <button onClick={()=>setSelectedPost(null)} className="mt-3 w-full bg-zinc-800 rounded-full py-2 text-xs">Close</button>
             </div>
           </div>
