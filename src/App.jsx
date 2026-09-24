@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 const OXA = "https://pay.oxapay.com/18802533"
 const ADMIN_EMAILS = ["huzayirukalungi4@gmail.com", "alexmakkoali@gmail.com"]
+const PACKAGES = [
+  {id:1, months:'1 Month', price:2.99, label:'$2.99', save:''},
+  {id:2, months:'3 Months', price:5.99, label:'$5.99', save:'Save 33%'},
+  {id:3, months:'6 Months', price:9.99, label:'$9.99', save:'Save 44%'},
+  {id:4, months:'1 Year', price:15.99, label:'$15.99', save:'Best Value 🔥'},
+]
 const WORLD = [
   {city:'Paris', flag:'🇫🇷', img:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'},
   {city:'Tokyo', flag:'🇯🇵', img:'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400'},
@@ -51,7 +57,6 @@ export default function App(){
   const fetchLikes = async () => { if(!user) return; const { data } = await supabase.from('likes').select('post_id').eq('from_user',user.id); if(data) setLikedIds(data.map(d=>d.post_id)) }
   const fetchNotifs = async () => { if(!user) return; const { data } = await supabase.from('notifications').select('*').eq('to_user',user.id).order('created_at',{ascending:false}).limit(20); if(data) setNotifications(data) }
   const fetchBanned = async () => { const { data } = await supabase.from('banned_users').select('*').order('created_at',{ascending:false}); if(data) setBanned(data) }
-
   const fetchMessages = async (otherId) => {
     if(!user ||!otherId) return
     const { data } = await supabase.from('messages').select('*').or(`and(from_user.eq.${user.id},to_user.eq.${otherId}),and(from_user.eq.${otherId},to_user.eq.${user.id})`).order('created_at',{ascending:true})
@@ -63,9 +68,8 @@ export default function App(){
     const t = setInterval(()=>fetchMessages(chatWith.user_id),3000)
     return ()=>clearInterval(t)
   },[chatWith])
-
-  const openCrypto = () => window.open(OXA, '_blank')
-  const openPesapal = async () => { try{ const r=await fetch('/api/pesapal',{method:'POST'}); const j=await r.json(); if(j.redirect_url) window.open(j.redirect_url,'_blank'); else window.open(OXA,'_blank') }catch{ window.open(OXA,'_blank') } }
+  const openCrypto = (pkg) => window.open(OXA, '_blank')
+  const openPesapal = async (pkg) => { try{ const r=await fetch('/api/pesapal',{method:'POST', body:JSON.stringify({package:pkg})}); const j=await r.json(); if(j.redirect_url) window.open(j.redirect_url,'_blank'); else window.open(OXA,'_blank') }catch{ window.open(OXA,'_blank') } }
   const handleTab = (t) => { if(t==='admin' &&!isAdmin) return; if((t==='nearby' || t==='chat' || t==='liked' || t==='profile') &&!isPremium &&!isAdmin){ setTab('premium'); return } setTab(t) }
   const handleSignup = async () => { if(!agreed){ alert('Check box to agree Terms & Privacy'); return } try{ const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'}); if(error) throw error; await supabase.from('profiles').insert([{id:data.user?.id, name:form.name, email:form.email.trim(), bio:form.bio, interests:form.interests, gender:form.gender, age:form.age}]); if(isAdminEmail(form.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', form.email.toLowerCase()) } setUser(data.user); setView('app'); setTab('profile') }catch(e){ alert(e.message) } }
   const handleSignin = async () => { try{ const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password}); if(error) throw error; setUser(data.user); if(isAdminEmail(data.user.email)){ setIsAdmin(true); setIsPremium(true); localStorage.setItem('kla_premium','yes'); localStorage.setItem('kla_email', data.user.email.toLowerCase()); setView('app'); setTab('admin') } else { setIsAdmin(false); setView('app'); setTab('discover') } }catch(e){ alert(e.message) } }  const getLocation = async () => {
@@ -101,11 +105,9 @@ export default function App(){
       setPostForm(f=>({...f, city:'Worldwide'}))
     }
   }
-
   const handleImage = (e) => { const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=(ev)=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); let w=img.width,h=img.height,max=500; if(w>max){h=Math.round(h*max/w);w=max} c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); let q=0.5,d=c.toDataURL('image/jpeg',q); while(d.length>150000&&q>0.1){q-=0.1;d=c.toDataURL('image/jpeg',q)} setPostForm(f=>({...f,preview:d})) }; img.src=ev.target.result }; reader.readAsDataURL(file) }
   const handleCreatePost = async () => { if(!user){ alert('Sign in'); return } if(!postForm.bio){ alert('Add bio'); return } if(posting) return; setPosting(true); try{ const imgUrl=postForm.preview||WORLD[0].img; await supabase.from('posts').insert([{user_id:user.id,name:form.name||user.email.split('@')[0],type:postForm.type,bio:postForm.bio,interests:postForm.interests||'music',age:form.age||'22',gender:form.gender||'Female',city:postForm.city||'Worldwide',lat:postForm.lat||0,lng:postForm.lng||0,image_url:imgUrl}]); setShowPostModal(false); await fetchPosts(); setTab('discover') }catch(e){ alert(e.message) } finally{ setPosting(false) } }
   const handleLike = async (post) => { if(!isPremium&&!isAdmin){ setTab('premium'); return } try{ await supabase.from('likes').insert([{from_user:user.id,to_user:post.user_id,post_id:post.id}]); await supabase.from('notifications').insert([{to_user:post.user_id,from_user:user.id,from_name:form.name||user.email.split('@')[0],type:'like',post_id:post.id}]); setLikedIds([...likedIds,post.id]); setChatWith(post); setTab('chat'); fetchMessages(post.user_id) }catch(e){ alert(e.message) } }
-
   const handleSendMsg = async () => {
     if(!newMsg.trim()||!chatWith) return
     const txt = newMsg
@@ -114,20 +116,28 @@ export default function App(){
     const { error } = await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:txt}])
     if(error) alert('Failed: '+error.message)
   }
-
   const adminDeletePost = async (id) => { if(!confirm('Delete?')) return; await supabase.from('posts').delete().eq('id',id); setPosts(posts.filter(p=>p.id!==id)) }
   const adminBanUser = async (p) => { const r=prompt('Reason?','Spam'); if(!r) return; await supabase.from('banned_users').insert([{user_id:p.user_id||p.id,email:p.email||'',reason:r}]); await supabase.from('posts').delete().eq('user_id',p.user_id||p.id); fetchPosts(); fetchBanned() }
   const adminUnban = async (id) => { await supabase.from('banned_users').delete().eq('id',id); fetchBanned() }
   const adminWarnUser = async (p) => { const m=prompt('Warning?'); if(!m) return; await supabase.from('warnings').insert([{user_id:p.user_id||p.id,message:m,by_admin:user.email}]); await supabase.from('notifications').insert([{to_user:p.user_id||p.id,from_user:user.id,from_name:'ADMIN',type:'warn'}]) }
   const adminDeleteProfile = async (p) => { if(!confirm('Delete '+p.email)) return; await supabase.from('profiles').delete().eq('id',p.id); fetchProfiles() }
-
   if(view==='landing'){
     return (
       <div className="min-h-screen bg-white text-black">
         <header className="bg-black text-white px-4 py-3 flex justify-between items-center"><h1 className="font-black text-xs">KLA-MEET • Keep Love Alive</h1><button onClick={()=>{setView('app'); setTab('discover')}} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-xs">Enter App</button></header>
         <div className="max-w-md mx-auto p-6 space-y-4">
           <h2 className="text-[32px] font-black leading-none">Date. Meet.<br/>Worldwide.</h2>
-          <div className="flex gap-3"><div className="bg-black text-white rounded-[20px] p-4 w-[160px]"><p className="text-[10px] text-[#FFC300]">Basic $2.99</p><button onClick={openCrypto} className="mt-3 w-full bg-white text-black rounded-full py-2 font-bold text-[10px]">Crypto</button><button onClick={openPesapal} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Pesapal</button></div><div className="bg-black text-white rounded-[20px] p-4 w-[160px]"><p className="text-[10px] text-[#FFC300]">Standard $5.99</p><button onClick={openCrypto} className="mt-3 w-full bg-white text-black rounded-full py-2 font-bold text-[10px]">Crypto</button><button onClick={openPesapal} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Pesapal</button></div></div>
+          <div className="grid grid-cols-2 gap-3">
+            {PACKAGES.map(pkg=>(
+              <div key={pkg.id} className="bg-black text-white rounded-[20px] p-4 border border-[#FFC300]/20">
+                <p className="text-[11px] font-black">{pkg.months}</p>
+                <p className="text-[18px] font-black text-[#FFC300]">{pkg.label}</p>
+                {pkg.save && <p className="text-[9px] bg-green-500 text-black rounded-full px-2 py-0.5 inline-block mt-1 font-bold">{pkg.save}</p>}
+                <button onClick={()=>openCrypto(pkg)} className="mt-3 w-full bg-white text-black rounded-full py-2 font-bold text-[10px]">Crypto</button>
+                <button onClick={()=>openPesapal(pkg)} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Pesapal</button>
+              </div>
+            ))}
+          </div>
           <div className="bg-zinc-100 rounded-[24px] p-5"><h3 className="font-black text-sm">📖 About KLA-MEET</h3><p className="text-[11px] mt-2 leading-relaxed">KLA-MEET is a global dating platform built to connect people worldwide for meaningful relationships, friendship and love. Secure profiles, verified photos, real-time discovery and premium chat. Our mission is to Keep Love Alive in a safe and respectful community.</p></div>
           <div className="bg-black text-white rounded-[24px] p-5"><h3 className="font-black text-[#FFC300] text-sm">⚙️ How It Works</h3><p className="text-[11px] mt-2 leading-relaxed">1. Create account & agree to Terms 2. Create a post with photo & bio 3. Discover people worldwide 4. Like to send notification 5. Chat when matched 6. Upgrade to Premium for unlimited access.</p></div>
           <div className="bg-red-50 border border-red-200 rounded-[24px] p-5"><h3 className="font-black text-sm text-red-700">🛡️ Safety Center</h3><p className="text-[11px] mt-2">18+ only. Never send money to someone you haven't met. Meet in public places. Report suspicious or fake profiles. 3 warnings may result in suspension.</p></div>
@@ -154,7 +164,6 @@ export default function App(){
       {tab==='nearby' && <div className="max-w-md mx-auto p-4"><h2 className="font-black">Near You</h2><div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(<div key={p.id} onClick={()=>setSelectedPost(p)} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={p.image_url} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs">{p.name} • {p.city}</p></div></div>))}</div></div>}
       {tab==='chat' && <div className="max-w-md mx-auto p-4"><h2 className="font-black">Messages</h2><div className="mt-3 space-y-2">{notifications.map(n=>(<div key={n.id} className="bg-zinc-900 rounded-xl p-3 flex justify-between"><p className="text-xs">🔔 {n.from_name} {n.type}</p><button onClick={async()=>{ const post=posts.find(pp=>pp.id===n.post_id); if(post){ setChatWith(post); fetchMessages(post.user_id) } }} className="text-[10px] bg-[#FFC300] text-black px-3 py-1 rounded-full">Chat</button></div>))}</div>{chatWith && (<div className="mt-6 bg-black border border-white/10 rounded-2xl p-3"><p className="font-black text-xs">Chat with {chatWith.name}</p><div className="mt-3 h-64 overflow-y-auto space-y-2 bg-zinc-900 rounded-xl p-2">{messages.map(m=>(<div key={m.id} className={`text-xs p-2 rounded-2xl max-w-[80%] ${m.from_user===user?.id?'bg-[#FFC300] text-black ml-auto':'bg-zinc-800'}`}>{m.text}<span className="block text-[8px] opacity-60 mt-1">{m.from_user===user?.id?'✓ Sent':''}</span></div>))}</div><div className="flex gap-2 mt-3"><input value={newMsg} onChange={e=>setNewMsg(e.target.value)} placeholder="Type..." className="flex-1 bg-zinc-800 rounded-full px-4 py-2 text-xs" /><button onClick={handleSendMsg} className="bg-[#FFC300] text-black px-5 py-2 rounded-full text-xs font-black">Send</button></div></div>)}</div>}
       {tab==='liked' && <div className="max-w-md mx-auto p-4"><h2 className="font-black">Liked • {likedIds.length}</h2><div className="mt-4 grid grid-cols-2 gap-3">{posts.filter(p=>likedIds.includes(p.id)).map(p=>(<div key={p.id} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={p.image_url} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs">{p.name}</p></div></div>))}</div></div>}
-
       {tab==='profile' && (
         <div className="max-w-md mx-auto p-4 space-y-4">
           <h2 className="font-black">My Profile</h2>
@@ -179,8 +188,23 @@ export default function App(){
           <button onClick={async()=>{await supabase.auth.signOut(); localStorage.clear(); location.reload()}} className="w-full bg-zinc-900 border border-red-500/30 text-red-400 px-4 py-3 rounded-full text-xs font-bold">Logout</button>
         </div>
       )}
-
-      {tab==='premium' && <div className="max-w-md mx-auto p-4 space-y-4"><h2 className="font-black">Premium</h2>{isAdmin && <div className="bg-green-500 text-black rounded-xl p-3 text-xs font-black">Admin Access - Free</div>}<div className="bg-[#FFC300] text-black rounded-2xl p-4"><button onClick={openCrypto} className="w-full bg-black text-white rounded-full py-3 font-bold text-xs">Crypto $2.99 / $5.99</button></div><div className="bg-zinc-900 rounded-2xl p-4"><button onClick={openPesapal} className="w-full bg-[#FF6A00] text-white rounded-full py-3 font-bold text-xs">Pesapal</button></div></div>}
+      {tab==='premium' && (
+        <div className="max-w-md mx-auto p-4 space-y-4">
+          <h2 className="font-black">Premium Packages</h2>
+          {isAdmin && <div className="bg-green-500 text-black rounded-xl p-3 text-xs font-black">Admin Access - Free</div>}
+          <div className="grid grid-cols-2 gap-3">
+            {PACKAGES.map(pkg=>(
+              <div key={pkg.id} className="bg-zinc-900 rounded-[20px] p-4 border border-white/10">
+                <p className="text-[11px] font-black">{pkg.months}</p>
+                <p className="text-[20px] font-black text-[#FFC300]">{pkg.label}</p>
+                {pkg.save && <p className="text-[9px] bg-[#FFC300] text-black rounded-full px-2 py-0.5 inline-block mt-1 font-bold">{pkg.save}</p>}
+                <button onClick={()=>openCrypto(pkg)} className="mt-3 w-full bg-white text-black rounded-full py-2 font-bold text-[10px]">Crypto {pkg.label}</button>
+                <button onClick={()=>openPesapal(pkg)} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Pesapal {pkg.label}</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {tab==='admin' && <div className="max-w-md mx-auto p-3"><h2 className="font-black">Admin Panel - Secure</h2><p className="text-[9px] text-white/60">Authorized Personnel Only</p><p className="text-[9px] text-green-400">Logged: {user?.email} {isAdmin?'✓ Authorized':'✗'}</p><div className="mt-3 flex gap-2"><button onClick={()=>setAdminTab('posts')} className={`px-4 py-2 rounded-full text-[11px] font-black ${adminTab==='posts'?'bg-[#FFC300] text-black':'bg-zinc-800'}`}>Posts {posts.length}</button><button onClick={()=>setAdminTab('users')} className={`px-4 py-2 rounded-full text-[11px] font-black ${adminTab==='users'?'bg-[#FFC300] text-black':'bg-zinc-800'}`}>Users {allProfiles.length}</button><button onClick={()=>setAdminTab('banned')} className={`px-4 py-2 rounded-full text-[11px] font-black ${adminTab==='banned'?'bg-red-600':'bg-zinc-800'}`}>Banned {banned.length}</button></div><input value={adminSearch} onChange={e=>setAdminSearch(e.target.value)} placeholder="Search" className="mt-3 w-full bg-zinc-900 border border-white/10 rounded-full px-4 py-2 text-xs" />{adminTab==='posts' && <div className="mt-4 space-y-3">{posts.map(p=>(<div key={p.id} className="bg-zinc-900 rounded-[16px] flex overflow-hidden"><img src={p.image_url} className="w-24 h-24 object-cover"/><div className="p-2 flex-1"><p className="text-[11px] font-bold">{p.name} • {p.city}</p><div className="flex gap-1 mt-2"><button onClick={()=>adminDeletePost(p.id)} className="bg-red-600 px-2 py-1 rounded-full text-[9px]">🗑️ Delete</button><button onClick={()=>adminBanUser(p)} className="bg-black border border-red-500 px-2 py-1 rounded-full text-[9px]">🚫 Ban</button><button onClick={()=>adminWarnUser(p)} className="bg-yellow-600 px-2 py-1 rounded-full text-[9px]">⚠️ Warn</button></div></div></div>))}</div>}{adminTab==='users' && <div className="mt-4 space-y-2">{allProfiles.map(p=>(<div key={p.id} className="bg-zinc-900 rounded-xl p-3"><p className="text-xs font-bold">{p.name} • {p.email}</p><div className="flex gap-1 mt-2"><button onClick={()=>adminWarnUser(p)} className="bg-yellow-600 px-3 py-1 rounded-full text-[9px]">⚠️ Warn</button><button onClick={()=>adminBanUser(p)} className="bg-red-600 px-3 py-1 rounded-full text-[9px]">🚫 Ban</button><button onClick={()=>adminDeleteProfile(p)} className="bg-black border px-3 py-1 rounded-full text-[9px]">🗑️ Delete</button></div></div>))}</div>}{adminTab==='banned' && <div className="mt-4 space-y-2">{banned.map(b=>(<div key={b.id} className="bg-red-900/20 border border-red-500/30 rounded-xl p-3"><p className="text-xs">{b.email} • {b.reason}</p><button onClick={()=>adminUnban(b.id)} className="mt-2 bg-white text-black px-3 py-1 rounded-full text-[9px]">Unban</button></div>))}</div>}</div>}
       {selectedPost && (<div className="fixed inset-0 bg-black/90 p-4 flex items-center justify-center z-[200]"><div className="bg-zinc-900 rounded-[24px] overflow-hidden w-full max-w-sm border border-[#FFC300]/30"><img src={selectedPost.image_url} className="h-80 w-full object-cover" /><div className="p-4"><h3 className="font-black">{selectedPost.name} • {selectedPost.age}</h3><p className="text-[11px] text-white/60">📍 {selectedPost.city}</p><p className="text-xs mt-2">{selectedPost.bio}</p><div className="flex gap-2 mt-4"><button onClick={()=>handleLike(selectedPost)} className="flex-1 bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">❤️ Like</button><button onClick={()=>{setChatWith(selectedPost); setSelectedPost(null); setTab('chat'); fetchMessages(selectedPost.user_id)}} className="flex-1 bg-white text-black rounded-full py-3 font-black text-xs">💬 Chat</button></div>{isAdmin && <div className="flex gap-2 mt-2"><button onClick={()=>adminDeletePost(selectedPost.id)} className="flex-1 bg-red-600 rounded-full py-2 text-[10px]">🗑️ Delete</button><button onClick={()=>adminBanUser(selectedPost)} className="flex-1 bg-black border border-red-500 rounded-full py-2 text-[10px]">🚫 Ban</button></div>}<button onClick={()=>setSelectedPost(null)} className="mt-3 w-full bg-zinc-800 rounded-full py-2 text-xs">Close</button></div></div></div>)}
       {showPostModal && (<div className="fixed inset-0 bg-black/95 p-0 flex items-end justify-center z-[100]"><div className="bg-zinc-900 rounded-t-[32px] p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center"><h3 className="font-black text-sm">Create Post</h3><button onClick={()=>setShowPostModal(false)} className="bg-zinc-800 w-8 h-8 rounded-full">✕</button></div><div className="flex gap-2 mt-4"><button onClick={()=>setPostForm({...postForm,type:'dating'})} className={`flex-1 rounded-full py-3 text-xs font-black ${postForm.type==='dating'?'bg-[#FFC300] text-black':'bg-zinc-800'}`}>❤️ Dating</button><button onClick={()=>setPostForm({...postForm,type:'friends'})} className={`flex-1 rounded-full py-3 text-xs font-black ${postForm.type==='friends'?'bg-white text-black':'bg-zinc-800'}`}>🤝 Friends</button></div><div className="mt-4"><input type="file" accept="image/*" onChange={handleImage} className="mt-2 w-full text-xs file:bg-white file:text-black file:rounded-full file:px-4 file:py-2" />{postForm.preview && <img src={postForm.preview} className="mt-3 w-full h-64 object-cover rounded-[20px]" />}</div><textarea value={postForm.bio} onChange={e=>setPostForm({...postForm,bio:e.target.value})} placeholder="Bio" className="mt-4 w-full bg-black border border-white/20 rounded-2xl px-4 py-3 text-xs h-20" /><div className="mt-3 bg-black rounded-2xl p-4 border border-white/10 flex justify-between items-center"><p className="text-xs font-bold">📍 {postForm.city}</p><button onClick={getLocation} className="bg-[#FFC300] text-black px-5 py-2.5 rounded-full text-[11px] font-black">Location</button></div><button onClick={handleCreatePost} disabled={posting} className="mt-5 w-full bg-[#FFC300] text-black rounded-full py-4 font-black text-[15px]">{posting?'Posting...':'Post Now'}</button></div></div>)}
