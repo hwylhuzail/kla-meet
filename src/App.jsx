@@ -161,7 +161,6 @@ export default function App(){
       {tab==='signup' && <Static title="Sign Up"><p>Create account to discover worldwide profiles. Premium unlocks chat.</p><button onClick={()=>handleTab('discover')} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-xs">Start Discover</button></Static>}
       {tab==='profile' && <Static title="Profile"><p>Your profile — Keep Love Alive. Premium shows verified badge.</p></Static>}
 
-      {/* Footer with all links */}
       <div className="max-w-md mx-auto p-4 mt-6 border-t border-white/10">
         <div className="flex flex-wrap gap-3 text-[10px] text-white/50">
           {['about','how-it-works','safety','privacy','terms','faqs','guidelines','profile','login','signin','signup','liked'].map(p=>(
