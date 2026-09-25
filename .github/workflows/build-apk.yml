@@ -4,24 +4,32 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - uses: actions/setup-java@v4
-        with: { distribution: 'temurin', java-version: 17 }
-      - run: npm install
-      - run: npm run build
-      - run: npx cap add android
-      - run: npx cap sync android
-      - name: Add permissions
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Install deps
+        run: npm install
+      - name: Build web
+        run: npm run build
+      - name: Add android
+        run: npx cap add android
+      - name: Sync android
+        run: npx cap sync android
+      - name: Build APK
         run: |
-          echo "Adding camera & mic permissions"
-          sed -i 's/<application/<uses-permission android:name="android.permission.CAMERA" \/>\n <uses-permission android:name="android.permission.RECORD_AUDIO" \/>\n <application/' android/app/src/main/AndroidManifest.xml
-      - run: |
           cd android
           chmod +x gradlew
-        ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
+         ./gradlew assembleDebug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: KLA-MEET-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
