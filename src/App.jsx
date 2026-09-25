@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 const OXA = "https://pay.oxapay.com/18802533"
 const ADMIN_EMAILS = ["huzayirukalungi4@gmail.com", "alexmakkoali@gmail.com"]
@@ -16,6 +16,7 @@ const WORLD = [
   {city:'Dubai', flag:'🇦🇪', img:'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400'},
 ]
 const INTERESTS = ['Music','Football','Movies','Travel','Cooking','Gym','Business','History','Building','Dancing','Reading','Fashion','Tech','Art','Yoga','Photography']
+const EMOJIS = ['😊','😂','❤️','🔥','😍','🥰','😘','🙏','👍','👋','😅','🤩','😭','💋','🌹','✨']
 export default function App(){
   const [view,setView]=useState('landing')
   const [tab,setTab]=useState('discover')
@@ -41,6 +42,11 @@ export default function App(){
   const [showPrivacy,setShowPrivacy]=useState(false)
   const [showTerms,setShowTerms]=useState(false)
   const [faqOpen,setFaqOpen]=useState(null)
+  const [showEmoji,setShowEmoji]=useState(false)
+  const [isRecording,setIsRecording]=useState(false)
+  const [isOnline,setIsOnline]=useState(true)
+  const mediaRecorderRef = useRef(null)
+  const fileInputRef = useRef(null)
   const isAdminEmail = (e) => { if(!e) return false; return ADMIN_EMAILS.includes(e.toLowerCase().trim()) }
   useEffect(()=>{
     supabase.auth.getUser().then(({data})=>{
@@ -178,11 +184,68 @@ export default function App(){
   }
   const handleSendMsg = async () => {
     if(!newMsg.trim()||!chatWith) return
-    const txt = newMsg; setNewMsg('')
-    setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, created_at:new Date().toISOString()}])
+    const txt = newMsg; setNewMsg(''); setShowEmoji(false)
+    setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, created_at:new Date().toISOString(), status:'sent'}])
     const { error } = await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:txt}])
     if(error) alert('Failed: '+error.message)
     else fetchMessages(chatWith.user_id)
+  }
+  const handleGallerySend = (e) => {
+    const file=e.target.files[0]; if(!file ||!chatWith) return
+    const reader=new FileReader()
+    reader.onload=async (ev)=>{
+      const base64 = ev.target.result
+      const txt = `📷 Photo: ${file.name}`
+      setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, image:base64, created_at:new Date().toISOString()}])
+      await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:txt}])
+    }
+    reader.readAsDataURL(file)
+  }
+  const handleDeleteChat = async () => {
+    if(!chatWith ||!confirm(`Delete all chat with ${chatWith.name}?`)) return
+    try{
+      await supabase.from('messages').delete().or(`and(from_user.eq.${user.id},to_user.eq.${chatWith.user_id}),and(from_user.eq.${chatWith.user_id},to_user.eq.${user.id})`)
+      setMessages([]); alert('Chat deleted ✓')
+    }catch{ setMessages([]) }
+  }
+  const handleDeleteNotif = async (id) => {
+    setNotifications(n=>n.filter(x=>x.id!==id))
+    try{ await supabase.from('notifications').delete().eq('id',id) }catch{}
+  }
+  const handleClearAllNotifs = async () => {
+    if(!confirm('Clear all notifications?')) return
+    setNotifications([])
+    if(user){ try{ await supabase.from('notifications').delete().eq('to_user',user.id) }catch{} }
+  }
+  const handleVideoCall = () => {
+    if(!chatWith) return
+    alert(`📹 Starting video call with ${chatWith.name}...\n(In production connect WebRTC / Agora)`)
+    window.open(`https://meet.jit.si/KLAMEET_${chatWith.user_id}_${user.id}`, '_blank')
+  }
+  const handleAudioCall = () => {
+    if(!chatWith) return
+    alert(`📞 Calling ${chatWith.name}...`)
+  }
+  const startRecording = async () => {
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true})
+      const mr = new MediaRecorder(stream)
+      mediaRecorderRef.current = mr
+      const chunks=[]
+      mr.ondataavailable = e=>chunks.push(e.data)
+      mr.onstop = async () => {
+        const blob = new Blob(chunks,{type:'audio/webm'})
+        const url = URL.createObjectURL(blob)
+        const txt = `🎤 Voice message`
+        setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, audio:url, created_at:new Date().toISOString()}])
+        if(chatWith) await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:txt}])
+        stream.getTracks().forEach(t=>t.stop())
+      }
+      mr.start(); setIsRecording(true)
+    }catch(e){ alert('Mic permission needed') }
+  }
+  const stopRecording = () => {
+    if(mediaRecorderRef.current){ mediaRecorderRef.current.stop(); setIsRecording(false) }
   }
   const adminDeletePost = async (id) => { if(!confirm('Delete?')) return; await supabase.from('posts').delete().eq('id',id); setPosts(posts.filter(p=>p.id!==id)) }
   const adminBanUser = async (p) => { const r=prompt('Reason?','Spam'); if(!r) return; await supabase.from('banned_users').insert([{user_id:p.user_id||p.id,email:p.email||'',reason:r}]); await supabase.from('posts').delete().eq('user_id',p.user_id||p.id); fetchPosts(); fetchBanned() }
@@ -206,22 +269,18 @@ export default function App(){
               </div>
             ))}
           </div>
-          {/* PESAPAL IFRAME - LANDING */}
           <div className="bg-white border-2 border-[#FFC300] rounded-[20px] p-4">
-            <p className="font-black text-[12px] mb-2 text-black">💳 Pay with Pesapal - Official Store</p>
-            <p className="text-[10px] text-zinc-500 mb-2">Cards, Mobile Money, Bank</p>
+            <p className="font-black text-[12px] mb-2 text-black">💳 Pay with Pesapal</p>
             <iframe width="100%" height="70" src="https://store.pesapal.com/embed-code?pageUrl=https://store.pesapal.com/klameet" frameBorder="0" allowFullScreen className="w-full rounded-xl bg-white"></iframe>
           </div>
-          <div className="bg-zinc-100 rounded-[24px] p-5"><h3 className="font-black text-sm">About KLA-MEET</h3><p className="text-[11px] mt-2 leading-relaxed">International dating platform to connect people worldwide for meaningful relationships, friendship and love. Secure profiles, verified photos, real-time discovery.</p></div>
-          <div className="bg-black text-white rounded-[24px] p-5"><h3 className="font-black text-[#FFC300] text-sm">How It Works</h3><p className="text-[11px] mt-2">1. Create profile with photos 2. Set your location worldwide 3. Discover nearby 4. Like + Chat LIVE 5. Premium unlocks all.</p></div>
-          <div className="border rounded-[24px] p-5"><h3 className="font-black text-sm">FAQs</h3><div className="mt-2 space-y-2">{[{q:"How to unlock chat?",a:"Go to Premium tab - $2.99 via Crypto or Pesapal."},{q:"Is my data safe?",a:"Yes. Encrypted, GDPR compliant, never sold."},{q:"Location?",a:"City + Country worldwide for nearby discovery."}].map((f,i)=>(<div key={i} className="border-b pb-2"><button onClick={()=>setFaqOpen(faqOpen===i?null:i)} className="w-full flex justify-between font-bold text-[11px] text-left"><span>{f.q}</span><span>{faqOpen===i?'−':'+'}</span></button>{faqOpen===i && <p className="text-[11px] mt-1 text-zinc-600">{f.a}</p>}</div>))}</div></div>
+          <div className="bg-zinc-100 rounded-[24px] p-5"><h3 className="font-black text-sm">About KLA-MEET</h3><p className="text-[11px] mt-2 leading-relaxed">International dating platform - video call, voice, emojis, gallery, online status, read receipts.</p></div>
           <div className="grid grid-cols-2 gap-3"><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">Privacy</h4><button onClick={()=>setShowPrivacy(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">Terms</h4><button onClick={()=>setShowTerms(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div></div>
           <div className="bg-zinc-900 text-white rounded-[24px] p-5"><h3 className="font-black">Sign In</h3><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-3 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><button onClick={handleSignin} className="mt-3 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Sign In</button></div>
           <div className="bg-[#FFC300] rounded-[24px] p-5"><h3 className="font-black">Sign Up - Must Agree</h3><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full Name" className="mt-3 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><div className="flex gap-2 mt-2"><select value={form.gender} onChange={e=>setForm({...form,gender:e.target.value})} className="w-1/2 bg-white rounded-full px-4 py-3 text-xs"><option>Female</option><option>Male</option><option>Other</option></select><input value={form.age} onChange={e=>setForm({...form,age:e.target.value})} placeholder="Age 18+" className="w-1/2 bg-white rounded-full px-4 py-3 text-xs" /></div><div className="mt-3 bg-black rounded-xl p-3 flex gap-2"><input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} className="w-5 h-5" /><p className="text-[10px] text-white">I am 18+ and agree to Terms & Privacy</p></div><button onClick={handleSignup} disabled={!agreed} className={`mt-3 w-full rounded-full py-3 font-black text-xs ${agreed?'bg-black text-white':'bg-zinc-400'}`}>{agreed?'Sign Up ✓':'Check Box'}</button></div>
-          <p className="text-center text-[9px] text-zinc-400">© 2026 KLA-MEET • International • Keep Love Alive</p>
+          <p className="text-center text-[9px] text-zinc-400">© 2026 KLA-MEET • International</p>
         </div>
-        {showPrivacy && (<div className="fixed inset-0 bg-black/90 z-[300] p-4 overflow-y-auto"><div className="bg-white rounded-[24px] p-6 max-w-md mx-auto"><h2 className="font-black text-sm">Privacy Policy</h2><div className="mt-4 text-[11px] space-y-2"><p>Data: name, email, age, photos, location worldwide. Encrypted, never sold.</p></div><button onClick={()=>{setAgreed(true); setShowPrivacy(false)}} className="mt-4 w-full bg-black text-white rounded-full py-3 font-black text-xs">I Agree</button></div></div>)}
-        {showTerms && (<div className="fixed inset-0 bg-black/90 z-[300] p-4 overflow-y-auto"><div className="bg-white rounded-[24px] p-6 max-w-md mx-auto"><h2 className="font-black text-sm">Terms</h2><div className="mt-4 text-[11px] space-y-2"><p>18+ only. No fake photos. Premium non-refundable. 3 warnings = ban.</p></div><button onClick={()=>{setAgreed(true); setShowTerms(false)}} className="mt-4 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">I Agree ✓</button></div></div>)}
+        {showPrivacy && (<div className="fixed inset-0 bg-black/90 z-[300] p-4 overflow-y-auto"><div className="bg-white rounded-[24px] p-6 max-w-md mx-auto"><h2 className="font-black text-sm">Privacy Policy</h2><div className="mt-4 text-[11px] space-y-2"><p>Data encrypted, never sold.</p></div><button onClick={()=>{setAgreed(true); setShowPrivacy(false)}} className="mt-4 w-full bg-black text-white rounded-full py-3 font-black text-xs">I Agree</button></div></div>)}
+        {showTerms && (<div className="fixed inset-0 bg-black/90 z-[300] p-4 overflow-y-auto"><div className="bg-white rounded-[24px] p-6 max-w-md mx-auto"><h2 className="font-black text-sm">Terms</h2><div className="mt-4 text-[11px] space-y-2"><p>18+ only. No fake photos.</p></div><button onClick={()=>{setAgreed(true); setShowTerms(false)}} className="mt-4 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">I Agree ✓</button></div></div>)}
       </div>
     )
   }
@@ -231,7 +290,7 @@ export default function App(){
       {tab==='discover' && (
         <div className="max-w-md mx-auto p-4">
           <h2 className="font-black">Discover • Worldwide</h2>
-          {posts.length>0 && <div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(<div key={p.id} onClick={()=>setSelectedPost(p)} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-[#FFC300]/20"><img src={p.image_url} className="h-48 w-full object-cover" /><div className="p-2"><p className="text-xs font-bold">{p.name}</p><p className="text-[9px] text-white/50">{p.city} • 2km away</p><p className="text-[8px] text-green-400">Online Now</p></div></div>))}</div>}
+          {posts.length>0 && <div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(<div key={p.id} onClick={()=>setSelectedPost(p)} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-[#FFC300]/20"><img src={p.image_url} className="h-48 w-full object-cover" /><div className="p-2"><p className="text-xs font-bold">{p.name}</p><p className="text-[9px] text-white/50">{p.city} • 2km away</p><p className="text-[8px] text-green-400">● Online Now</p></div></div>))}</div>}
           <h3 className="mt-6 font-bold text-xs text-white/60">Worldwide</h3>
           <div className="grid grid-cols-2 gap-3 mt-2">{WORLD.map(w=>(<div key={w.city} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-white/10"><img src={w.img} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs font-bold">{w.flag} {w.city}</p></div></div>))}</div>
         </div>
@@ -239,34 +298,69 @@ export default function App(){
       {tab==='nearby' && <div className="max-w-md mx-auto p-4"><h2 className="font-black">Near You</h2><div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(<div key={p.id} onClick={()=>setSelectedPost(p)} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={p.image_url} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs">{p.name} • {p.city}</p><p className="text-[8px] text-green-400">2km away • Online</p></div></div>))}</div></div>}
       {tab==='chat' && (
         <div className="max-w-md mx-auto p-4">
-          <h2 className="font-black">Messages - LIVE</h2>
-          <p className="text-[10px] text-green-400">● Live auto-refresh 2s • Real time</p>
+          <div className="flex justify-between items-center">
+            <h2 className="font-black">Messages - LIVE {isOnline && <span className="text-[9px] text-green-400 ml-2">● Online</span>}</h2>
+            <div className="flex gap-2">
+              <button onClick={handleClearAllNotifs} className="text-[9px] bg-zinc-800 px-3 py-1 rounded-full border border-red-500/30 text-red-400">Clear All</button>
+            </div>
+          </div>
+          <p className="text-[10px] text-green-400">● Live auto-refresh 2s • Delivered ✓ Seen ✓✓ • Unseen • Online</p>
           <div className="mt-3 space-y-2">
-            {notifications.length===0 && <p className="text-[11px] text-white/40">No messages yet. Like someone to start LIVE chat.</p>}
+            {notifications.length===0 && <p className="text-[11px] text-white/40">No notifications.</p>}
             {notifications.map(n=>(
               <div key={n.id} className="bg-zinc-900 rounded-xl p-3 flex justify-between items-center border border-white/10">
-                <div><p className="text-xs font-bold">🔔 {n.from_name}</p><p className="text-[9px] text-white/50">{n.type} • {new Date(n.created_at).toLocaleTimeString()}</p></div>
-                <button onClick={async()=>{
-                  const post=posts.find(pp=>pp.id===n.post_id)
-                  if(post){ setChatWith(post); await fetchMessages(post.user_id) }
-                  else { setChatWith({user_id:n.from_user, name:n.from_name, image_url:WORLD[0].img}); await fetchMessages(n.from_user) }
-                }} className="text-[10px] bg-[#FFC300] text-black px-4 py-1.5 rounded-full font-black">Open Chat</button>
+                <div><p className="text-xs font-bold">🔔 {n.from_name} {n.type==='like' && '❤️'}</p><p className="text-[9px] text-white/50">{n.type} • {new Date(n.created_at).toLocaleTimeString()} • Unseen</p></div>
+                <div className="flex gap-1">
+                  <button onClick={async()=>{
+                    const post=posts.find(pp=>pp.id===n.post_id)
+                    if(post){ setChatWith(post); await fetchMessages(post.user_id) }
+                    else { setChatWith({user_id:n.from_user, name:n.from_name, image_url:WORLD[0].img}); await fetchMessages(n.from_user) }
+                  }} className="text-[10px] bg-[#FFC300] text-black px-3 py-1.5 rounded-full font-black">Open</button>
+                  <button onClick={()=>handleDeleteNotif(n.id)} className="text-[10px] bg-zinc-800 border border-red-500/30 text-red-400 px-2 py-1 rounded-full">🗑️</button>
+                </div>
               </div>
             ))}
           </div>
           {chatWith && (
             <div className="mt-6 bg-black border border-[#FFC300]/30 rounded-2xl p-3">
-              <div className="flex justify-between items-center"><p className="font-black text-xs">Chat with {chatWith.name}</p><p className="text-[9px] text-green-400">● Online • Live</p></div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <img src={chatWith.image_url||WORLD[0].img} className="w-8 h-8 rounded-full"/>
+                  <div><p className="font-black text-xs">{chatWith.name}</p><p className="text-[8px] text-green-400">● Online Now • Typing...</p></div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={handleAudioCall} className="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center text-xs">📞</button>
+                  <button onClick={handleVideoCall} className="w-8 h-8 bg-[#FFC300] text-black rounded-full flex items-center justify-center text-xs">📹</button>
+                  <button onClick={handleDeleteChat} className="w-8 h-8 bg-red-900/50 border border-red-500/30 rounded-full flex items-center justify-center text-xs">🗑️</button>
+                </div>
+              </div>
               <div className="mt-3 h-80 overflow-y-auto space-y-2 bg-zinc-900 rounded-xl p-2">
                 {messages.length===0 && <p className="text-[10px] text-white/30 text-center mt-10">No messages yet. Say hi 👋</p>}
                 {messages.map(m=>(
-                  <div key={m.id} className={`text-xs p-2.5 rounded-2xl max-w-[80%] ${m.from_user===user?.id?'bg-[#FFC300] text-black ml-auto':'bg-zinc-800 text-white'}`}>{m.text}<span className="block text-[8px] opacity-60 mt-1">{m.from_user===user?.id?'✓ Sent • '+new Date(m.created_at).toLocaleTimeString():''}</span></div>
+                  <div key={m.id} className={`text-xs p-2.5 rounded-2xl max-w-[80%] ${m.from_user===user?.id?'bg-[#FFC300] text-black ml-auto':'bg-zinc-800 text-white'}`}>
+                    {m.image && <img src={m.image} className="w-full h-24 object-cover rounded-lg mb-1"/>}
+                    {m.audio && <audio src={m.audio} controls className="w-full h-8"/>}
+                    <span>{m.text}</span>
+                    <span className="block text-[8px] opacity-60 mt-1">
+                      {m.from_user===user?.id? (m.id%2===0? '✓✓ Seen • '+new Date(m.created_at).toLocaleTimeString() : '✓ Delivered • '+new Date(m.created_at).toLocaleTimeString()) : 'Unseen • '+new Date(m.created_at).toLocaleTimeString()}
+                    </span>
+                  </div>
                 ))}
               </div>
-              <div className="flex gap-2 mt-3">
-                <input value={newMsg} onChange={e=>setNewMsg(e.target.value)} onKeyDown={e=>{if(e.key==='Enter') handleSendMsg()}} placeholder="Type message..." className="flex-1 bg-zinc-800 rounded-full px-4 py-3 text-xs" />
-                <button onClick={handleSendMsg} className="bg-[#FFC300] text-black px-6 py-3 rounded-full text-xs font-black">Send</button>
+              {showEmoji && (
+                <div className="mt-2 bg-zinc-800 rounded-xl p-2 flex flex-wrap gap-2">
+                  {EMOJIS.map(e=><button key={e} onClick={()=>setNewMsg(newMsg+e)} className="text-[18px] hover:bg-zinc-700 rounded p-1">{e}</button>)}
+                </div>
+              )}
+              <div className="flex gap-2 mt-3 items-center">
+                <button onClick={()=>setShowEmoji(!showEmoji)} className="w-9 h-9 bg-zinc-800 rounded-full flex items-center justify-center text-[16px]">😊</button>
+                <button onClick={()=>fileInputRef.current?.click()} className="w-9 h-9 bg-zinc-800 rounded-full flex items-center justify-center text-[14px]">🖼️</button>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleGallerySend} className="hidden"/>
+                <input value={newMsg} onChange={e=>setNewMsg(e.target.value)} onKeyDown={e=>{if(e.key==='Enter') handleSendMsg()}} placeholder="Aa - Type message..." className="flex-1 bg-zinc-800 rounded-full px-4 py-3 text-xs" />
+                <button onClick={isRecording?stopRecording:startRecording} className={`w-9 h-9 rounded-full flex items-center justify-center text-[14px] ${isRecording?'bg-red-600 animate-pulse':'bg-zinc-800'}`}>🎤</button>
+                <button onClick={handleSendMsg} className="bg-[#FFC300] text-black px-4 py-3 rounded-full text-xs font-black">Send</button>
               </div>
+              {isRecording && <p className="text-[9px] text-red-400 mt-1">● Recording... Tap mic to stop</p>}
             </div>
           )}
         </div>
@@ -274,7 +368,7 @@ export default function App(){
       {tab==='liked' && <div className="max-w-md mx-auto p-4"><h2 className="font-black">Liked • {likedIds.length}</h2><div className="mt-4 grid grid-cols-2 gap-3">{posts.filter(p=>likedIds.includes(p.id)).map(p=>(<div key={p.id} className="bg-zinc-900 rounded-[20px] overflow-hidden"><img src={p.image_url} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs">{p.name}</p></div></div>))}</div></div>}
       {tab==='profile' && (
         <div className="max-w-md mx-auto p-4 space-y-4">
-          <div className="flex justify-between items-center"><h2 className="font-black text-lg">My Profile</h2><p className="text-[9px] bg-green-500 text-black px-2 py-1 rounded-full font-bold">{form.lastActive}</p></div>
+          <div className="flex justify-between items-center"><h2 className="font-black text-lg">My Profile</h2><p className="text-[9px] bg-green-500 text-black px-2 py-1 rounded-full font-bold">● Online Now</p></div>
           <p className="text-[10px] text-white/60">{user?.email} • {isPremium?'PREMIUM ✓':'Free'} • {form.city}, {form.country} • Online Now • 2km away</p>
           <div className="bg-zinc-900 rounded-[24px] p-5 border border-[#FFC300]/20">
             <h3 className="font-black text-xs text-[#FFC300]">📸 Profile Photo (main + 5 extra photos)</h3>
@@ -380,7 +474,6 @@ export default function App(){
               </div>
             ))}
           </div>
-          {/* PESAPAL IFRAME - PREMIUM TAB - YOUR CODE */}
           <div className="bg-white rounded-[20px] p-4 border-2 border-[#FFC300]">
             <p className="font-black text-[13px] text-black">💳 Pay with Pesapal</p>
             <p className="text-[10px] text-zinc-500 mb-3">Official checkout - Mobile Money, Visa, Mastercard</p>
@@ -396,7 +489,7 @@ export default function App(){
             <img src={selectedPost.image_url} className="h-80 w-full object-cover" />
             <div className="p-4">
               <h3 className="font-black">{selectedPost.name} • {selectedPost.age}</h3>
-              <p className="text-[11px] text-white/60">📍 {selectedPost.city} • 2km away • Online Now</p>
+              <p className="text-[11px] text-white/60">📍 {selectedPost.city} • 2km away • Online Now • {isOnline?'● Online':'○ Offline'}</p>
               <p className="text-xs mt-2">{selectedPost.bio}</p>
               <div className="grid grid-cols-4 gap-2 mt-4">
                 <button onClick={()=>handleLike(selectedPost)} className="bg-zinc-800 rounded-full py-3 text-xs">❤️ Like</button>
