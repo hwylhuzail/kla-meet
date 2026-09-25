@@ -125,8 +125,7 @@ export default function App(){
       } else setCity('Worldwide',0,0)
     }
   }
-  const handleMainPhoto = (e) => {
-    const file=e.target.files[0]; if(!file) return
+  const handleMainPhoto = (e) => { const file=e.target.files[0]; if(!file) return
     const reader=new FileReader()
     reader.onload=(ev)=>{
       const img=new Image()
@@ -185,19 +184,34 @@ export default function App(){
   const handleSendMsg = async () => {
     if(!newMsg.trim()||!chatWith) return
     const txt = newMsg; setNewMsg(''); setShowEmoji(false)
-    setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, created_at:new Date().toISOString(), status:'sent'}])
+    setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, created_at:new Date().toISOString()}])
     const { error } = await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:txt}])
     if(error) alert('Failed: '+error.message)
     else fetchMessages(chatWith.user_id)
   }
-  const handleGallerySend = (e) => {
+  // FIXED: Gallery now saves viewable URL
+  const handleGallerySend = async (e) => {
     const file=e.target.files[0]; if(!file ||!chatWith) return
     const reader=new FileReader()
     reader.onload=async (ev)=>{
       const base64 = ev.target.result
-      const txt = `📷 Photo: ${file.name}`
-      setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, image:base64, created_at:new Date().toISOString()}])
-      await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:txt}])
+      // Show instantly
+      setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:'📷 Photo', image_url:base64, created_at:new Date().toISOString()}])
+      try{
+        // Try upload to storage for permanent URL
+        const fileName = `${user.id}_${Date.now()}_${file.name}`
+        const { error: upErr } = await supabase.storage.from('chat-media').upload(fileName, file)
+        if(!upErr){
+          const { data } = supabase.storage.from('chat-media').getPublicUrl(fileName)
+          await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'📷 Photo', image_url:data.publicUrl}])
+        }else{
+          // Fallback save base64 (small compressed)
+          await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'📷 Photo', image_url:base64}])
+        }
+      }catch{
+        await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'📷 Photo', image_url:base64}])
+      }
+      fetchMessages(chatWith.user_id)
     }
     reader.readAsDataURL(file)
   }
@@ -219,33 +233,49 @@ export default function App(){
   }
   const handleVideoCall = () => {
     if(!chatWith) return
-    alert(`📹 Starting video call with ${chatWith.name}...\n(In production connect WebRTC / Agora)`)
     window.open(`https://meet.jit.si/KLAMEET_${chatWith.user_id}_${user.id}`, '_blank')
   }
   const handleAudioCall = () => {
     if(!chatWith) return
     alert(`📞 Calling ${chatWith.name}...`)
   }
+  // FIXED: Recording now saves playable audio_url
   const startRecording = async () => {
     try{
       const stream = await navigator.mediaDevices.getUserMedia({audio:true})
       const mr = new MediaRecorder(stream)
       mediaRecorderRef.current = mr
       const chunks=[]
-      mr.ondataavailable = e=>chunks.push(e.data)
+      mr.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data) }
       mr.onstop = async () => {
         const blob = new Blob(chunks,{type:'audio/webm'})
-        const url = URL.createObjectURL(blob)
-        const txt = `🎤 Voice message`
-        setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, audio:url, created_at:new Date().toISOString()}])
-        if(chatWith) await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:txt}])
+        const localUrl = URL.createObjectURL(blob)
+        setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:'🎤 Voice message', audio_url:localUrl, created_at:new Date().toISOString()}])
+        try{
+          const fileName = `${user.id}_${Date.now()}_voice.webm`
+          const { error: upErr } = await supabase.storage.from('chat-media').upload(fileName, blob)
+          if(!upErr){
+            const { data } = supabase.storage.from('chat-media').getPublicUrl(fileName)
+            await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'🎤 Voice message', audio_url:data.publicUrl}])
+          }else{
+            const reader = new FileReader()
+            reader.onload = async (ev)=>{
+              await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'🎤 Voice message', audio_url:ev.target.result}])
+            }
+            reader.readAsDataURL(blob)
+          }
+        }catch{
+          await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'🎤 Voice message', audio_url:localUrl}])
+        }
+        fetchMessages(chatWith.user_id)
         stream.getTracks().forEach(t=>t.stop())
       }
       mr.start(); setIsRecording(true)
-    }catch(e){ alert('Mic permission needed') }
+      setTimeout(()=>{ if(mr.state==='recording'){ mr.stop(); setIsRecording(false) } },15000)
+    }catch(e){ alert('Mic blocked! Tap 🔒 → Allow microphone → Refresh') }
   }
   const stopRecording = () => {
-    if(mediaRecorderRef.current){ mediaRecorderRef.current.stop(); setIsRecording(false) }
+    if(mediaRecorderRef.current && mediaRecorderRef.current.state==='recording'){ mediaRecorderRef.current.stop(); setIsRecording(false) }
   }
   const adminDeletePost = async (id) => { if(!confirm('Delete?')) return; await supabase.from('posts').delete().eq('id',id); setPosts(posts.filter(p=>p.id!==id)) }
   const adminBanUser = async (p) => { const r=prompt('Reason?','Spam'); if(!r) return; await supabase.from('banned_users').insert([{user_id:p.user_id||p.id,email:p.email||'',reason:r}]); await supabase.from('posts').delete().eq('user_id',p.user_id||p.id); fetchPosts(); fetchBanned() }
@@ -338,11 +368,17 @@ export default function App(){
                 {messages.length===0 && <p className="text-[10px] text-white/30 text-center mt-10">No messages yet. Say hi 👋</p>}
                 {messages.map(m=>(
                   <div key={m.id} className={`text-xs p-2.5 rounded-2xl max-w-[80%] ${m.from_user===user?.id?'bg-[#FFC300] text-black ml-auto':'bg-zinc-800 text-white'}`}>
-                    {m.image && <img src={m.image} className="w-full h-24 object-cover rounded-lg mb-1"/>}
-                    {m.audio && <audio src={m.audio} controls className="w-full h-8"/>}
+                    {/* FIXED: Now shows real photo */}
+                    {(m.image_url || m.image) && (
+                      <img src={m.image_url || m.image} onClick={()=>window.open(m.image_url || m.image,'_blank')} className="w-full h-40 object-cover rounded-lg mb-2 cursor-pointer border border-white/20"/>
+                    )}
+                    {/* FIXED: Now shows playable audio */}
+                    {(m.audio_url || m.audio) && (
+                      <audio src={m.audio_url || m.audio} controls className="w-full mb-2 rounded-lg" style={{height:'40px'}}/>
+                    )}
                     <span>{m.text}</span>
                     <span className="block text-[8px] opacity-60 mt-1">
-                      {m.from_user===user?.id? (m.id%2===0? '✓✓ Seen • '+new Date(m.created_at).toLocaleTimeString() : '✓ Delivered • '+new Date(m.created_at).toLocaleTimeString()) : 'Unseen • '+new Date(m.created_at).toLocaleTimeString()}
+                      {m.from_user===user?.id? '✓✓ Seen • '+new Date(m.created_at).toLocaleTimeString() : 'Unseen • '+new Date(m.created_at).toLocaleTimeString()}
                     </span>
                   </div>
                 ))}
@@ -360,7 +396,7 @@ export default function App(){
                 <button onClick={isRecording?stopRecording:startRecording} className={`w-9 h-9 rounded-full flex items-center justify-center text-[14px] ${isRecording?'bg-red-600 animate-pulse':'bg-zinc-800'}`}>🎤</button>
                 <button onClick={handleSendMsg} className="bg-[#FFC300] text-black px-4 py-3 rounded-full text-xs font-black">Send</button>
               </div>
-              {isRecording && <p className="text-[9px] text-red-400 mt-1">● Recording... Tap mic to stop</p>}
+              {isRecording && <p className="text-[9px] text-red-400 mt-1">● Recording... Tap mic to stop (max 15s)</p>}
             </div>
           )}
         </div>
@@ -433,8 +469,7 @@ export default function App(){
             <p className="text-[9px] text-white/40">{form.interests.length}/8 selected</p>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map(chip=>(
-                <button key={chip} onClick={()=>toggleInterest(chip)} className={`px-3 py-1.5 rounded-full text-[10px] font-bold border ${form.interests.includes(chip)?'bg-[#FFC300] text-black border-[#FFC300]':'bg-zinc-800 text-white/70 border-white/10'}`}>{chip}</button>
-              ))}
+                <button key={chip} onClick={()=>toggleInterest(chip)} className={`px-3 py-1.5 rounded-full text-[10px] font-bold border ${form.interests.includes(chip)?'bg-[#FFC300] text-black border-[#FFC300]':'bg-zinc-800 text-white/70 border-white/10'}`}>{chip}</button> ))}
             </div>
           </div>
           <div className="bg-zinc-900 rounded-[24px] p-5 space-y-3 border border-white/10">
