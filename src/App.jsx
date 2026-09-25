@@ -206,9 +206,15 @@ export default function App(){
               </div>
             ))}
           </div>
+          {/* PESAPAL IFRAME - LANDING */}
+          <div className="bg-white border-2 border-[#FFC300] rounded-[20px] p-4">
+            <p className="font-black text-[12px] mb-2 text-black">💳 Pay with Pesapal - Official Store</p>
+            <p className="text-[10px] text-zinc-500 mb-2">Cards, Mobile Money, Bank</p>
+            <iframe width="100%" height="70" src="https://store.pesapal.com/embed-code?pageUrl=https://store.pesapal.com/klameet" frameBorder="0" allowFullScreen className="w-full rounded-xl bg-white"></iframe>
+          </div>
           <div className="bg-zinc-100 rounded-[24px] p-5"><h3 className="font-black text-sm">About KLA-MEET</h3><p className="text-[11px] mt-2 leading-relaxed">International dating platform to connect people worldwide for meaningful relationships, friendship and love. Secure profiles, verified photos, real-time discovery.</p></div>
           <div className="bg-black text-white rounded-[24px] p-5"><h3 className="font-black text-[#FFC300] text-sm">How It Works</h3><p className="text-[11px] mt-2">1. Create profile with photos 2. Set your location worldwide 3. Discover nearby 4. Like + Chat LIVE 5. Premium unlocks all.</p></div>
-          <div className="border rounded-[24px] p-5"><h3 className="font-black text-sm">FAQs</h3><div className="mt-2 space-y-2">{[{q:"How to unlock chat?",a:"Go to Premium tab - $2.99 via Crypto or Card."},{q:"Is my data safe?",a:"Yes. Encrypted, GDPR compliant, never sold."},{q:"Location?",a:"City + Country worldwide for nearby discovery."}].map((f,i)=>(<div key={i} className="border-b pb-2"><button onClick={()=>setFaqOpen(faqOpen===i?null:i)} className="w-full flex justify-between font-bold text-[11px] text-left"><span>{f.q}</span><span>{faqOpen===i?'−':'+'}</span></button>{faqOpen===i && <p className="text-[11px] mt-1 text-zinc-600">{f.a}</p>}</div>))}</div></div>
+          <div className="border rounded-[24px] p-5"><h3 className="font-black text-sm">FAQs</h3><div className="mt-2 space-y-2">{[{q:"How to unlock chat?",a:"Go to Premium tab - $2.99 via Crypto or Pesapal."},{q:"Is my data safe?",a:"Yes. Encrypted, GDPR compliant, never sold."},{q:"Location?",a:"City + Country worldwide for nearby discovery."}].map((f,i)=>(<div key={i} className="border-b pb-2"><button onClick={()=>setFaqOpen(faqOpen===i?null:i)} className="w-full flex justify-between font-bold text-[11px] text-left"><span>{f.q}</span><span>{faqOpen===i?'−':'+'}</span></button>{faqOpen===i && <p className="text-[11px] mt-1 text-zinc-600">{f.a}</p>}</div>))}</div></div>
           <div className="grid grid-cols-2 gap-3"><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">Privacy</h4><button onClick={()=>setShowPrivacy(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">Terms</h4><button onClick={()=>setShowTerms(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div></div>
           <div className="bg-zinc-900 text-white rounded-[24px] p-5"><h3 className="font-black">Sign In</h3><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-3 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><button onClick={handleSignin} className="mt-3 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Sign In</button></div>
           <div className="bg-[#FFC300] rounded-[24px] p-5"><h3 className="font-black">Sign Up - Must Agree</h3><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full Name" className="mt-3 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><div className="flex gap-2 mt-2"><select value={form.gender} onChange={e=>setForm({...form,gender:e.target.value})} className="w-1/2 bg-white rounded-full px-4 py-3 text-xs"><option>Female</option><option>Male</option><option>Other</option></select><input value={form.age} onChange={e=>setForm({...form,age:e.target.value})} placeholder="Age 18+" className="w-1/2 bg-white rounded-full px-4 py-3 text-xs" /></div><div className="mt-3 bg-black rounded-xl p-3 flex gap-2"><input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} className="w-5 h-5" /><p className="text-[10px] text-white">I am 18+ and agree to Terms & Privacy</p></div><button onClick={handleSignup} disabled={!agreed} className={`mt-3 w-full rounded-full py-3 font-black text-xs ${agreed?'bg-black text-white':'bg-zinc-400'}`}>{agreed?'Sign Up ✓':'Check Box'}</button></div>
@@ -234,7 +240,7 @@ export default function App(){
       {tab==='chat' && (
         <div className="max-w-md mx-auto p-4">
           <h2 className="font-black">Messages - LIVE</h2>
-          <p className="text-[10px] text-green-400">● Live auto-refresh 2s • Real time - NOT premium page</p>
+          <p className="text-[10px] text-green-400">● Live auto-refresh 2s • Real time</p>
           <div className="mt-3 space-y-2">
             {notifications.length===0 && <p className="text-[11px] text-white/40">No messages yet. Like someone to start LIVE chat.</p>}
             {notifications.map(n=>(
@@ -373,6 +379,13 @@ export default function App(){
                 <button onClick={openPesapal} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Card {pkg.label}</button>
               </div>
             ))}
+          </div>
+          {/* PESAPAL IFRAME - PREMIUM TAB - YOUR CODE */}
+          <div className="bg-white rounded-[20px] p-4 border-2 border-[#FFC300]">
+            <p className="font-black text-[13px] text-black">💳 Pay with Pesapal</p>
+            <p className="text-[10px] text-zinc-500 mb-3">Official checkout - Mobile Money, Visa, Mastercard</p>
+            <iframe width="100%" height="60" src="https://store.pesapal.com/embed-code?pageUrl=https://store.pesapal.com/klameet" frameBorder="0" allowFullScreen style={{borderRadius:'12px', background:'white'}}></iframe>
+            <p className="text-[9px] text-zinc-400 mt-2 text-center">Secure checkout by Pesapal - store.pesapal.com/klameet</p>
           </div>
         </div>
       )}
