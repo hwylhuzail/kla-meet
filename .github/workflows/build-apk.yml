@@ -13,10 +13,14 @@ jobs:
       - run: npm run build
       - run: npx cap add android
       - run: npx cap sync android
+      - name: Add permissions
+        run: |
+          echo "Adding camera & mic permissions"
+          sed -i 's/<application/<uses-permission android:name="android.permission.CAMERA" \/>\n <uses-permission android:name="android.permission.RECORD_AUDIO" \/>\n <application/' android/app/src/main/AndroidManifest.xml
       - run: |
           cd android
           chmod +x gradlew
-         ./gradlew assembleDebug
+        ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: KLA-MEET-APK
