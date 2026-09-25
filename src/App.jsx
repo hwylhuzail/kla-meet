@@ -74,7 +74,6 @@ export default function App(){
   },[chatWith])
   const openCrypto = () => window.open(OXA, '_blank')
   const openPesapal = async () => { try{ const r=await fetch('/api/pesapal',{method:'POST'}); const j=await r.json(); if(j.redirect_url) window.open(j.redirect_url,'_blank'); else window.open(OXA,'_blank') }catch{ window.open(OXA,'_blank') } }
-  // FIXED: profile FREE - only nearby/chat/liked need premium
   const handleTab = (t) => {
     if(t==='admin' &&!isAdmin) return
     if((t==='nearby' || t==='chat' || t==='liked') &&!isPremium &&!isAdmin){ setTab('premium'); return }
@@ -180,7 +179,6 @@ export default function App(){
   const handleSendMsg = async () => {
     if(!newMsg.trim()||!chatWith) return
     const txt = newMsg; setNewMsg('')
-    // LIVE - instant
     setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, created_at:new Date().toISOString()}])
     const { error } = await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:txt}])
     if(error) alert('Failed: '+error.message)
@@ -204,13 +202,13 @@ export default function App(){
                 <p className="text-[18px] font-black text-[#FFC300]">{pkg.label}</p>
                 {pkg.save && <p className="text-[9px] bg-green-500 text-black rounded-full px-2 py-0.5 inline-block mt-1 font-bold">{pkg.save}</p>}
                 <button onClick={openCrypto} className="mt-3 w-full bg-white text-black rounded-full py-2 font-bold text-[10px]">Crypto</button>
-                <button onClick={openPesapal} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Pesapal</button>
+                <button onClick={openPesapal} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Card</button>
               </div>
             ))}
           </div>
           <div className="bg-zinc-100 rounded-[24px] p-5"><h3 className="font-black text-sm">About KLA-MEET</h3><p className="text-[11px] mt-2 leading-relaxed">International dating platform to connect people worldwide for meaningful relationships, friendship and love. Secure profiles, verified photos, real-time discovery.</p></div>
           <div className="bg-black text-white rounded-[24px] p-5"><h3 className="font-black text-[#FFC300] text-sm">How It Works</h3><p className="text-[11px] mt-2">1. Create profile with photos 2. Set your location worldwide 3. Discover nearby 4. Like + Chat LIVE 5. Premium unlocks all.</p></div>
-          <div className="border rounded-[24px] p-5"><h3 className="font-black text-sm">FAQs</h3><div className="mt-2 space-y-2">{[{q:"How to unlock chat?",a:"Go to Premium tab - $2.99 via Crypto or Pesapal."},{q:"Is my data safe?",a:"Yes. Encrypted, GDPR compliant, never sold."},{q:"Location?",a:"City + Country worldwide for nearby discovery."}].map((f,i)=>(<div key={i} className="border-b pb-2"><button onClick={()=>setFaqOpen(faqOpen===i?null:i)} className="w-full flex justify-between font-bold text-[11px] text-left"><span>{f.q}</span><span>{faqOpen===i?'−':'+'}</span></button>{faqOpen===i && <p className="text-[11px] mt-1 text-zinc-600">{f.a}</p>}</div>))}</div></div>
+          <div className="border rounded-[24px] p-5"><h3 className="font-black text-sm">FAQs</h3><div className="mt-2 space-y-2">{[{q:"How to unlock chat?",a:"Go to Premium tab - $2.99 via Crypto or Card."},{q:"Is my data safe?",a:"Yes. Encrypted, GDPR compliant, never sold."},{q:"Location?",a:"City + Country worldwide for nearby discovery."}].map((f,i)=>(<div key={i} className="border-b pb-2"><button onClick={()=>setFaqOpen(faqOpen===i?null:i)} className="w-full flex justify-between font-bold text-[11px] text-left"><span>{f.q}</span><span>{faqOpen===i?'−':'+'}</span></button>{faqOpen===i && <p className="text-[11px] mt-1 text-zinc-600">{f.a}</p>}</div>))}</div></div>
           <div className="grid grid-cols-2 gap-3"><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">Privacy</h4><button onClick={()=>setShowPrivacy(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div><div className="bg-zinc-900 text-white rounded-[20px] p-4"><h4 className="font-black text-[11px]">Terms</h4><button onClick={()=>setShowTerms(true)} className="text-[9px] text-[#FFC300] underline">Read Full</button></div></div>
           <div className="bg-zinc-900 text-white rounded-[24px] p-5"><h3 className="font-black">Sign In</h3><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-3 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><button onClick={handleSignin} className="mt-3 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Sign In</button></div>
           <div className="bg-[#FFC300] rounded-[24px] p-5"><h3 className="font-black">Sign Up - Must Agree</h3><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full Name" className="mt-3 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><div className="flex gap-2 mt-2"><select value={form.gender} onChange={e=>setForm({...form,gender:e.target.value})} className="w-1/2 bg-white rounded-full px-4 py-3 text-xs"><option>Female</option><option>Male</option><option>Other</option></select><input value={form.age} onChange={e=>setForm({...form,age:e.target.value})} placeholder="Age 18+" className="w-1/2 bg-white rounded-full px-4 py-3 text-xs" /></div><div className="mt-3 bg-black rounded-xl p-3 flex gap-2"><input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} className="w-5 h-5" /><p className="text-[10px] text-white">I am 18+ and agree to Terms & Privacy</p></div><button onClick={handleSignup} disabled={!agreed} className={`mt-3 w-full rounded-full py-3 font-black text-xs ${agreed?'bg-black text-white':'bg-zinc-400'}`}>{agreed?'Sign Up ✓':'Check Box'}</button></div>
@@ -272,7 +270,6 @@ export default function App(){
         <div className="max-w-md mx-auto p-4 space-y-4">
           <div className="flex justify-between items-center"><h2 className="font-black text-lg">My Profile</h2><p className="text-[9px] bg-green-500 text-black px-2 py-1 rounded-full font-bold">{form.lastActive}</p></div>
           <p className="text-[10px] text-white/60">{user?.email} • {isPremium?'PREMIUM ✓':'Free'} • {form.city}, {form.country} • Online Now • 2km away</p>
-
           <div className="bg-zinc-900 rounded-[24px] p-5 border border-[#FFC300]/20">
             <h3 className="font-black text-xs text-[#FFC300]">📸 Profile Photo (main + 5 extra photos)</h3>
             <div className="mt-3">
@@ -291,7 +288,6 @@ export default function App(){
               ))}
             </div>
           </div>
-
           <div className="bg-zinc-900 rounded-[24px] p-5 space-y-3 border border-white/10">
             <h3 className="font-black text-xs text-[#FFC300]">👤 Full Info</h3>
             <div><p className="text-[10px] text-white/50 mb-1">Full Name</p><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full Name" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
@@ -312,7 +308,6 @@ export default function App(){
               <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Height</p><input value={form.height} onChange={e=>setForm({...form,height:e.target.value})} placeholder="165cm" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
             </div>
           </div>
-
           <div className="bg-zinc-900 rounded-[24px] p-5 space-y-3 border border-white/10">
             <h3 className="font-black text-xs text-[#FFC300]">Details</h3>
             <div><p className="text-[10px] text-white/50 mb-1">Body Type</p><select value={form.bodyType} onChange={e=>setForm({...form,bodyType:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option value="">Select</option><option>Slim</option><option>Average</option><option>Athletic</option><option>Curvy</option><option>Plus Size</option></select></div>
@@ -325,7 +320,6 @@ export default function App(){
               <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Want Kids?</p><select value={form.wantKids} onChange={e=>setForm({...form,wantKids:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Yes</option><option>No</option><option>Maybe</option></select></div>
             </div>
           </div>
-
           <div className="bg-zinc-900 rounded-[24px] p-5 space-y-3 border border-white/10">
             <h3 className="font-black text-xs text-[#FFC300]">💬 Prompts</h3>
             <div><p className="text-[10px] text-white/50 mb-1">My ideal date is...</p><input value={form.idealDate} onChange={e=>setForm({...form,idealDate:e.target.value})} placeholder="My ideal date is..." className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
@@ -334,7 +328,6 @@ export default function App(){
             <div><p className="text-[10px] text-white/50 mb-1">I'm looking for...</p><input value={form.lookingDesc} onChange={e=>setForm({...form,lookingDesc:e.target.value})} placeholder="I'm looking for..." className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
             <div><p className="text-[10px] text-white/50 mb-1">Fun fact about me...</p><input value={form.funFact} onChange={e=>setForm({...form,funFact:e.target.value})} placeholder="Fun fact about me..." className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
           </div>
-
           <div className="bg-black border border-[#FFC300]/20 rounded-[24px] p-5 space-y-3">
             <h3 className="font-black text-xs">🎯 Chips: Select 5-8 interests</h3>
             <p className="text-[9px] text-white/40">{form.interests.length}/8 selected</p>
@@ -344,7 +337,6 @@ export default function App(){
               ))}
             </div>
           </div>
-
           <div className="bg-zinc-900 rounded-[24px] p-5 space-y-3 border border-white/10">
             <h3 className="font-black text-xs text-[#FFC300]">✅ Verify + Safety</h3>
             <div><p className="text-[10px] text-white/50 mb-1">Verify with Phone Number (OTP)</p><div className="flex gap-2"><input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="+1 234..." className="flex-1 bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/><button onClick={()=>{ if(!form.phone) alert('Enter phone'); else { alert('OTP sent to '+form.phone); setForm(f=>({...f, verified:true})) } }} className="bg-green-500 text-black px-4 py-2 rounded-full text-[10px] font-black">Verify OTP</button></div>{form.verified && <p className="text-[9px] text-green-400 mt-1">✓ Phone Verified</p>}</div>
@@ -352,14 +344,12 @@ export default function App(){
             <div className="bg-black rounded-xl p-3 flex justify-between items-center"><div><p className="text-[11px] font-bold">Last Active / Online Now</p><p className="text-[9px] text-green-400">● Online Now • Distance Away: 2km away • {form.city}</p></div><div>✓</div></div>
             <div className="flex gap-2"><button className="flex-1 bg-zinc-800 border border-red-500/30 text-red-400 py-2 rounded-full text-[10px]">🚩 Report</button><button className="flex-1 bg-zinc-800 border border-white/10 py-2 rounded-full text-[10px]">🚫 Block</button></div>
           </div>
-
           <button onClick={async()=>{
             if(!user) return
             localStorage.setItem('kla_profile_'+user.id, JSON.stringify(form))
             try{ await supabase.from('profiles').update({name:form.name, bio:form.bio, interests:form.interests.join(','), gender:form.gender, age:form.age}).eq('id',user.id) }catch{}
             alert('Profile saved ✓')
           }} className="w-full bg-[#FFC300] text-black rounded-full py-4 font-black text-sm">Save Full Profile ✓</button>
-
           <div className="grid grid-cols-4 gap-2">
             <button className="bg-zinc-900 border border-white/10 rounded-2xl py-3 text-[11px]">❤️<br/><span className="text-[8px]">Like</span></button>
             <button className="bg-[#FFC300] text-black rounded-2xl py-3 text-[11px] font-black">⭐<br/><span className="text-[8px]">Super Like</span></button>
