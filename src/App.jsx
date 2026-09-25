@@ -45,6 +45,7 @@ export default function App(){
   const [showEmoji,setShowEmoji]=useState(false)
   const [isRecording,setIsRecording]=useState(false)
   const [isOnline,setIsOnline]=useState(true)
+  const [conversations,setConversations]=useState([])
   const mediaRecorderRef = useRef(null)
   const fileInputRef = useRef(null)
   const isAdminEmail = (e) => { if(!e) return false; return ADMIN_EMAILS.includes(e.toLowerCase().trim()) }
@@ -60,13 +61,24 @@ export default function App(){
     })
     fetchPosts()
   },[])
-  useEffect(()=>{ if(user){ fetchLikes(); fetchNotifs(); const i=setInterval(fetchNotifs,3000); return ()=>clearInterval(i) } },[user])
+  useEffect(()=>{ if(user){ fetchLikes(); fetchNotifs(); fetchConversations(); const i=setInterval(()=>{fetchNotifs(); fetchConversations()},3000); return ()=>clearInterval(i) } },[user])
   useEffect(()=>{ if(tab==='admin' && isAdmin){ fetchProfiles(); fetchBanned() } },[tab])
   const fetchProfiles = async () => { const { data } = await supabase.from('profiles').select('*').order('created_at',{ascending:false}); if(data) setAllProfiles(data) }
   const fetchPosts = async () => { const { data } = await supabase.from('posts').select('*').order('created_at',{ascending:false}); if(data) setPosts(data) }
   const fetchLikes = async () => { if(!user) return; const { data } = await supabase.from('likes').select('post_id').eq('from_user',user.id); if(data) setLikedIds(data.map(d=>d.post_id)) }
   const fetchNotifs = async () => { if(!user) return; const { data } = await supabase.from('notifications').select('*').eq('to_user',user.id).order('created_at',{ascending:false}).limit(20); if(data) setNotifications(data) }
   const fetchBanned = async () => { const { data } = await supabase.from('banned_users').select('*').order('created_at',{ascending:false}); if(data) setBanned(data) }
+  const fetchConversations = async () => {
+    if(!user) return
+    const { data } = await supabase.from('messages').select('*').or(`from_user.eq.${user.id},to_user.eq.${user.id}`).order('created_at',{ascending:false}).limit(100)
+    if(!data) return
+    const map = {}
+    data.forEach(m=>{
+      const otherId = m.from_user===user.id? m.to_user : m.from_user
+      if(!map[otherId]) map[otherId] = { user_id: otherId, lastMsg: m.text, time: m.created_at }
+    })
+    setConversations(Object.values(map))
+  }
   const fetchMessages = async (otherId) => {
     if(!user ||!otherId) return
     const { data } = await supabase.from('messages').select('*').or(`and(from_user.eq.${user.id},to_user.eq.${otherId}),and(from_user.eq.${otherId},to_user.eq.${user.id})`).order('created_at',{ascending:true})
@@ -78,11 +90,23 @@ export default function App(){
     const t = setInterval(()=>fetchMessages(chatWith.user_id),2000)
     return ()=>clearInterval(t)
   },[chatWith])
+  useEffect(()=>{
+    if(!user) return
+    const channel = supabase.channel('msg-live-'+user.id)
+    .on('postgres_changes',{event:'INSERT', schema:'public', table:'messages', filter:`to_user=eq.${user.id}`}, (payload)=>{
+        fetchConversations()
+        if(chatWith && payload.new.from_user===chatWith.user_id){
+          setMessages(m=>[...m, payload.new])
+        }
+      }).subscribe()
+    return ()=>{ supabase.removeChannel(channel) }
+  },[user, chatWith])
   const openCrypto = () => window.open(OXA, '_blank')
   const openPesapal = async () => { try{ const r=await fetch('/api/pesapal',{method:'POST'}); const j=await r.json(); if(j.redirect_url) window.open(j.redirect_url,'_blank'); else window.open(OXA,'_blank') }catch{ window.open(OXA,'_blank') } }
   const handleTab = (t) => {
     if(t==='admin' &&!isAdmin) return
     if((t==='nearby' || t==='chat' || t==='liked') &&!isPremium &&!isAdmin){ setTab('premium'); return }
+    if(t==='chat') fetchConversations()
     setTab(t)
   }
   const handleSignup = async () => {
@@ -187,31 +211,27 @@ export default function App(){
     setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:txt, created_at:new Date().toISOString()}])
     const { error } = await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:txt}])
     if(error) alert('Failed: '+error.message)
-    else fetchMessages(chatWith.user_id)
+    else { fetchMessages(chatWith.user_id); fetchConversations() }
   }
-  // FIXED: Gallery now saves viewable URL
   const handleGallerySend = async (e) => {
     const file=e.target.files[0]; if(!file ||!chatWith) return
     const reader=new FileReader()
     reader.onload=async (ev)=>{
       const base64 = ev.target.result
-      // Show instantly
       setMessages(m=>[...m,{id:Date.now(), from_user:user.id, text:'📷 Photo', image_url:base64, created_at:new Date().toISOString()}])
       try{
-        // Try upload to storage for permanent URL
         const fileName = `${user.id}_${Date.now()}_${file.name}`
         const { error: upErr } = await supabase.storage.from('chat-media').upload(fileName, file)
         if(!upErr){
           const { data } = supabase.storage.from('chat-media').getPublicUrl(fileName)
           await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'📷 Photo', image_url:data.publicUrl}])
         }else{
-          // Fallback save base64 (small compressed)
           await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'📷 Photo', image_url:base64}])
         }
       }catch{
         await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'📷 Photo', image_url:base64}])
       }
-      fetchMessages(chatWith.user_id)
+      fetchMessages(chatWith.user_id); fetchConversations()
     }
     reader.readAsDataURL(file)
   }
@@ -239,7 +259,6 @@ export default function App(){
     if(!chatWith) return
     alert(`📞 Calling ${chatWith.name}...`)
   }
-  // FIXED: Recording now saves playable audio_url
   const startRecording = async () => {
     try{
       const stream = await navigator.mediaDevices.getUserMedia({audio:true})
@@ -258,16 +277,14 @@ export default function App(){
             const { data } = supabase.storage.from('chat-media').getPublicUrl(fileName)
             await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'🎤 Voice message', audio_url:data.publicUrl}])
           }else{
-            const reader = new FileReader()
-            reader.onload = async (ev)=>{
-              await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'🎤 Voice message', audio_url:ev.target.result}])
-            }
-            reader.readAsDataURL(blob)
+            const r = new FileReader()
+            r.onload = async (ev)=>{ await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'🎤 Voice message', audio_url:ev.target.result}]) }
+            r.readAsDataURL(blob)
           }
         }catch{
-          await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'🎤 Voice message', audio_url:localUrl}])
+          await supabase.from('messages').insert([{from_user:user.id,to_user:chatWith.user_id,text:'🎤 Voice message'}])
         }
-        fetchMessages(chatWith.user_id)
+        fetchMessages(chatWith.user_id); fetchConversations()
         stream.getTracks().forEach(t=>t.stop())
       }
       mr.start(); setIsRecording(true)
@@ -334,12 +351,31 @@ export default function App(){
               <button onClick={handleClearAllNotifs} className="text-[9px] bg-zinc-800 px-3 py-1 rounded-full border border-red-500/30 text-red-400">Clear All</button>
             </div>
           </div>
-          <p className="text-[10px] text-green-400">● Live auto-refresh 2s • Delivered ✓ Seen ✓✓ • Unseen • Online</p>
+          <p className="text-[10px] text-green-400">● Auto receiver ON - You will now get messages</p>
+          <div className="mt-4 bg-black border border-[#FFC300]/30 rounded-2xl p-3">
+            <h3 className="font-black text-xs">💬 Recent Chats - Tap to open (FIXES RECEIVING)</h3>
+            {conversations.length===0 && <p className="text-[10px] text-white/30 mt-2">No chats yet. Wait for someone to message you, it will appear here.</p>}
+            <div className="mt-2 space-y-2 max-h-48 overflow-y-auto">
+              {conversations.map(c=>{
+                const postData = posts.find(p=>p.user_id===c.user_id)
+                return (
+                  <div key={c.user_id} onClick={async()=>{
+                    const p = postData || {user_id:c.user_id, name:c.user_id.slice(0,6), image_url:WORLD[0].img}
+                    setChatWith(p); await fetchMessages(c.user_id)
+                  }} className="bg-zinc-900 rounded-xl p-2 flex justify-between items-center cursor-pointer border border-white/10">
+                    <div className="flex gap-2 items-center"><img src={postData?.image_url || WORLD[0].img} className="w-8 h-8 rounded-full"/><div><p className="text-xs font-bold">{postData?.name || c.user_id.slice(0,6)}</p><p className="text-[9px] text-white/50 truncate w-32">{c.lastMsg}</p></div></div>
+                    <p className="text-[8px] text-white/40">{new Date(c.time).toLocaleTimeString()}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
           <div className="mt-3 space-y-2">
+            <h3 className="font-bold text-[11px] text-white/60">🔔 Notifications</h3>
             {notifications.length===0 && <p className="text-[11px] text-white/40">No notifications.</p>}
             {notifications.map(n=>(
               <div key={n.id} className="bg-zinc-900 rounded-xl p-3 flex justify-between items-center border border-white/10">
-                <div><p className="text-xs font-bold">🔔 {n.from_name} {n.type==='like' && '❤️'}</p><p className="text-[9px] text-white/50">{n.type} • {new Date(n.created_at).toLocaleTimeString()} • Unseen</p></div>
+                <div><p className="text-xs font-bold">🔔 {n.from_name} {n.type==='like' && '❤️'}</p><p className="text-[9px] text-white/50">{n.type} • {new Date(n.created_at).toLocaleTimeString()}</p></div>
                 <div className="flex gap-1">
                   <button onClick={async()=>{
                     const post=posts.find(pp=>pp.id===n.post_id)
@@ -354,49 +390,23 @@ export default function App(){
           {chatWith && (
             <div className="mt-6 bg-black border border-[#FFC300]/30 rounded-2xl p-3">
               <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <img src={chatWith.image_url||WORLD[0].img} className="w-8 h-8 rounded-full"/>
-                  <div><p className="font-black text-xs">{chatWith.name}</p><p className="text-[8px] text-green-400">● Online Now • Typing...</p></div>
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={handleAudioCall} className="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center text-xs">📞</button>
-                  <button onClick={handleVideoCall} className="w-8 h-8 bg-[#FFC300] text-black rounded-full flex items-center justify-center text-xs">📹</button>
-                  <button onClick={handleDeleteChat} className="w-8 h-8 bg-red-900/50 border border-red-500/30 rounded-full flex items-center justify-center text-xs">🗑️</button>
-                </div>
+                <div className="flex items-center gap-2"><img src={chatWith.image_url||WORLD[0].img} className="w-8 h-8 rounded-full"/><div><p className="font-black text-xs">{chatWith.name}</p><p className="text-[8px] text-green-400">● Online Now</p></div></div>
+                <div className="flex gap-2"><button onClick={handleAudioCall} className="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center text-xs">📞</button><button onClick={handleVideoCall} className="w-8 h-8 bg-[#FFC300] text-black rounded-full flex items-center justify-center text-xs">📹</button><button onClick={handleDeleteChat} className="w-8 h-8 bg-red-900/50 border border-red-500/30 rounded-full flex items-center justify-center text-xs">🗑️</button></div>
               </div>
               <div className="mt-3 h-80 overflow-y-auto space-y-2 bg-zinc-900 rounded-xl p-2">
                 {messages.length===0 && <p className="text-[10px] text-white/30 text-center mt-10">No messages yet. Say hi 👋</p>}
                 {messages.map(m=>(
-                  <div key={m.id} className={`text-xs p-2.5 rounded-2xl max-w-[80%] ${m.from_user===user?.id?'bg-[#FFC300] text-black ml-auto':'bg-zinc-800 text-white'}`}>
-                    {/* FIXED: Now shows real photo */}
-                    {(m.image_url || m.image) && (
-                      <img src={m.image_url || m.image} onClick={()=>window.open(m.image_url || m.image,'_blank')} className="w-full h-40 object-cover rounded-lg mb-2 cursor-pointer border border-white/20"/>
-                    )}
-                    {/* FIXED: Now shows playable audio */}
-                    {(m.audio_url || m.audio) && (
-                      <audio src={m.audio_url || m.audio} controls className="w-full mb-2 rounded-lg" style={{height:'40px'}}/>
-                    )}
+                  <div key={m.id} className={`text-xs p-2.5 rounded-2xl max-w-[85%] ${m.from_user===user?.id?'bg-[#FFC300] text-black ml-auto':'bg-zinc-800 text-white mr-auto border border-green-500/30'}`}>
+                    {m.image_url && <img src={m.image_url} onClick={()=>window.open(m.image_url,'_blank')} className="w-full h-44 object-cover rounded-lg mb-2 cursor-pointer"/>}
+                    {m.audio_url && <audio src={m.audio_url} controls className="w-full mb-2" style={{height:'38px'}}/>}
                     <span>{m.text}</span>
-                    <span className="block text-[8px] opacity-60 mt-1">
-                      {m.from_user===user?.id? '✓✓ Seen • '+new Date(m.created_at).toLocaleTimeString() : 'Unseen • '+new Date(m.created_at).toLocaleTimeString()}
-                    </span>
+                    <span className="block text-[8px] opacity-60 mt-1">{m.from_user===user?.id?'✓✓ Sent • '+new Date(m.created_at).toLocaleTimeString():'● Received • '+new Date(m.created_at).toLocaleTimeString()}</span>
                   </div>
                 ))}
               </div>
-              {showEmoji && (
-                <div className="mt-2 bg-zinc-800 rounded-xl p-2 flex flex-wrap gap-2">
-                  {EMOJIS.map(e=><button key={e} onClick={()=>setNewMsg(newMsg+e)} className="text-[18px] hover:bg-zinc-700 rounded p-1">{e}</button>)}
-                </div>
-              )}
-              <div className="flex gap-2 mt-3 items-center">
-                <button onClick={()=>setShowEmoji(!showEmoji)} className="w-9 h-9 bg-zinc-800 rounded-full flex items-center justify-center text-[16px]">😊</button>
-                <button onClick={()=>fileInputRef.current?.click()} className="w-9 h-9 bg-zinc-800 rounded-full flex items-center justify-center text-[14px]">🖼️</button>
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleGallerySend} className="hidden"/>
-                <input value={newMsg} onChange={e=>setNewMsg(e.target.value)} onKeyDown={e=>{if(e.key==='Enter') handleSendMsg()}} placeholder="Aa - Type message..." className="flex-1 bg-zinc-800 rounded-full px-4 py-3 text-xs" />
-                <button onClick={isRecording?stopRecording:startRecording} className={`w-9 h-9 rounded-full flex items-center justify-center text-[14px] ${isRecording?'bg-red-600 animate-pulse':'bg-zinc-800'}`}>🎤</button>
-                <button onClick={handleSendMsg} className="bg-[#FFC300] text-black px-4 py-3 rounded-full text-xs font-black">Send</button>
-              </div>
-              {isRecording && <p className="text-[9px] text-red-400 mt-1">● Recording... Tap mic to stop (max 15s)</p>}
+              {showEmoji && (<div className="mt-2 bg-zinc-800 rounded-xl p-2 flex flex-wrap gap-2">{EMOJIS.map(e=><button key={e} onClick={()=>setNewMsg(newMsg+e)} className="text-[18px] hover:bg-zinc-700 rounded p-1">{e}</button>)}</div>)}
+              <div className="flex gap-2 mt-3 items-center"><button onClick={()=>setShowEmoji(!showEmoji)} className="w-9 h-9 bg-zinc-800 rounded-full flex items-center justify-center text-[16px]">😊</button><button onClick={()=>fileInputRef.current?.click()} className="w-9 h-9 bg-zinc-800 rounded-full flex items-center justify-center text-[14px]">🖼️</button><input ref={fileInputRef} type="file" accept="image/*" onChange={handleGallerySend} className="hidden"/><input value={newMsg} onChange={e=>setNewMsg(e.target.value)} onKeyDown={e=>{if(e.key==='Enter') handleSendMsg()}} placeholder="Aa - Type message..." className="flex-1 bg-zinc-800 rounded-full px-4 py-3 text-xs" /><button onClick={isRecording?stopRecording:startRecording} className={`w-9 h-9 rounded-full flex items-center justify-center text-[14px] ${isRecording?'bg-red-600 animate-pulse':'bg-zinc-800'}`}>🎤</button><button onClick={handleSendMsg} className="bg-[#FFC300] text-black px-4 py-3 rounded-full text-xs font-black">Send</button></div>
+              {isRecording && <p className="text-[9px] text-red-400 mt-1">● Recording... Tap to stop (max 15s)</p>}
             </div>
           )}
         </div>
@@ -408,53 +418,22 @@ export default function App(){
           <p className="text-[10px] text-white/60">{user?.email} • {isPremium?'PREMIUM ✓':'Free'} • {form.city}, {form.country} • Online Now • 2km away</p>
           <div className="bg-zinc-900 rounded-[24px] p-5 border border-[#FFC300]/20">
             <h3 className="font-black text-xs text-[#FFC300]">📸 Profile Photo (main + 5 extra photos)</h3>
-            <div className="mt-3">
-              <p className="text-[10px] mb-1">Main Photo - Add pic</p>
-              <div className="w-full h-64 bg-black rounded-[20px] overflow-hidden border border-white/10 relative">
-                {form.photos[0]? <img src={form.photos[0]} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center text-[11px] text-white/30">Add pic</div>}
-                <label className="absolute bottom-2 right-2 bg-[#FFC300] text-black px-3 py-1.5 rounded-full text-[10px] font-black cursor-pointer">Add pic<input type="file" accept="image/*" onChange={handleMainPhoto} className="hidden"/></label>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-2 mt-3">
-              {[1,2,3,4,5].map(idx=>(
-                <div key={idx} className="h-24 bg-black rounded-xl overflow-hidden border border-white/10 relative">
-                  {form.photos[idx]? <img src={form.photos[idx]} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center text-[20px] text-white/20">+</div>}
-                  <label className="absolute inset-0 cursor-pointer"><input type="file" accept="image/*" onChange={(e)=>handleExtraPhoto(idx,e)} className="hidden"/></label>
-                </div>
-              ))}
-            </div>
+            <div className="mt-3"><p className="text-[10px] mb-1">Main Photo - Add pic</p><div className="w-full h-64 bg-black rounded-[20px] overflow-hidden border border-white/10 relative">{form.photos[0]? <img src={form.photos[0]} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center text-[11px] text-white/30">Add pic</div>}<label className="absolute bottom-2 right-2 bg-[#FFC300] text-black px-3 py-1.5 rounded-full text-[10px] font-black cursor-pointer">Add pic<input type="file" accept="image/*" onChange={handleMainPhoto} className="hidden"/></label></div></div>
+            <div className="grid grid-cols-3 gap-2 mt-3">{[1,2,3,4,5].map(idx=>(<div key={idx} className="h-24 bg-black rounded-xl overflow-hidden border border-white/10 relative">{form.photos[idx]? <img src={form.photos[idx]} className="w-full h-full object-cover"/> : <div className="w-full h-full flex items-center justify-center text-[20px] text-white/20">+</div>}<label className="absolute inset-0 cursor-pointer"><input type="file" accept="image/*" onChange={(e)=>handleExtraPhoto(idx,e)} className="hidden"/></label></div>))}</div>
           </div>
           <div className="bg-zinc-900 rounded-[24px] p-5 space-y-3 border border-white/10">
             <h3 className="font-black text-xs text-[#FFC300]">👤 Full Info</h3>
             <div><p className="text-[10px] text-white/50 mb-1">Full Name</p><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full Name" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
-            <div className="flex gap-2">
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Age / DOB</p><input value={form.age} onChange={e=>setForm({...form,age:e.target.value})} placeholder="Age 22" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">DOB</p><input value={form.dob} onChange={e=>setForm({...form,dob:e.target.value})} type="date" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
-            </div>
-            <div className="flex gap-2">
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Gender</p><select value={form.gender} onChange={e=>setForm({...form,gender:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Female</option><option>Male</option><option>Other</option></select></div>
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">What are you looking for?</p><select value={form.lookingFor} onChange={e=>setForm({...form,lookingFor:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Love</option><option>Friends</option><option>Casual</option><option>Marriage</option></select></div>
-            </div>
-            <div className="flex gap-2">
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Location - City</p><input value={form.city} onChange={e=>setForm({...form,city:e.target.value})} placeholder="Paris" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Country</p><input value={form.country} onChange={e=>setForm({...form,country:e.target.value})} placeholder="France" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
-            </div>
-            <div className="flex gap-2">
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Status</p><select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Single</option><option>Divorced</option><option>Widowed</option></select></div>
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Height</p><input value={form.height} onChange={e=>setForm({...form,height:e.target.value})} placeholder="165cm" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
-            </div>
+            <div className="flex gap-2"><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Age / DOB</p><input value={form.age} onChange={e=>setForm({...form,age:e.target.value})} placeholder="Age 22" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">DOB</p><input value={form.dob} onChange={e=>setForm({...form,dob:e.target.value})} type="date" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div></div>
+            <div className="flex gap-2"><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Gender</p><select value={form.gender} onChange={e=>setForm({...form,gender:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Female</option><option>Male</option><option>Other</option></select></div><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">What are you looking for?</p><select value={form.lookingFor} onChange={e=>setForm({...form,lookingFor:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Love</option><option>Friends</option><option>Casual</option><option>Marriage</option></select></div></div>
+            <div className="flex gap-2"><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Location - City</p><input value={form.city} onChange={e=>setForm({...form,city:e.target.value})} placeholder="Paris" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Country</p><input value={form.country} onChange={e=>setForm({...form,country:e.target.value})} placeholder="France" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div></div>
+            <div className="flex gap-2"><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Status</p><select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Single</option><option>Divorced</option><option>Widowed</option></select></div><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Height</p><input value={form.height} onChange={e=>setForm({...form,height:e.target.value})} placeholder="165cm" className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div></div>
           </div>
           <div className="bg-zinc-900 rounded-[24px] p-5 space-y-3 border border-white/10">
             <h3 className="font-black text-xs text-[#FFC300]">Details</h3>
             <div><p className="text-[10px] text-white/50 mb-1">Body Type</p><select value={form.bodyType} onChange={e=>setForm({...form,bodyType:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option value="">Select</option><option>Slim</option><option>Average</option><option>Athletic</option><option>Curvy</option><option>Plus Size</option></select></div>
-            <div className="flex gap-2">
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Religion</p><select value={form.religion} onChange={e=>setForm({...form,religion:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Christian</option><option>Muslim</option><option>Catholic</option><option>Other</option></select></div>
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Smoking / Drinking</p><select value={form.smoking} onChange={e=>setForm({...form,smoking:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>No</option><option>Yes</option><option>Sometimes</option></select></div>
-            </div>
-            <div className="flex gap-2">
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Have Kids?</p><select value={form.haveKids} onChange={e=>setForm({...form,haveKids:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>No</option><option>Yes</option></select></div>
-              <div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Want Kids?</p><select value={form.wantKids} onChange={e=>setForm({...form,wantKids:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Yes</option><option>No</option><option>Maybe</option></select></div>
-            </div>
+            <div className="flex gap-2"><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Religion</p><select value={form.religion} onChange={e=>setForm({...form,religion:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Christian</option><option>Muslim</option><option>Catholic</option><option>Other</option></select></div><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Smoking / Drinking</p><select value={form.smoking} onChange={e=>setForm({...form,smoking:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>No</option><option>Yes</option><option>Sometimes</option></select></div></div>
+            <div className="flex gap-2"><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Have Kids?</p><select value={form.haveKids} onChange={e=>setForm({...form,haveKids:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>No</option><option>Yes</option></select></div><div className="w-1/2"><p className="text-[10px] text-white/50 mb-1">Want Kids?</p><select value={form.wantKids} onChange={e=>setForm({...form,wantKids:e.target.value})} className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"><option>Yes</option><option>No</option><option>Maybe</option></select></div></div>
           </div>
           <div className="bg-zinc-900 rounded-[24px] p-5 space-y-3 border border-white/10">
             <h3 className="font-black text-xs text-[#FFC300]">💬 Prompts</h3>
@@ -464,14 +443,7 @@ export default function App(){
             <div><p className="text-[10px] text-white/50 mb-1">I'm looking for...</p><input value={form.lookingDesc} onChange={e=>setForm({...form,lookingDesc:e.target.value})} placeholder="I'm looking for..." className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
             <div><p className="text-[10px] text-white/50 mb-1">Fun fact about me...</p><input value={form.funFact} onChange={e=>setForm({...form,funFact:e.target.value})} placeholder="Fun fact about me..." className="w-full bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/></div>
           </div>
-          <div className="bg-black border border-[#FFC300]/20 rounded-[24px] p-5 space-y-3">
-            <h3 className="font-black text-xs">🎯 Chips: Select 5-8 interests</h3>
-            <p className="text-[9px] text-white/40">{form.interests.length}/8 selected</p>
-            <div className="flex flex-wrap gap-2">
-              {INTERESTS.map(chip=>(
-                <button key={chip} onClick={()=>toggleInterest(chip)} className={`px-3 py-1.5 rounded-full text-[10px] font-bold border ${form.interests.includes(chip)?'bg-[#FFC300] text-black border-[#FFC300]':'bg-zinc-800 text-white/70 border-white/10'}`}>{chip}</button> ))}
-            </div>
-          </div>
+          <div className="bg-black border border-[#FFC300]/20 rounded-[24px] p-5 space-y-3"><h3 className="font-black text-xs">🎯 Chips: Select 5-8 interests</h3><p className="text-[9px] text-white/40">{form.interests.length}/8 selected</p><div className="flex flex-wrap gap-2">{INTERESTS.map(chip=>(<button key={chip} onClick={()=>toggleInterest(chip)} className={`px-3 py-1.5 rounded-full text-[10px] font-bold border ${form.interests.includes(chip)?'bg-[#FFC300] text-black border-[#FFC300]':'bg-zinc-800 text-white/70 border-white/10'}`}>{chip}</button>))}</div></div>
           <div className="bg-zinc-900 rounded-[24px] p-5 space-y-3 border border-white/10">
             <h3 className="font-black text-xs text-[#FFC300]">✅ Verify + Safety</h3>
             <div><p className="text-[10px] text-white/50 mb-1">Verify with Phone Number (OTP)</p><div className="flex gap-2"><input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="+1 234..." className="flex-1 bg-black border border-white/20 rounded-full px-4 py-3 text-xs"/><button onClick={()=>{ if(!form.phone) alert('Enter phone'); else { alert('OTP sent to '+form.phone); setForm(f=>({...f, verified:true})) } }} className="bg-green-500 text-black px-4 py-2 rounded-full text-[10px] font-black">Verify OTP</button></div>{form.verified && <p className="text-[9px] text-green-400 mt-1">✓ Phone Verified</p>}</div>
@@ -479,18 +451,8 @@ export default function App(){
             <div className="bg-black rounded-xl p-3 flex justify-between items-center"><div><p className="text-[11px] font-bold">Last Active / Online Now</p><p className="text-[9px] text-green-400">● Online Now • Distance Away: 2km away • {form.city}</p></div><div>✓</div></div>
             <div className="flex gap-2"><button className="flex-1 bg-zinc-800 border border-red-500/30 text-red-400 py-2 rounded-full text-[10px]">🚩 Report</button><button className="flex-1 bg-zinc-800 border border-white/10 py-2 rounded-full text-[10px]">🚫 Block</button></div>
           </div>
-          <button onClick={async()=>{
-            if(!user) return
-            localStorage.setItem('kla_profile_'+user.id, JSON.stringify(form))
-            try{ await supabase.from('profiles').update({name:form.name, bio:form.bio, interests:form.interests.join(','), gender:form.gender, age:form.age}).eq('id',user.id) }catch{}
-            alert('Profile saved ✓')
-          }} className="w-full bg-[#FFC300] text-black rounded-full py-4 font-black text-sm">Save Full Profile ✓</button>
-          <div className="grid grid-cols-4 gap-2">
-            <button className="bg-zinc-900 border border-white/10 rounded-2xl py-3 text-[11px]">❤️<br/><span className="text-[8px]">Like</span></button>
-            <button className="bg-[#FFC300] text-black rounded-2xl py-3 text-[11px] font-black">⭐<br/><span className="text-[8px]">Super Like</span></button>
-            <button onClick={()=>setTab('chat')} className="bg-white text-black rounded-2xl py-3 text-[11px] font-black">💬<br/><span className="text-[8px]">Message</span></button>
-            <button onClick={()=>setTab('premium')} className="bg-zinc-800 border border-[#FFC300]/30 rounded-2xl py-3 text-[11px]">🎁<br/><span className="text-[8px]">Gift</span></button>
-          </div>
+          <button onClick={async()=>{ if(!user) return; localStorage.setItem('kla_profile_'+user.id, JSON.stringify(form)); try{ await supabase.from('profiles').update({name:form.name, bio:form.bio, interests:form.interests.join(','), gender:form.gender, age:form.age}).eq('id',user.id) }catch{}; alert('Profile saved ✓') }} className="w-full bg-[#FFC300] text-black rounded-full py-4 font-black text-sm">Save Full Profile ✓</button>
+          <div className="grid grid-cols-4 gap-2"><button className="bg-zinc-900 border border-white/10 rounded-2xl py-3 text-[11px]">❤️<br/><span className="text-[8px]">Like</span></button><button className="bg-[#FFC300] text-black rounded-2xl py-3 text-[11px] font-black">⭐<br/><span className="text-[8px]">Super Like</span></button><button onClick={()=>setTab('chat')} className="bg-white text-black rounded-2xl py-3 text-[11px] font-black">💬<br/><span className="text-[8px]">Message</span></button><button onClick={()=>setTab('premium')} className="bg-zinc-800 border border-[#FFC300]/30 rounded-2xl py-3 text-[11px]">🎁<br/><span className="text-[8px]">Gift</span></button></div>
           <button onClick={async()=>{await supabase.auth.signOut(); localStorage.clear(); location.reload()}} className="w-full bg-zinc-900 border border-red-500/30 text-red-400 px-4 py-3 rounded-full text-xs font-bold">Logout</button>
         </div>
       )}
@@ -498,72 +460,14 @@ export default function App(){
         <div className="max-w-md mx-auto p-4 space-y-4">
           <h2 className="font-black">Premium Packages - International</h2>
           {isAdmin && <div className="bg-green-500 text-black rounded-xl p-3 text-xs font-black">Admin Access - Free</div>}
-          <div className="grid grid-cols-2 gap-3">
-            {PACKAGES.map(pkg=>(
-              <div key={pkg.id} className="bg-zinc-900 rounded-[20px] p-4 border border-white/10">
-                <p className="text-[11px] font-black">{pkg.months}</p>
-                <p className="text-[20px] font-black text-[#FFC300]">{pkg.label}</p>
-                {pkg.save && <p className="text-[9px] bg-[#FFC300] text-black rounded-full px-2 py-0.5 inline-block mt-1 font-bold">{pkg.save}</p>}
-                <button onClick={openCrypto} className="mt-3 w-full bg-white text-black rounded-full py-2 font-bold text-[10px]">Crypto {pkg.label}</button>
-                <button onClick={openPesapal} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Card {pkg.label}</button>
-              </div>
-            ))}
-          </div>
-          <div className="bg-white rounded-[20px] p-4 border-2 border-[#FFC300]">
-            <p className="font-black text-[13px] text-black">💳 Pay with Pesapal</p>
-            <p className="text-[10px] text-zinc-500 mb-3">Official checkout - Mobile Money, Visa, Mastercard</p>
-            <iframe width="100%" height="60" src="https://store.pesapal.com/embed-code?pageUrl=https://store.pesapal.com/klameet" frameBorder="0" allowFullScreen style={{borderRadius:'12px', background:'white'}}></iframe>
-            <p className="text-[9px] text-zinc-400 mt-2 text-center">Secure checkout by Pesapal - store.pesapal.com/klameet</p>
-          </div>
+          <div className="grid grid-cols-2 gap-3">{PACKAGES.map(pkg=>(<div key={pkg.id} className="bg-zinc-900 rounded-[20px] p-4 border border-white/10"><p className="text-[11px] font-black">{pkg.months}</p><p className="text-[20px] font-black text-[#FFC300]">{pkg.label}</p>{pkg.save && <p className="text-[9px] bg-[#FFC300] text-black rounded-full px-2 py-0.5 inline-block mt-1 font-bold">{pkg.save}</p>}<button onClick={openCrypto} className="mt-3 w-full bg-white text-black rounded-full py-2 font-bold text-[10px]">Crypto {pkg.label}</button><button onClick={openPesapal} className="mt-2 w-full bg-[#FF6A00] text-white rounded-full py-2 font-bold text-[10px]">Card {pkg.label}</button></div>))}</div>
+          <div className="bg-white rounded-[20px] p-4 border-2 border-[#FFC300]"><p className="font-black text-[13px] text-black">💳 Pay with Pesapal</p><p className="text-[10px] text-zinc-500 mb-3">Official checkout - Mobile Money, Visa, Mastercard</p><iframe width="100%" height="60" src="https://store.pesapal.com/embed-code?pageUrl=https://store.pesapal.com/klameet" frameBorder="0" allowFullScreen style={{borderRadius:'12px', background:'white'}}></iframe><p className="text-[9px] text-zinc-400 mt-2 text-center">Secure checkout by Pesapal - store.pesapal.com/klameet</p></div>
         </div>
       )}
       {tab==='admin' && <div className="max-w-md mx-auto p-3"><h2 className="font-black">Admin Panel</h2><p className="text-[9px] text-green-400">Logged: {user?.email} {isAdmin?'Authorized':'X'}</p><div className="mt-3 flex gap-2"><button onClick={()=>setAdminTab('posts')} className={`px-4 py-2 rounded-full text-[11px] font-black ${adminTab==='posts'?'bg-[#FFC300] text-black':'bg-zinc-800'}`}>Posts {posts.length}</button><button onClick={()=>setAdminTab('users')} className={`px-4 py-2 rounded-full text-[11px] font-black ${adminTab==='users'?'bg-[#FFC300] text-black':'bg-zinc-800'}`}>Users {allProfiles.length}</button><button onClick={()=>setAdminTab('banned')} className={`px-4 py-2 rounded-full text-[11px] font-black ${adminTab==='banned'?'bg-red-600':'bg-zinc-800'}`}>Banned {banned.length}</button></div><input value={adminSearch} onChange={e=>setAdminSearch(e.target.value)} placeholder="Search" className="mt-3 w-full bg-zinc-900 border border-white/10 rounded-full px-4 py-2 text-xs" />{adminTab==='posts' && <div className="mt-4 space-y-3">{posts.map(p=>(<div key={p.id} className="bg-zinc-900 rounded-[16px] flex overflow-hidden"><img src={p.image_url} className="w-24 h-24 object-cover"/><div className="p-2 flex-1"><p className="text-[11px] font-bold">{p.name} • {p.city}</p><div className="flex gap-1 mt-2"><button onClick={()=>adminDeletePost(p.id)} className="bg-red-600 px-2 py-1 rounded-full text-[9px]">Delete</button><button onClick={()=>adminBanUser(p)} className="bg-black border border-red-500 px-2 py-1 rounded-full text-[9px]">Ban</button></div></div></div>))}</div>}{adminTab==='users' && <div className="mt-4 space-y-2">{allProfiles.map(p=>(<div key={p.id} className="bg-zinc-900 rounded-xl p-3"><p className="text-xs font-bold">{p.name} • {p.email}</p><div className="flex gap-1 mt-2"><button onClick={()=>adminWarnUser(p)} className="bg-yellow-600 px-3 py-1 rounded-full text-[9px]">Warn</button><button onClick={()=>adminBanUser(p)} className="bg-red-600 px-3 py-1 rounded-full text-[9px]">Ban</button></div></div>))}</div>}{adminTab==='banned' && <div className="mt-4 space-y-2">{banned.map(b=>(<div key={b.id} className="bg-red-900/20 border border-red-500/30 rounded-xl p-3"><p className="text-xs">{b.email} • {b.reason}</p><button onClick={()=>adminUnban(b.id)} className="mt-2 bg-white text-black px-3 py-1 rounded-full text-[9px]">Unban</button></div>))}</div>}</div>}
-      {selectedPost && (
-        <div className="fixed inset-0 bg-black/90 p-4 flex items-center justify-center z-[200] overflow-y-auto">
-          <div className="bg-zinc-900 rounded-[24px] overflow-hidden w-full max-w-sm border border-[#FFC300]/30">
-            <img src={selectedPost.image_url} className="h-80 w-full object-cover" />
-            <div className="p-4">
-              <h3 className="font-black">{selectedPost.name} • {selectedPost.age}</h3>
-              <p className="text-[11px] text-white/60">📍 {selectedPost.city} • 2km away • Online Now • {isOnline?'● Online':'○ Offline'}</p>
-              <p className="text-xs mt-2">{selectedPost.bio}</p>
-              <div className="grid grid-cols-4 gap-2 mt-4">
-                <button onClick={()=>handleLike(selectedPost)} className="bg-zinc-800 rounded-full py-3 text-xs">❤️ Like</button>
-                <button className="bg-[#FFC300] text-black rounded-full py-3 text-xs font-black">⭐</button>
-                <button onClick={()=>{setChatWith(selectedPost); setSelectedPost(null); setTab('chat'); fetchMessages(selectedPost.user_id)}} className="bg-white text-black rounded-full py-3 text-xs font-black">💬 Message</button>
-                <button className="bg-zinc-800 rounded-full py-3 text-xs">🎁 Gift</button>
-              </div>
-              <button className="mt-2 w-full bg-black border border-red-500/30 text-red-400 rounded-full py-2 text-[10px]">🚩 Report & Block</button>
-              {isAdmin && <div className="flex gap-2 mt-2"><button onClick={()=>adminDeletePost(selectedPost.id)} className="flex-1 bg-red-600 rounded-full py-2 text-[10px]">Delete</button><button onClick={()=>adminBanUser(selectedPost)} className="flex-1 bg-black border border-red-500 rounded-full py-2 text-[10px]">Ban</button></div>}
-              <button onClick={()=>setSelectedPost(null)} className="mt-3 w-full bg-zinc-800 rounded-full py-2 text-xs">Close</button>
-            </div>
-          </div>
-        </div>
-      )}
-      {showPostModal && (
-        <div className="fixed inset-0 bg-black/95 p-0 flex items-end justify-center z-[100]">
-          <div className="bg-zinc-900 rounded-t-[32px] p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center"><h3 className="font-black text-sm">Create Post</h3><button onClick={()=>setShowPostModal(false)} className="bg-zinc-800 w-8 h-8 rounded-full">✕</button></div>
-            <div className="flex gap-2 mt-4">
-              <button onClick={()=>setPostForm({...postForm,type:'dating'})} className={`flex-1 rounded-full py-3 text-xs font-black ${postForm.type==='dating'?'bg-[#FFC300] text-black':'bg-zinc-800'}`}>❤️ Dating</button>
-              <button onClick={()=>setPostForm({...postForm,type:'friends'})} className={`flex-1 rounded-full py-3 text-xs font-black ${postForm.type==='friends'?'bg-white text-black':'bg-zinc-800'}`}>🤝 Friends</button>
-            </div>
-            <div className="mt-4">
-              <input type="file" accept="image/*" onChange={handleMainPhoto} className="mt-2 w-full text-xs file:bg-white file:text-black file:rounded-full file:px-4 file:py-2" />
-              {(postForm.preview || form.photos[0]) && <img src={postForm.preview || form.photos[0]} className="mt-3 w-full h-64 object-cover rounded-[20px]" />}
-            </div>
-            <textarea value={postForm.bio} onChange={e=>setPostForm({...postForm,bio:e.target.value})} placeholder="Bio" className="mt-4 w-full bg-black border border-white/20 rounded-2xl px-4 py-3 text-xs h-20" />
-            <div className="mt-3 bg-black rounded-2xl p-4 border border-white/10 flex justify-between items-center"><p className="text-xs font-bold">📍 {postForm.city || form.city+', '+form.country}</p><button onClick={getLocation} className="bg-[#FFC300] text-black px-5 py-2.5 rounded-full text-[11px] font-black">Location</button></div>
-            <button onClick={handleCreatePost} disabled={posting} className="mt-5 w-full bg-[#FFC300] text-black rounded-full py-4 font-black text-[15px]">{posting?'Posting...':'Post Now'}</button>
-          </div>
-        </div>
-      )}
-      <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 flex justify-around items-center py-2">
-        <button onClick={()=>handleTab('discover')} className="text-[11px]">♡<br/><span className="text-[8px]">Discover</span></button>
-        <button onClick={()=>handleTab('nearby')} className="text-[11px]">◎<br/><span className="text-[8px]">Near You</span></button>
-        <button onClick={()=>setShowPostModal(true)} className="bg-[#FFC300] text-black w-14 h-14 rounded-full flex items-center justify-center font-black text-2xl -mt-5 border-4 border-black">+</button>
-        <button onClick={()=>handleTab('chat')} className="text-[11px] relative">💬<br/><span className="text-[8px]">Chat</span>{notifications.length>0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[7px] w-3 h-3 rounded-full flex items-center justify-center">{notifications.length}</span>}</button>
-        {isAdmin? <button onClick={()=>handleTab('admin')} className="text-[11px] text-[#FFC300] font-black">★<br/><span className="text-[8px]">Admin</span></button> : <button onClick={()=>handleTab('premium')} className="text-[11px]">★<br/><span className="text-[8px]">Premium</span></button>}
-      </nav>
+      {selectedPost && (<div className="fixed inset-0 bg-black/90 p-4 flex items-center justify-center z-[200] overflow-y-auto"><div className="bg-zinc-900 rounded-[24px] overflow-hidden w-full max-w-sm border border-[#FFC300]/30"><img src={selectedPost.image_url} className="h-80 w-full object-cover" /><div className="p-4"><h3 className="font-black">{selectedPost.name} • {selectedPost.age}</h3><p className="text-[11px] text-white/60">📍 {selectedPost.city} • 2km away • Online Now • {isOnline?'● Online':'○ Offline'}</p><p className="text-xs mt-2">{selectedPost.bio}</p><div className="grid grid-cols-4 gap-2 mt-4"><button onClick={()=>handleLike(selectedPost)} className="bg-zinc-800 rounded-full py-3 text-xs">❤️ Like</button><button className="bg-[#FFC300] text-black rounded-full py-3 text-xs font-black">⭐</button><button onClick={()=>{setChatWith(selectedPost); setSelectedPost(null); setTab('chat'); fetchMessages(selectedPost.user_id)}} className="bg-white text-black rounded-full py-3 text-xs font-black">💬 Message</button><button className="bg-zinc-800 rounded-full py-3 text-xs">🎁 Gift</button></div><button className="mt-2 w-full bg-black border border-red-500/30 text-red-400 rounded-full py-2 text-[10px]">🚩 Report & Block</button>{isAdmin && <div className="flex gap-2 mt-2"><button onClick={()=>adminDeletePost(selectedPost.id)} className="flex-1 bg-red-600 rounded-full py-2 text-[10px]">Delete</button><button onClick={()=>adminBanUser(selectedPost)} className="flex-1 bg-black border border-red-500 rounded-full py-2 text-[10px]">Ban</button></div>}<button onClick={()=>setSelectedPost(null)} className="mt-3 w-full bg-zinc-800 rounded-full py-2 text-xs">Close</button></div></div></div>)}
+      {showPostModal && (<div className="fixed inset-0 bg-black/95 p-0 flex items-end justify-center z-[100]"><div className="bg-zinc-900 rounded-t-[32px] p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"><div className="flex justify-between items-center"><h3 className="font-black text-sm">Create Post</h3><button onClick={()=>setShowPostModal(false)} className="bg-zinc-800 w-8 h-8 rounded-full">✕</button></div><div className="flex gap-2 mt-4"><button onClick={()=>setPostForm({...postForm,type:'dating'})} className={`flex-1 rounded-full py-3 text-xs font-black ${postForm.type==='dating'?'bg-[#FFC300] text-black':'bg-zinc-800'}`}>❤️ Dating</button><button onClick={()=>setPostForm({...postForm,type:'friends'})} className={`flex-1 rounded-full py-3 text-xs font-black ${postForm.type==='friends'?'bg-white text-black':'bg-zinc-800'}`}>🤝 Friends</button></div><div className="mt-4"><input type="file" accept="image/*" onChange={handleMainPhoto} className="mt-2 w-full text-xs file:bg-white file:text-black file:rounded-full file:px-4 file:py-2" />{(postForm.preview || form.photos[0]) && <img src={postForm.preview || form.photos[0]} className="mt-3 w-full h-64 object-cover rounded-[20px]" />}</div><textarea value={postForm.bio} onChange={e=>setPostForm({...postForm,bio:e.target.value})} placeholder="Bio" className="mt-4 w-full bg-black border border-white/20 rounded-2xl px-4 py-3 text-xs h-20" /><div className="mt-3 bg-black rounded-2xl p-4 border border-white/10 flex justify-between items-center"><p className="text-xs font-bold">📍 {postForm.city || form.city+', '+form.country}</p><button onClick={getLocation} className="bg-[#FFC300] text-black px-5 py-2.5 rounded-full text-[11px] font-black">Location</button></div><button onClick={handleCreatePost} disabled={posting} className="mt-5 w-full bg-[#FFC300] text-black rounded-full py-4 font-black text-[15px]">{posting?'Posting...':'Post Now'}</button></div></div>)}
+      <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 flex justify-around items-center py-2"><button onClick={()=>handleTab('discover')} className="text-[11px]">♡<br/><span className="text-[8px]">Discover</span></button><button onClick={()=>handleTab('nearby')} className="text-[11px]">◎<br/><span className="text-[8px]">Near You</span></button><button onClick={()=>setShowPostModal(true)} className="bg-[#FFC300] text-black w-14 h-14 rounded-full flex items-center justify-center font-black text-2xl -mt-5 border-4 border-black">+</button><button onClick={()=>handleTab('chat')} className="text-[11px] relative">💬<br/><span className="text-[8px]">Chat</span>{notifications.length>0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[7px] w-3 h-3 rounded-full flex items-center justify-center">{notifications.length}</span>}{conversations.length>0 && <span className="absolute -top-1 right-2 bg-green-500 text-black text-[7px] w-3 h-3 rounded-full flex items-center justify-center">{conversations.length}</span>}</button>{isAdmin? <button onClick={()=>handleTab('admin')} className="text-[11px] text-[#FFC300] font-black">★<br/><span className="text-[8px]">Admin</span></button> : <button onClick={()=>handleTab('premium')} className="text-[11px]">★<br/><span className="text-[8px]">Premium</span></button>}</nav>
     </div>
   )
 }
