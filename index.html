@@ -11,13 +11,15 @@
 <script type="module" src="/src/main.jsx"></script>
 
 <script>
-// FIX: Load ads 4 seconds later and NEVER on login/signup pages
+// Monetag SmartLink + Tag - loads after 4 sec, never on login pages
+var MONETAG_SMARTLINK = "https://omg10.com/4/11900458";
+window.openKlaOffer = function() { window.open(MONETAG_SMARTLINK, "_blank"); };
+
 setTimeout(function() {
   var path = window.location.pathname.toLowerCase();
   if(path.includes('login') || path.includes('signin') || path.includes('sign-in') || path.includes('auth')) {
-    return; // don't load ads here
+    return;
   }
-
   var s1 = document.createElement('script');
   s1.src = 'https://quge5.com/88/tag.min.js';
   s1.setAttribute('data-zone','287250');
@@ -29,7 +31,6 @@ setTimeout(function() {
   s2.src = 'https://pl31526696.profitableratecpmnetwork.com/a0/f2/f3/a0f2f39e185a5d6beb265399f4ff2ce5.js';
   s2.async = true;
   document.body.appendChild(s2);
-
 }, 4000);
 </script>
 
