@@ -113,7 +113,7 @@ export default function App(){
   const handleSignup = async () => {
     if(!agreed){ alert('You must be 18+ and agree to Terms & Privacy Policy - check box'); return }
     const ageNum = parseInt(form.age) || 0
-    if(ageNum < 18){ alert('KLA-MEET is strictly 18+ only. You must be 18 or older.'); return }
+    if(ageNum < 18){ alert('KLA-MEET is for Singles and Older 18+ only. You must be 18 or older.'); return }
     if(!form.name ||!form.email){ alert('Name and email required'); return }
     try{
       const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'});
