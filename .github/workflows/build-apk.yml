@@ -6,26 +6,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with:
+          node-version: 20
       - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: 17 }
+        with:
+          distribution: temurin
+          java-version: 17
       - run: npm install
       - run: npm run build
       - run: npx cap add android || true
       - run: npx cap sync android
-      - name: Build DEBUG signed APK (installable + Uptodown ok)
-        run: cd android && chmod +x gradlew &&./gradlew assembleDebug
-      - name: Build RELEASE and sign with debug keystore
-        run: |
-          cd android
-         ./gradlew assembleRelease
-          # Sign the unsigned APK with debug keystore so it installs
-          $ANDROID_HOME/build-tools/34.0.0/apksigner sign --ks ~/.android/debug.keystore --ks-pass pass:android --key-pass pass:android --out app/build/outputs/apk/release/app-release-signed.apk app/build/outputs/apk/release/app-release-unsigned.apk || $ANDROID_HOME/build-tools/33.0.1/apksigner sign --ks ~/.android/debug.keystore --ks-pass pass:android --key-pass pass:android --out app/build/outputs/apk/release/app-release-signed.apk app/build/outputs/apk/release/app-release-unsigned.apk
+      - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: KLA-MEET-DEBUG-SIGNED
           path: android/app/build/outputs/apk/debug/app-debug.apk
-      - uses: actions/upload-artifact@v4
-        with:
-          name: KLA-MEET-RELEASE-SIGNED
-          path: android/app/build/outputs/apk/release/app-release-signed.apk
