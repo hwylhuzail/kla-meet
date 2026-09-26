@@ -1,0 +1,17 @@
+name: Gen Keystore
+on: [workflow_dispatch]
+jobs:
+  gen:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          keytool -genkey -v -keystore kla-meet.keystore -alias kla-meet -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=KLA Meet, OU=UG, O=KLA, L=Kampala, C=UG"
+          base64 -w 0 kla-meet.keystore > key.b64
+          echo "COPY THIS BASE64:"
+          cat key.b64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: keystore-files
+          path: |
+            kla-meet.keystore
+            key.b64
