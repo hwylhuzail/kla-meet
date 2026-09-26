@@ -11,7 +11,7 @@
 <script type="module" src="/src/main.jsx"></script>
 
 <script>
-// Monetag SmartLink + Tag - loads after 4 sec, never on login pages
+// ONLY Monetag - SmartLink + Tag
 var MONETAG_SMARTLINK = "https://omg10.com/4/11900458";
 window.openKlaOffer = function() { window.open(MONETAG_SMARTLINK, "_blank"); };
 
@@ -26,11 +26,6 @@ setTimeout(function() {
   s1.async = true;
   s1.setAttribute('data-cfasync','false');
   document.body.appendChild(s1);
-
-  var s2 = document.createElement('script');
-  s2.src = 'https://pl31526696.profitableratecpmnetwork.com/a0/f2/f3/a0f2f39e185a5d6beb265399f4ff2ce5.js';
-  s2.async = true;
-  document.body.appendChild(s2);
 }, 4000);
 </script>
 
