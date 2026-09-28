@@ -1,9 +1,13 @@
 {
   "appId": "com.klameet.app",
-  "appName": "KLA-MEET",
+  "appName": "KLA-MEET Uganda",
   "webDir": "dist",
-  "server": { "url": "https://kla-meet.vercel.app", "cleartext": true },
+  "bundledWebRuntime": false,
   "plugins": {
-    "SplashScreen": { "launchShowDuration": 2000 }
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#E11D48",
+      "showSpinner": false
+    }
   }
 }
