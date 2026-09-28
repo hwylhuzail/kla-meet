@@ -43,7 +43,6 @@ export default function App(){
   const [newPost,setNewPost]=useState({name:'',city:'Kampala',image_url:'',bio:'',useLocation:true,uploading:false})
 
   useEffect(()=>{
-    // Get real location for Nearby
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition(
         p=>setUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),
@@ -60,12 +59,10 @@ export default function App(){
       setLoading(false)
     })
 
-    // ALL PROFILES DISCOVERABLE - merge posts + profiles
     const loadAll = async () => {
       const {data:postData} = await supabase.from('posts').select('*').order('created_at',{ascending:false})
       const {data:profileData} = await supabase.from('profiles').select('*').order('created_at',{ascending:false})
       let combined = [...(postData||[])]
-      // Add profiles as discoverable cards if they have image
       if(profileData){
         profileData.forEach(pro=>{
           if(pro.image_url || pro.avatar_url){
@@ -120,7 +117,6 @@ export default function App(){
   const onFetchMessages = async (uid) => { setMessages([{id:1,text:'Hi! 👋 Nice to meet you. Friendship only 😊', from:uid}]) }
   const onSend = () => { if(!newMsg.trim()) return; setMessages([...messages,{id:Date.now(), text:newMsg, from:'me'}]); setNewMsg('') }
 
-  // GALLERY UPLOAD + TRUE LOCATION
   const handleGalleryUpload = async (e) => {
     const file=e.target.files[0]; if(!file) return
     if(file.size>5*1024*1024) return alert('Max 5MB')
@@ -151,7 +147,6 @@ export default function App(){
       user_id:user?.id, age:parseInt(form.age||22), lat, lng
     }]).select()
     if(error) return alert(error.message)
-    // Also update profile with true location + image for discoverability
     await supabase.from('profiles').upsert({id:user.id, image_url:newPost.image_url, lat, lng, city:newPost.city, updated_at:new Date().toISOString()},{onConflict:'id'})
     setPosts([data[0],...posts]); setShowPost(false); setNewPost({name:'',city:'Kampala',image_url:'',bio:'',useLocation:true,uploading:false})
   }
@@ -163,8 +158,16 @@ export default function App(){
     await supabase.auth.signOut(); localStorage.clear(); window.location.href='/'
   }
 
-  const onCrypto = () => window.open('https://nowpayments.io/payment/?iid=4727316829','_blank')
-  const onPesapal = () => { window.open('https://www.pesapal.com/','_blank'); alert('Pesapal: MTN/Airtel UGX 10k. After payment send screenshot to kla.meet.ug@gmail.com — admin activates in 5 mins') }
+  // --- PAYMENTS LIVE LINKS - ONLY THIS CHANGED ---
+  const onCrypto = () => {
+    const email = encodeURIComponent(user?.email || form.email || '')
+    window.open(`https://nowpayments.io/payment/?iid=4727316829&email=${email}`,'_blank','noopener,noreferrer')
+  }
+  const onPesapal = () => {
+    const email = user?.email || form.email || ''
+    window.open('https://www.pesapal.com/','_blank','noopener,noreferrer');
+    alert(`Pesapal LIVE: MTN/Airtel UGX 10k. Email: ${email}. After payment send screenshot to kla.meet.ug@gmail.com — admin activates in 5 mins`)
+  }
 
   if(loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white font-black text-xs">KLA-MEET • Loading...</div>
 
@@ -199,16 +202,13 @@ export default function App(){
       {tab==='premium' && <PremiumTab isAdmin={isAdmin} onCrypto={onCrypto} onPesapal={onPesapal} />}
       {tab==='profile' && <ProfileTab user={user} isAdmin={isAdmin} form={form} setForm={setForm} onDelete={handleDeleteAccount} />}
 
-      {/* POST MODAL WITH GALLERY + URL + TRUE LOCATION */}
       {showPost && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
           <div className="bg-zinc-900 rounded-[24px] p-5 w-full max-w-sm max-h-[92vh] overflow-y-auto">
             <h3 className="font-black text-white">+ Post to Discover</h3>
             <p className="text-[9px] text-white/40 mt-1">All profiles discoverable • True GPS for Nearby</p>
-
             <input value={newPost.name} onChange={e=>setNewPost({...newPost,name:e.target.value})} placeholder="Your display name" className="mt-3 w-full bg-black rounded-full px-4 py-3 text-xs text-white" />
             <input value={newPost.city} onChange={e=>setNewPost({...newPost,city:e.target.value})} placeholder="City: Kampala" className="mt-2 w-full bg-black rounded-full px-4 py-3 text-xs text-white" />
-
             <div className="mt-3 bg-black rounded-[16px] p-3">
               <p className="text-[10px] font-bold text-white">Photo • Gallery Upload + URL</p>
               <label className="mt-2 block w-full bg-zinc-800 text-white rounded-full py-2.5 text-center text-xs font-bold cursor-pointer">
@@ -219,14 +219,11 @@ export default function App(){
               <input value={newPost.image_url} onChange={e=>setNewPost({...newPost,image_url:e.target.value})} placeholder="Photo URL https://..." className="mt-2 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs text-white" />
               {newPost.image_url && <img src={newPost.image_url} className="mt-2 w-full h-36 object-cover rounded-xl bg-zinc-800" />}
             </div>
-
             <textarea value={newPost.bio} onChange={e=>setNewPost({...newPost,bio:e.target.value})} placeholder="Bio: football, music, friendship..." className="mt-2 w-full bg-black rounded-xl px-4 py-3 text-xs text-white h-20" />
-
             <label className="mt-3 flex items-center gap-2 bg-[#FFC300]/10 border border-[#FFC300]/20 rounded-full px-3 py-2">
               <input type="checkbox" checked={newPost.useLocation} onChange={e=>setNewPost({...newPost,useLocation:e.target.checked})} />
               <span className="text-[10px] text-white">Use my true location for Nearby • 📍 {userLoc?`${userLoc.lat.toFixed(2)},${userLoc.lng.toFixed(2)}`:'locating...'}</span>
             </label>
-
             <div className="flex gap-2 mt-3">
               <button onClick={()=>setShowPost(false)} className="flex-1 bg-zinc-800 text-white rounded-full py-3 text-xs font-bold">Cancel</button>
               <button onClick={createPost} disabled={newPost.uploading} className="flex-1 bg-[#FFC300] text-black rounded-full py-3 text-xs font-black">{newPost.uploading?'Wait...':'Post Now'}</button>
