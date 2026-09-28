@@ -9,24 +9,14 @@
   "theme_color": "#FFCC00",
   "description": "KLA-MEET - Uganda friendship social network for adults 18+ to make new friends in Kampala, Entebbe, Wakiso. Safe chat with nearby friends.",
   "categories": ["social", "lifestyle"],
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-e961c7705bb9",
+  "prefer_related_applications": false,
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
   "screenshots": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "KLA-MEET"
-    },
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Make Friends in Kampala"
-    }
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "form_factor": "wide", "label": "KLA-MEET Social" },
+    { "src": "/icon-192.png", "sizes": "384x384", "type": "image/png", "form_factor": "narrow", "label": "Make Friends in Kampala" }
   ]
 }
