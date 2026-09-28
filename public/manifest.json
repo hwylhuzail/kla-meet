@@ -1,22 +1,36 @@
 {
-  "name": "KLA-MEET",
+  "name": "KLA-MEET - Kampala Dating",
   "short_name": "KLA-MEET",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#FFD700",
   "description": "Kampala's #1 dating & hookup app - Meet real singles near you. Chat, match & date tonight!",
+  "categories": ["dating", "social", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/vite.svg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/vite.svg",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/vite.svg",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow"
     }
   ]
 }
