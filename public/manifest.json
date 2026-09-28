@@ -2,21 +2,91 @@
   "id": "/",
   "name": "KLA-MEET - Make Friends in Kampala",
   "short_name": "KLA-MEET",
-  "start_url": "/",
+  "start_url": "/?utm_source=pwa",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "tabbed", "standalone"],
   "orientation": "portrait",
   "background_color": "#FFCC00",
   "theme_color": "#FFCC00",
   "description": "KLA-MEET - Uganda friendship social network for adults 18+ to make new friends in Kampala, Entebbe, Wakiso. Safe chat with nearby friends.",
   "categories": ["social", "lifestyle"],
+  "lang": "en",
+  "dir": "ltr",
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-e961c7705bb9",
   "prefer_related_applications": false,
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
   "screenshots": [
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "form_factor": "wide", "label": "KLA-MEET Social" },
-    { "src": "/icon-192.png", "sizes": "384x384", "type": "image/png", "form_factor": "narrow", "label": "Make Friends in Kampala" }
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "KLA-MEET - Make Friends in Kampala"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "KLA-MEET Mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find Friends Near You",
+      "short_name": "Nearby",
+      "description": "Find friends in Kampala",
+      "url": "/?action=nearby",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Chat with Friends",
+      "short_name": "Chat",
+      "description": "Open your chats",
+      "url": "/?action=chat",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Make New Friends",
+      "short_name": "Discover",
+      "description": "Discover new people",
+      "url": "/?action=discover",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "/?share=true",
+    "method": "GET",
+    "params": { "title": "title", "text": "text", "url": "url" }
+  },
+  "protocol_handlers": [
+    { "protocol": "web+kla", "url": "/?protocol=%s" }
+  ],
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": { "image/*": [".jpg", ".jpeg", ".png"] }
+    }
+  ],
+  "widgets": [
+    {
+      "name": "KLA-MEET Friends",
+      "description": "See nearby friends",
+      "tag": "kla-friends",
+      "template": "kla-template",
+      "msAcTemplate": "widgets/template.json",
+      "data": "widgets/data.json",
+      "type": "application/json"
+    }
   ]
 }
