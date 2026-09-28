@@ -4,15 +4,16 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "description": "Uganda 18+ friendship community - meet nearby",
   "background_color": "#000000",
   "theme_color": "#FFD700",
   "orientation": "portrait",
   "lang": "en",
   "icons": [
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/vite.svg",
       "sizes": "192x192 512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]
