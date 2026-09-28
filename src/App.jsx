@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import PrivacyPage from './Privacy'
+import TermsPage from './Terms'
 
 import About from './components/landing/About'
 import HowItWorks from './components/landing/HowItWorks'
@@ -17,8 +18,9 @@ import ProfileTab from './components/tabs/Profile'
 const ADMIN_EMAILS = ["huzayirukalungi4@gmail.com", "alexmakkoali@gmail.com"]
 
 export default function App(){
-  if(typeof window!== 'undefined' && window.location.pathname === '/privacy'){
-    return <PrivacyPage />
+  if(typeof window!== 'undefined'){
+    if(window.location.pathname === '/privacy') return <PrivacyPage />
+    if(window.location.pathname === '/terms') return <TermsPage />
   }
   const [view,setView]=useState('landing')
   const [tab,setTab]=useState('discover')
@@ -108,7 +110,7 @@ export default function App(){
         </div>
 
         <footer className="py-10 text-center text-[10px] text-gray-500 border-t mt-6">
-          <a href="/privacy" className="mx-2 underline">Privacy</a> | <a href="mailto:kla.meet.ug@gmail.com" className="mx-2 underline">Contact</a>
+          <a href="/privacy" className="mx-2 underline">Privacy</a> | <a href="/terms" className="mx-2 underline">Terms</a> | <a href="mailto:kla.meet.ug@gmail.com" className="mx-2 underline">Contact</a>
           <p className="mt-2">© 2026 KLA-MEET Uganda - Friendship Community</p>
         </footer>
       </div>
@@ -117,12 +119,15 @@ export default function App(){
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pb-28">
-      <header className="p-3 bg-black flex justify-between"><h1 className="font-black text-xs">KLA-MEET</h1><button onClick={async()=>{await supabase.auth.signOut(); setView('landing')}} className="text-[11px] bg-white text-black px-3 py-1.5 rounded-full">Logout</button></header>
+      <header className="p-3 bg-black flex justify-between">
+        <h1 className="font-black text-xs">KLA-MEET</h1>
+        <button onClick={async()=>{await supabase.auth.signOut(); setView('landing')}} className="text-[11px] bg-white text-black px-3 py-1.5 rounded-full">Logout</button>
+      </header>
       {tab==='discover' && <DiscoverTab posts={posts} />}
       {tab==='chat' && <ChatTab />}
       {tab==='nearby' && <NearbyTab />}
       {tab==='premium' && <PremiumTab />}
-      {tab==='profile' && <ProfileTab form={form} setForm={setForm} user={user} />}
+      {tab==='profile' && <ProfileTab user={user} isAdmin={isAdmin} form={form} setForm={setForm} />}
       <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 flex justify-around items-center py-2">
         <button onClick={()=>handleTab('discover')} className="text-[11px]">♡<br/>Discover</button>
         <button onClick={()=>handleTab('nearby')} className="text-[11px]">📍<br/>Nearby</button>
