@@ -15,9 +15,32 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npx cap add android || true
+      - run: |
+          # Fix quality: real bundled app, not wrapper
+          echo "Fixing Capacitor config for real APK..."
+          cat > capacitor.config.json <<EOF
+          {
+            "appId": "com.klameet.app",
+            "appName": "KLA-MEET Uganda",
+            "webDir": "dist",
+            "bundledWebRuntime": true,
+            "plugins": {
+              "SplashScreen": { "launchShowDuration": 3000 }
+            }
+          }
+          EOF
+          cat capacitor.config.json
       - run: npx cap sync android
-      - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
+      - run: |
+          # Fix versionCode for Uptodown
+          sed -i "s/versionCode 1/versionCode 5/" android/app/build.gradle || true
+          sed -i "s/versionCode 2/versionCode 5/" android/app/build.gradle || true
+          sed -i "s/versionCode 3/versionCode 5/" android/app/build.gradle || true
+          sed -i "s/versionCode 4/versionCode 5/" android/app/build.gradle || true
+          sed -i "s/versionName.*/versionName \"4.0.1\"/" android/app/build.gradle || true
+          grep version android/app/build.gradle
+      - run: cd android && chmod +x gradlew &&./gradlew assembleRelease
       - uses: actions/upload-artifact@v4
         with:
-          name: KLA-MEET-DEBUG-SIGNED
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: KLA-MEET-UGANDA-4.0.1-RELEASE
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
