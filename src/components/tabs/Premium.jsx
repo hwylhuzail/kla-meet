@@ -1,3 +1,14 @@
 export default function Premium({isAdmin,onCrypto,onPesapal}){
-  return <div className="max-w-md mx-auto p-4 space-y-4"><h2 className="font-black text-white">Premium</h2>{isAdmin && <div className="bg-green-500 text-black rounded-xl p-3 text-xs font-black">Admin FREE</div>}<div className="bg-[#FFC300] text-black rounded-2xl p-4"><button onClick={onCrypto} className="w-full bg-black text-white rounded-full py-3 font-bold text-xs">Crypto $2.99 / $5.99</button></div><div className="bg-zinc-900 rounded-2xl p-4"><button onClick={onPesapal} className="w-full bg-[#FF6A00] text-white rounded-full py-3 font-bold text-xs">Pesapal</button></div></div>
+  return (
+  <div className="max-w-md mx-auto p-4 space-y-4 pb-24">
+    <h2 className="font-black text-white text-sm">Premium • Friendship Plus</h2>
+    {isAdmin && <div className="bg-green-500 text-black rounded-xl p-3 text-xs font-black">ADMIN FREE • All unlocked</div>}
+    <div className="bg-zinc-900 rounded-[24px] p-4 border border-[#FFC300]/20">
+      <p className="text-[11px] text-white/60">Free: 5 likes/day, 1 chat/day, 3 nearby preview</p>
+      <p className="text-[11px] text-[#FFC300] mt-1">Premium: unlimited chat, see likes, boost post</p>
+      <button onClick={onCrypto} className="mt-4 w-full bg-[#FFC300] text-black rounded-full py-4 font-black text-xs">Crypto $2.99 / $5.99 • Pay Now</button>
+      <button onClick={onPesapal} className="mt-3 w-full bg-[#FF6A00] text-white rounded-full py-4 font-black text-xs">Pesapal • MTN / Airtel Money</button>
+    </div>
+  </div>
+  )
 }
