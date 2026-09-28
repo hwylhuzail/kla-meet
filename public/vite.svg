@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="110" fill="#000000"/>
-  <rect x="86" y="86" width="340" height="340" rx="70" fill="#FFD700"/>
-  <text x="50%" y="48%" dominant-baseline="middle" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="110" fill="black">KLA</text>
-  <text x="50%" y="70%" dominant-baseline="middle" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="62" fill="black">MEET</text>
+  <rect width="512" height="512" rx="120" fill="#000000"/>
+  <rect x="64" y="64" width="384" height="384" rx="85" fill="#FFD700"/>
+  <text x="256" y="235" text-anchor="middle" font-family="Arial Black" font-weight="900" font-size="115" fill="black">KLA</text>
+  <text x="256" y="315" text-anchor="middle" font-family="Arial Black" font-weight="900" font-size="66" fill="black">MEET</text>
 </svg>
