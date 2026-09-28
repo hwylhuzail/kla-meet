@@ -12,37 +12,37 @@ export default function Privacy(){
  <h2>2. Information We Collect</h2>
  <ul>
  <li>Profile information you provide: name, age, gender, bio, photos</li>
- <li>Location: city/country you provide and approximate location for nearby friends (you can disable)</li>
+ <li>Location: city/country you provide and approximate location for nearby friends</li>
  <li>Messages and interactions within the app</li>
  <li>Email and authentication data via Supabase</li>
- <li>Device info: OS, crash logs for app improvement</li>
+ <li>Device info: OS, crash logs</li>
  </ul>
 
  <h2>3. How We Use Information</h2>
- <p>To provide our social networking service, show nearby friends, ensure safety, prevent fraud, and improve the app experience.</p>
+ <p>To provide social networking service, show nearby friends, ensure safety, prevent fraud.</p>
 
  <h2>4. Data Sharing</h2>
- <p>We do NOT sell your personal data. Data is only shared with trusted service providers: Supabase (secure database) and Vercel (hosting), and only when required by applicable Uganda law.</p>
+ <p>We do NOT sell your personal data. Data is only shared with Supabase and Vercel.</p>
 
  <h2>5. Safety Features</h2>
  <ul>
- <li>Report & Block button on every profile and chat</li>
+ <li>Report and Block button on every profile</li>
  <li>Photo moderation</li>
  <li>Admin moderation 24/7</li>
- <li>Zero tolerance for harassment, explicit content, hate speech, or spam</li>
+ <li>Zero tolerance for harassment or spam</li>
  </ul>
 
- <h2>6. Your Rights & Account Deletion</h2>
- <p>You can delete your account anytime: Go to Profile > Settings > Delete Account, or email us at kla.meet.ug@gmail.com with subject DELETE MY DATA. We will delete all your data within 30 days.</p>
+ <h2>6. Your Rights and Account Deletion</h2>
+ <p>You can delete your account anytime: Go to Profile, then Settings, then Delete Account, or email us at kla.meet.ug@gmail.com with subject DELETE MY DATA. We will delete all your data within 30 days.</p>
 
  <h2>7. Data Retention</h2>
- <p>We keep your profile until you delete it. Messages are kept for up to 12 months for safety. Data of banned users may be retained for security reasons.</p>
+ <p>We keep your profile until you delete it. Messages are kept for up to 12 months.</p>
 
  <h2>8. Security</h2>
- <p>All data is encrypted in transit via HTTPS and stored securely via Supabase. While we take strong measures, no system is 100% secure.</p>
+ <p>All data is encrypted via HTTPS and stored securely via Supabase.</p>
 
  <h2>9. Changes to Policy</h2>
- <p>We will notify you via the app or website if this policy changes.</p>
+ <p>We will notify you via the app if this policy changes.</p>
 
  <br/>
  <a href="/" style={{background:'#E11D48',color:'white',padding:'12px 24px',borderRadius:'24px',textDecoration:'none',fontWeight:'bold'}}>Back to KLA-MEET</a>
