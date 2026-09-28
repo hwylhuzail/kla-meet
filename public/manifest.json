@@ -1,0 +1,24 @@
+{
+  "name": "KLA-MEET - Uganda Friendship",
+  "short_name": "KLA-MEET",
+  "description": "Uganda 18+ friendship community - Make friends near you in Kampala, Entebbe, Jinja",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#FFD700",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
