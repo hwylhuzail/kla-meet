@@ -3,13 +3,11 @@ import { supabase } from './supabase'
 import PrivacyPage from './Privacy'
 import TermsPage from './Terms'
 import GuidelinesPage from './Guidelines'
-
 import About from './components/landing/About'
 import HowItWorks from './components/landing/HowItWorks'
 import Safety from './components/landing/Safety'
 import Pricing from './components/landing/Pricing'
 import Faqs from './components/landing/Faqs'
-
 import DiscoverTab from './components/tabs/Discover'
 import ChatTab from './components/tabs/Chat'
 import NearbyTab from './components/tabs/Nearby'
@@ -34,7 +32,6 @@ export default function App(){
   const [userLoc,setUserLoc]=useState(null)
   const [form,setForm]=useState({name:'',email:'',password:'',bio:'',age:'22',city:'Kampala',photos:['']})
   const [agreed,setAgreed]=useState(false)
-
   const [chatWith,setChatWith]=useState(null)
   const [messages,setMessages]=useState([])
   const [newMsg,setNewMsg]=useState('')
@@ -49,7 +46,6 @@ export default function App(){
         ()=>setUserLoc({lat:0.3476,lng:32.5825})
       )
     }
-
     supabase.auth.getSession().then(({data})=>{
       if(data?.session?.user){
         const u=data.session.user; setUser(u); setView('app')
@@ -58,7 +54,6 @@ export default function App(){
       }
       setLoading(false)
     })
-
     const loadAll = async () => {
       const {data:postData} = await supabase.from('posts').select('*').order('created_at',{ascending:false})
       const {data:profileData} = await supabase.from('profiles').select('*').order('created_at',{ascending:false})
@@ -88,23 +83,14 @@ export default function App(){
     loadAll()
   },[])
 
-  const handleTab = (t) => {
-    if(t==='admin' &&!isAdmin) return
-    setTab(t)
-  }
-
+  const handleTab = (t) => { if(t==='admin' &&!isAdmin) return; setTab(t) }
   const handleSignup = async () => {
     if(!agreed) return alert('Confirm 18+')
     const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'})
     if(error) return alert(error.message)
     const u=data.user || data.session?.user
     setUser(u);
-    await supabase.from('profiles').upsert({
-      id:u.id, email:form.email.trim(), name:form.name, city:form.city,
-      age:parseInt(form.age||22), bio:form.bio,
-      lat:userLoc?.lat||null, lng:userLoc?.lng||null,
-      created_at:new Date().toISOString()
-    })
+    await supabase.from('profiles').upsert({ id:u.id, email:form.email.trim(), name:form.name, city:form.city, age:parseInt(form.age||22), bio:form.bio, lat:userLoc?.lat||null, lng:userLoc?.lng||null, created_at:new Date().toISOString() })
     setView('app'); setTab('profile')
   }
   const handleSignin = async () => {
@@ -112,11 +98,9 @@ export default function App(){
     if(error) return alert(error.message)
     setUser(data.user); setView('app'); setTab('discover')
   }
-
   const onSelect = (post) => { setChatWith(post); setTab('chat'); setNotifications(prev=>[...prev,{id:Date.now(), from_name:post.name, type:'liked your profile', post_id:post.id}]) }
   const onFetchMessages = async (uid) => { setMessages([{id:1,text:'Hi! 👋 Nice to meet you. Friendship only 😊', from:uid}]) }
   const onSend = () => { if(!newMsg.trim()) return; setMessages([...messages,{id:Date.now(), text:newMsg, from:'me'}]); setNewMsg('') }
-
   const handleGalleryUpload = async (e) => {
     const file=e.target.files[0]; if(!file) return
     if(file.size>5*1024*1024) return alert('Max 5MB')
@@ -129,28 +113,20 @@ export default function App(){
       setNewPost(s=>({...s,image_url:data.publicUrl, uploading:false}))
     }catch(err){ alert(err.message); setNewPost(s=>({...s,uploading:false})) }
   }
-
   const createPost = async () => {
     if(!newPost.name ||!newPost.image_url) return alert('Name + Photo required (gallery or URL)')
     let lat=null,lng=null
     if(newPost.useLocation){
       if(userLoc){ lat=userLoc.lat; lng=userLoc.lng }
       else if(navigator.geolocation){
-        try{
-          const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000}))
-          lat=pos.coords.latitude; lng=pos.coords.longitude
-        }catch{}
+        try{ const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:5000})); lat=pos.coords.latitude; lng=pos.coords.longitude }catch{}
       }
     }
-    const { data, error } = await supabase.from('posts').insert([{
-      name:newPost.name, city:newPost.city, image_url:newPost.image_url, bio:newPost.bio,
-      user_id:user?.id, age:parseInt(form.age||22), lat, lng
-    }]).select()
+    const { data, error } = await supabase.from('posts').insert([{ name:newPost.name, city:newPost.city, image_url:newPost.image_url, bio:newPost.bio, user_id:user?.id, age:parseInt(form.age||22), lat, lng }]).select()
     if(error) return alert(error.message)
     await supabase.from('profiles').upsert({id:user.id, image_url:newPost.image_url, lat, lng, city:newPost.city, updated_at:new Date().toISOString()},{onConflict:'id'})
     setPosts([data[0],...posts]); setShowPost(false); setNewPost({name:'',city:'Kampala',image_url:'',bio:'',useLocation:true,uploading:false})
   }
-
   const handleDeleteAccount = async () => {
     if(!confirm('Delete ALL your posts + profile forever?')) return
     await supabase.from('posts').delete().eq('user_id', user.id)
@@ -158,7 +134,6 @@ export default function App(){
     await supabase.auth.signOut(); localStorage.clear(); window.location.href='/'
   }
 
-  // --- PAYMENTS LIVE LINKS - ONLY THIS CHANGED ---
   const onCrypto = () => {
     const email = encodeURIComponent(user?.email || form.email || '')
     window.open(`https://nowpayments.io/payment/?iid=4727316829&email=${email}`,'_blank','noopener,noreferrer')
@@ -182,7 +157,7 @@ export default function App(){
           </div>
         </header>
         <div className="max-w-md mx-auto p-6"><h2 className="text-[36px] font-black leading-none">Make New Friends<br/>Near You in Uganda.</h2><p className="text-[11px] bg-black text-white px-3 py-2 rounded-full font-bold inline-block mt-3">Kampala • Entebbe • Jinja • Safe Community</p></div>
-        <About /><HowItWorks /><Safety /><Pricing /><Faqs />
+        <About /><HowItWorks /><Safety /><Pricing onCrypto={onCrypto} onPesapal={onPesapal} /><Faqs />
         <div className="max-w-md mx-auto p-6 space-y-4">
           <div id="signin-box" className="bg-zinc-900 text-white rounded-[24px] p-5"><h3 className="font-black">Welcome Back</h3><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-3 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" /><button onClick={handleSignin} className="mt-3 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Sign In & Continue</button></div>
           <div id="signup-box" className="bg-[#FFC300] rounded-[24px] p-5"><h3 className="font-black">Create Friendship Profile</h3><input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full Name" className="mt-3 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password 8+ chars" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" /><div className="mt-3 bg-black rounded-xl p-3 flex gap-2"><input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} className="w-5 h-5" /><p className="text-[10px] text-white">I confirm I am 18 years or older and agree to Privacy & Terms</p></div><button onClick={handleSignup} disabled={!agreed} className={`mt-3 w-full rounded-full py-3 font-black text-xs ${agreed?'bg-black text-white':'bg-zinc-400'}`}>Create Account</button></div>
@@ -195,13 +170,11 @@ export default function App(){
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pb-28">
       <header className="p-3 bg-black flex justify-between"><h1 className="font-black text-xs">KLA-MEET {isAdmin && '• ADMIN'} {userLoc&&'• 📍'}</h1><button onClick={async()=>{await supabase.auth.signOut(); setView('landing')}} className="text-[11px] bg-white text-black px-3 py-1.5 rounded-full">Logout</button></header>
-
       {tab==='discover' && <DiscoverTab posts={posts} onSelect={onSelect} isAdmin={isAdmin} isPremium={isPremium||isAdmin} userLocation={userLoc} />}
       {tab==='chat' && <ChatTab notifications={notifications} chatWith={chatWith} messages={messages} newMsg={newMsg} setNewMsg={setNewMsg} onSend={onSend} onFetchMessages={onFetchMessages} setChatWith={setChatWith} posts={posts} isPremium={isPremium||isAdmin} />}
       {tab==='nearby' && <NearbyTab posts={posts} onSelect={onSelect} isPremium={isPremium||isAdmin} userLocation={userLoc} />}
       {tab==='premium' && <PremiumTab isAdmin={isAdmin} onCrypto={onCrypto} onPesapal={onPesapal} />}
       {tab==='profile' && <ProfileTab user={user} isAdmin={isAdmin} form={form} setForm={setForm} onDelete={handleDeleteAccount} />}
-
       {showPost && (
         <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
           <div className="bg-zinc-900 rounded-[24px] p-5 w-full max-w-sm max-h-[92vh] overflow-y-auto">
@@ -228,11 +201,9 @@ export default function App(){
               <button onClick={()=>setShowPost(false)} className="flex-1 bg-zinc-800 text-white rounded-full py-3 text-xs font-bold">Cancel</button>
               <button onClick={createPost} disabled={newPost.uploading} className="flex-1 bg-[#FFC300] text-black rounded-full py-3 text-xs font-black">{newPost.uploading?'Wait...':'Post Now'}</button>
             </div>
-            <p className="text-[8px] text-white/30 mt-2 text-center">Gallery → Supabase Storage • URL → free • Location saved → Discover & Nearby true distance</p>
           </div>
         </div>
       )}
-
       <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 flex justify-around items-center py-2 z-50">
         <button onClick={()=>handleTab('discover')} className={`text-[10px] flex flex-col items-center ${tab==='discover'?'text-[#FFC300]':'text-white/60'}`}>♡<span>Discover</span></button>
         <button onClick={()=>handleTab('nearby')} className={`text-[10px] flex flex-col items-center ${tab==='nearby'?'text-[#FFC300]':'text-white/60'}`}>📍<span>Nearby</span></button>
