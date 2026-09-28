@@ -14,23 +14,23 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "/vite.svg",
+      "src": "https://i.ibb.co/xKHHMnzN/IMG-20260929-WA7040.jpg",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/vite.svg",
+      "src": "https://i.ibb.co/kggw3gb0/IMG-20260929-WA2429.jpg",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "any"
     }
   ],
   "screenshots": [
     {
-      "src": "/vite.svg",
+      "src": "https://i.ibb.co/kggw3gb0/IMG-20260929-WA2429.jpg",
       "sizes": "540x720",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "KLA-MEET Chat"
     }
