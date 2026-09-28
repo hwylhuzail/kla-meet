@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="120" fill="#000000"/>
-  <rect x="64" y="64" width="384" height="384" rx="85" fill="#FFD700"/>
-  <text x="256" y="235" text-anchor="middle" font-family="Arial Black" font-weight="900" font-size="115" fill="black">KLA</text>
-  <text x="256" y="315" text-anchor="middle" font-family="Arial Black" font-weight="900" font-size="66" fill="black">MEET</text>
+  <rect width="512" height="512" rx="110" fill="#FFCC00"/>
+  <g transform="translate(256 190)">
+    <path d="M -40 -10 C -60 -40 0 -50 0 -20 C 0 -50 60 -40 40 -10 C 20 20 -5 35 0 38 C 5 35 -20 20 -40 -10 Z" fill="none" stroke="black" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="256" y="325" font-family="Arial" font-weight="900" font-size="54" fill="black" text-anchor="middle">KLA-MEET</text>
 </svg>
