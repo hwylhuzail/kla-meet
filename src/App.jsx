@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './supabase'
 import PrivacyPage from './Privacy'
 import TermsPage from './Terms'
+import GuidelinesPage from './Guidelines'
 
 import About from './components/landing/About'
 import HowItWorks from './components/landing/HowItWorks'
@@ -21,6 +22,7 @@ export default function App(){
   if(typeof window!== 'undefined'){
     if(window.location.pathname === '/privacy') return <PrivacyPage />
     if(window.location.pathname === '/terms') return <TermsPage />
+    if(window.location.pathname === '/guidelines') return <GuidelinesPage />
   }
   const [view,setView]=useState('landing')
   const [tab,setTab]=useState('discover')
@@ -31,6 +33,12 @@ export default function App(){
   const [user,setUser]=useState(null)
   const [form,setForm]=useState({name:'',email:'',password:'',bio:'',age:'22',city:'Kampala',photos:['']})
   const [agreed,setAgreed]=useState(false)
+
+  // Chat states
+  const [chatWith,setChatWith]=useState(null)
+  const [messages,setMessages]=useState([])
+  const [newMsg,setNewMsg]=useState('')
+  const [notifications,setNotifications]=useState([])
 
   useEffect(()=>{
     supabase.auth.getSession().then(({data})=>{
@@ -61,6 +69,22 @@ export default function App(){
     const { data, error } = await supabase.auth.signInWithPassword({email:form.email.trim(), password:form.password})
     if(error) return alert(error.message)
     setUser(data.user); setView('app'); setTab('discover')
+  }
+
+  const onSelect = (post) => {
+    setChatWith(post)
+    setTab('chat')
+    setNotifications(prev=>[...prev,{id:Date.now(), from_name:post.name, type:'like', post_id:post.id}])
+  }
+
+  const onFetchMessages = async (uid) => {
+    // demo fetch
+    setMessages([{id:1,text:'Hi! Nice to meet you 👋', from:uid}])
+  }
+  const onSend = () => {
+    if(!newMsg.trim()) return
+    setMessages([...messages,{id:Date.now(), text:newMsg, from:'me'}])
+    setNewMsg('')
   }
 
   if(loading){
@@ -110,7 +134,7 @@ export default function App(){
         </div>
 
         <footer className="py-10 text-center text-[10px] text-gray-500 border-t mt-6">
-          <a href="/privacy" className="mx-2 underline">Privacy</a> | <a href="/terms" className="mx-2 underline">Terms</a> | <a href="mailto:kla.meet.ug@gmail.com" className="mx-2 underline">Contact</a>
+          <a href="/privacy" className="mx-2 underline">Privacy</a> | <a href="/terms" className="mx-2 underline">Terms</a> | <a href="/guidelines" className="mx-2 underline">Guidelines</a> | <a href="mailto:kla.meet.ug@gmail.com" className="mx-2 underline">Contact</a>
           <p className="mt-2">© 2026 KLA-MEET Uganda - Friendship Community</p>
         </footer>
       </div>
@@ -120,14 +144,16 @@ export default function App(){
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pb-28">
       <header className="p-3 bg-black flex justify-between">
-        <h1 className="font-black text-xs">KLA-MEET</h1>
+        <h1 className="font-black text-xs">KLA-MEET {isAdmin && '• ADMIN'}</h1>
         <button onClick={async()=>{await supabase.auth.signOut(); setView('landing')}} className="text-[11px] bg-white text-black px-3 py-1.5 rounded-full">Logout</button>
       </header>
-      {tab==='discover' && <DiscoverTab posts={posts} />}
-      {tab==='chat' && <ChatTab />}
-      {tab==='nearby' && <NearbyTab />}
+
+      {tab==='discover' && <DiscoverTab posts={posts} onSelect={onSelect} isAdmin={isAdmin} />}
+      {tab==='chat' && <ChatTab notifications={notifications} chatWith={chatWith} messages={messages} newMsg={newMsg} setNewMsg={setNewMsg} onSend={onSend} onFetchMessages={onFetchMessages} setChatWith={setChatWith} posts={posts} isPremium={isPremium||isAdmin} />}
+      {tab==='nearby' && <NearbyTab posts={posts} onSelect={onSelect} />}
       {tab==='premium' && <PremiumTab />}
       {tab==='profile' && <ProfileTab user={user} isAdmin={isAdmin} form={form} setForm={setForm} />}
+
       <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 flex justify-around items-center py-2">
         <button onClick={()=>handleTab('discover')} className="text-[11px]">♡<br/>Discover</button>
         <button onClick={()=>handleTab('nearby')} className="text-[11px]">📍<br/>Nearby</button>
