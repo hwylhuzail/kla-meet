@@ -2,7 +2,7 @@
   "id": "/",
   "name": "KLA-MEET - Kampala Dating",
   "short_name": "KLA-MEET",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
@@ -14,23 +14,23 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "https://i.ibb.co/xKHHMnzN/IMG-20260929-WA7040.jpg",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://i.ibb.co/kggw3gb0/IMG-20260929-WA2429.jpg",
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
-      "purpose": "any"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "https://i.ibb.co/kggw3gb0/IMG-20260929-WA2429.jpg",
+      "src": "/screenshot-1.png",
       "sizes": "540x720",
-      "type": "image/jpeg",
+      "type": "image/png",
       "form_factor": "narrow",
       "label": "KLA-MEET Chat"
     }
@@ -38,8 +38,9 @@
   "shortcuts": [
     {
       "name": "Find Matches",
-      "url": "/",
-      "description": "Find singles near you"
+      "url": "/?shortcut=matches",
+      "description": "Find singles near you",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
