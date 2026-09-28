@@ -22,6 +22,7 @@ export default function App(){
   }
   const [view,setView]=useState('landing')
   const [tab,setTab]=useState('discover')
+  const [loading,setLoading]=useState(true)
   const [isPremium,setIsPremium]=useState(false)
   const [isAdmin,setIsAdmin]=useState(false)
   const [posts,setPosts]=useState([])
@@ -30,12 +31,14 @@ export default function App(){
   const [agreed,setAgreed]=useState(false)
 
   useEffect(()=>{
-    supabase.auth.getUser().then(({data})=>{
-      if(data?.user){
-        setUser(data.user)
-        setView('app') // auto-enter if already logged in
-        if(ADMIN_EMAILS.includes(data.user.email?.toLowerCase().trim())){ setIsAdmin(true); setIsPremium(true) }
+    supabase.auth.getSession().then(({data})=>{
+      if(data?.session?.user){
+        const u = data.session.user
+        setUser(u)
+        setView('app')
+        if(ADMIN_EMAILS.includes(u.email?.toLowerCase().trim())){ setIsAdmin(true); setIsPremium(true) }
       }
+      setLoading(false)
     })
     supabase.from('posts').select('*').order('created_at',{ascending:false}).then(({data})=>{ if(data) setPosts(data) })
   },[])
@@ -47,8 +50,7 @@ export default function App(){
   }
 
   const handleSignup = async () => {
-    if(!agreed) return alert('18+ agree required')
-    if(parseInt(form.age)<18) return alert('18+ only')
+    if(!agreed) return alert('Please confirm you are 18 or older')
     const { data, error } = await supabase.auth.signUp({email:form.email.trim(), password:form.password || '12345678'})
     if(error) return alert(error.message)
     setUser(data.user); setView('app'); setTab('profile')
@@ -59,12 +61,15 @@ export default function App(){
     setUser(data.user); setView('app'); setTab('discover')
   }
 
+  if(loading){
+    return <div className="min-h-screen bg-black flex items-center justify-center text-white font-black text-xs">KLA-MEET • Loading...</div>
+  }
+
   if(view==='landing'){
     return (
       <div className="min-h-screen bg-white text-black">
-        {/* HEADER WITHOUT ENTER APP - LOCKED */}
         <header className="bg-black text-white px-4 py-3 flex justify-between items-center sticky top-0 z-50">
-          <h1 className="font-black text-xs">KLA-MEET • Uganda 18+</h1>
+          <h1 className="font-black text-xs">KLA-MEET • Friendship in Uganda</h1>
           <div className="flex gap-2">
             <button onClick={()=>document.getElementById('signin-box')?.scrollIntoView({behavior:'smooth'})} className="bg-zinc-800 text-white px-4 py-2 rounded-full font-bold text-xs">Sign In</button>
             <button onClick={()=>document.getElementById('signup-box')?.scrollIntoView({behavior:'smooth'})} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-xs">Join</button>
@@ -72,8 +77,8 @@ export default function App(){
         </header>
 
         <div className="max-w-md mx-auto p-6">
-          <h2 className="text-[36px] font-black leading-none">Meet. Chat.<br/>Friends in Uganda.</h2>
-          <p className="text-[11px] bg-black text-white px-3 py-2 rounded-full font-bold inline-block mt-3">18+ Only • Safe Friendship • Login Required</p>
+          <h2 className="text-[36px] font-black leading-none">Make New Friends<br/>Near You in Uganda.</h2>
+          <p className="text-[11px] bg-black text-white px-3 py-2 rounded-full font-bold inline-block mt-3">Kampala • Entebbe • Jinja • Safe Community</p>
         </div>
 
         <About />
@@ -84,27 +89,27 @@ export default function App(){
 
         <div className="max-w-md mx-auto p-6 space-y-4">
           <div id="signin-box" className="bg-zinc-900 text-white rounded-[24px] p-5">
-            <h3 className="font-black">Sign In - 18+ Only</h3>
+            <h3 className="font-black">Welcome Back</h3>
             <input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-3 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" />
             <input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password" className="mt-2 w-full bg-zinc-800 rounded-full px-4 py-3 text-xs" />
-            <button onClick={handleSignin} className="mt-3 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Sign In & Enter</button>
+            <button onClick={handleSignin} className="mt-3 w-full bg-[#FFC300] text-black rounded-full py-3 font-black text-xs">Sign In & Continue</button>
           </div>
           <div id="signup-box" className="bg-[#FFC300] rounded-[24px] p-5">
-            <h3 className="font-black">Sign Up - 18+ Only</h3>
+            <h3 className="font-black">Create Friendship Profile</h3>
             <input value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Full Name" className="mt-3 w-full bg-white rounded-full px-4 py-3 text-xs" />
             <input value={form.email} onChange={e=>setForm({...form,email:e.target.value})} placeholder="Email" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" />
             <input value={form.password} onChange={e=>setForm({...form,password:e.target.value})} type="password" placeholder="Password 8+ chars" className="mt-2 w-full bg-white rounded-full px-4 py-3 text-xs" />
             <div className="mt-3 bg-black rounded-xl p-3 flex gap-2">
               <input type="checkbox" checked={agreed} onChange={e=>setAgreed(e.target.checked)} className="w-5 h-5" />
-              <p className="text-[10px] text-white">I am 18+ and agree to Privacy & Terms</p>
+              <p className="text-[10px] text-white">I confirm I am 18 years or older and agree to Privacy & Terms</p>
             </div>
-            <button onClick={handleSignup} disabled={!agreed} className={`mt-3 w-full rounded-full py-3 font-black text-xs ${agreed?'bg-black text-white':'bg-zinc-400'}`}>Create Account & Enter</button>
+            <button onClick={handleSignup} disabled={!agreed} className={`mt-3 w-full rounded-full py-3 font-black text-xs ${agreed?'bg-black text-white':'bg-zinc-400'}`}>Create Account</button>
           </div>
         </div>
 
         <footer className="py-10 text-center text-[10px] text-gray-500 border-t mt-6">
           <a href="/privacy" className="mx-2 underline">Privacy</a> | <a href="mailto:kla.meet.ug@gmail.com" className="mx-2 underline">Contact</a>
-          <p className="mt-2">© 2026 KLA-MEET Uganda - 18+ Only</p>
+          <p className="mt-2">© 2026 KLA-MEET Uganda - Friendship Community</p>
         </footer>
       </div>
     )
@@ -112,7 +117,7 @@ export default function App(){
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white pb-28">
-      <header className="p-3 bg-black flex justify-between"><h1 className="font-black text-xs">KLA-MEET</h1><button onClick={()=>handleTab('profile')} className="text-[11px] bg-white text-black px-3 py-1.5 rounded-full">Profile</button></header>
+      <header className="p-3 bg-black flex justify-between"><h1 className="font-black text-xs">KLA-MEET</h1><button onClick={async()=>{await supabase.auth.signOut(); setView('landing')}} className="text-[11px] bg-white text-black px-3 py-1.5 rounded-full">Logout</button></header>
       {tab==='discover' && <DiscoverTab posts={posts} />}
       {tab==='chat' && <ChatTab />}
       {tab==='nearby' && <NearbyTab />}
