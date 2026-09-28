@@ -1,7 +1,9 @@
 {
+  "id": "/",
   "name": "KLA-MEET - Kampala Dating",
   "short_name": "KLA-MEET",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#000000",
@@ -11,6 +13,10 @@
   "lang": "en",
   "dir": "ltr",
   "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
   "icons": [
     {
       "src": "/vite.svg",
@@ -28,7 +34,7 @@
   "screenshots": [
     {
       "src": "/vite.svg",
-      "sizes": "512x512",
+      "sizes": "540x720",
       "type": "image/png",
       "form_factor": "narrow"
     }
