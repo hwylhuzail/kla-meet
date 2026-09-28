@@ -1,5 +1,11 @@
 {
+  "functions": {
+    "api/icon.js": {
+      "includeFiles": "node_modules/sharp/**"
+    }
+  },
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
+    { "source": "/icon-192.png", "destination": "/api/icon?size=192" },
+    { "source": "/icon-512.png", "destination": "/api/icon?size=512" }
   ]
 }
