@@ -12,37 +12,27 @@
   "categories": ["dating", "social", "lifestyle"],
   "lang": "en",
   "dir": "ltr",
-  "iarc_rating_id": "00000000-0000-0000-0000-000000000000",
-  "prefer_related_applications": false,
-  "related_applications": [],
   "icons": [
     {
       "src": "/vite.svg",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
       "src": "/vite.svg",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
   "screenshots": [
     {
       "src": "/vite.svg",
       "sizes": "540x720",
-      "type": "image/png",
+      "type": "image/svg+xml",
       "form_factor": "narrow",
       "label": "KLA-MEET Chat"
-    },
-    {
-      "src": "/vite.svg",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "KLA-MEET Wide"
     }
   ],
   "shortcuts": [
