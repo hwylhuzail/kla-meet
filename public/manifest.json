@@ -5,18 +5,16 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#000000",
   "theme_color": "#FFD700",
   "description": "Kampala's #1 dating & hookup app - Meet real singles near you. Chat, match & date tonight!",
   "categories": ["dating", "social", "lifestyle"],
   "lang": "en",
   "dir": "ltr",
+  "iarc_rating_id": "00000000-0000-0000-0000-000000000000",
   "prefer_related_applications": false,
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "handle_links": "preferred",
+  "related_applications": [],
   "icons": [
     {
       "src": "/vite.svg",
@@ -36,7 +34,22 @@
       "src": "/vite.svg",
       "sizes": "540x720",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "KLA-MEET Chat"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "KLA-MEET Wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find Matches",
+      "url": "/",
+      "description": "Find singles near you"
     }
   ]
 }
