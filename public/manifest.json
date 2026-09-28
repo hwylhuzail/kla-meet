@@ -9,13 +9,13 @@
   "description": "Kampala's #1 dating & hookup app - Meet real singles near you. Chat, match & date tonight!",
   "icons": [
     {
-      "src": "https://i.ibb.co/xKHHMnzN/IMG-20260929-WA7040.jpg",
+      "src": "/api/icon?size=192",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://i.ibb.co/kggw3gb0/IMG-20260929-WA2429.jpg",
+      "src": "/api/icon?size=512",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
