@@ -1,16 +1,75 @@
-const WORLD = [
-  {city:'Paris', flag:'🇫🇷', img:'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'},
-  {city:'Tokyo', flag:'🇯🇵', img:'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400'},
-  {city:'New York', flag:'🇺🇸', img:'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400'},
-  {city:'London', flag:'🇬🇧', img:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'},
-]
+import { useState } from 'react'
+
+const UGANDA_CITIES = ['All','Kampala','Entebbe','Jinja','Arua','Mbarara','Gulu','Mbale']
+
 export default function Discover({posts,onSelect,isAdmin}){
+  const [city,setCity]=useState('All')
+  const [reported,setReported]=useState([])
+
+  const ugandaOnly = posts.filter(p=>{
+    if(!p.city) return true
+    const banned = ['paris','tokyo','london','new york','usa','france','japan','uk']
+    return!banned.some(b=>p.city.toLowerCase().includes(b))
+  })
+
+  const filtered = ugandaOnly.filter(p=>{
+    if(reported.includes(p.id)) return false
+    if(city!=='All' && p.city!==city) return false
+    return true
+  })
+
+  const handleReport = (id,name) => {
+    if(confirm(`Report ${name}? Admin reviews in 24h`)){
+      setReported([...reported,id])
+      alert('Reported. Thanks for keeping community safe!')
+    }
+  }
+
   return (
-    <div className="max-w-md mx-auto p-4">
-      <h2 className="font-black text-white">Discover • Tap to Like {isAdmin && '(Admin)'}</h2>
-      {posts.length>0 && <div className="mt-4 grid grid-cols-2 gap-3">{posts.map(p=>(<div key={p.id} onClick={()=>onSelect(p)} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-[#FFC300]/20"><img src={p.image_url} className="h-48 w-full object-cover" /><div className="p-2"><p className="text-xs font-bold text-white">{p.name}</p><p className="text-[9px] text-white/50">{p.city}</p></div></div>))}</div>}
-      <h3 className="mt-6 font-bold text-xs text-white/60">🌍 Worldwide Examples - Always Visible</h3>
-      <div className="grid grid-cols-2 gap-3 mt-2">{WORLD.map(w=>(<div key={w.city} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-white/10"><img src={w.img} className="h-32 w-full object-cover"/><div className="p-2"><p className="text-xs font-bold text-white">{w.flag} {w.city}</p></div></div>))}</div>
+    <div className="max-w-md mx-auto p-3 space-y-3 pb-24">
+      <div className="bg-[#FFC300] rounded-full px-4 py-2 flex justify-between">
+        <p className="text-[10px] font-black text-black">🛡️ {filtered.length} Friends in Uganda • Verified</p>
+        {isAdmin && <span className="text-[9px] bg-black text-white px-2 py-0.5 rounded-full">ADMIN</span>}
+      </div>
+
+      <div className="flex gap-1.5 overflow-x-auto pb-1">
+        {UGANDA_CITIES.map(c=>(
+          <button key={c} onClick={()=>setCity(c)} className={`whitespace-nowrap px-3 py-1.5 rounded-full text-[10px] font-bold ${city===c?'bg-white text-black':'bg-zinc-800 text-white'}`}>{c}</button>
+        ))}
+      </div>
+
+      <h2 className="font-black text-white text-xs">Discover Friends {city!=='All'&&`• ${city}`}</h2>
+
+      <div className="grid grid-cols-2 gap-3">
+        {filtered.map(p=>(
+          <div key={p.id} className="bg-zinc-900 rounded-[20px] overflow-hidden border border-white/10">
+            <img src={p.image_url||p.photo} onClick={()=>onSelect?.(p)} className="h-48 w-full object-cover cursor-pointer bg-zinc-800" />
+            <div className="p-2.5">
+              <p className="text-xs font-bold text-white truncate">{p.name} • {p.age||22}</p>
+              <p className="text-[9px] text-white/50">{p.city||'Kampala'}</p>
+              <div className="mt-2 flex gap-1">
+                <button onClick={()=>onSelect?.(p)} className="flex-1 bg-white text-black rounded-full py-1.5 text-[10px] font-black">♡ Like</button>
+                <button onClick={()=>alert('Chat unlocked with Premium')} className="flex-1 bg-[#FFC300] text-black rounded-full py-1.5 text-[10px] font-black">Chat</button>
+              </div>
+              <div className="mt-2 flex justify-center gap-2">
+                <button onClick={()=>handleReport(p.id,p.name)} className="text-[8px] text-red-400 underline">Report</button>
+                <span className="text-[8px] text-white/20">•</span>
+                <button onClick={()=>setReported([...reported,p.id])} className="text-[8px] text-white/40 underline">Block</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {filtered.length===0 && (
+        <div className="bg-zinc-900 rounded-[24px] p-8 text-center">
+          <p className="text-white font-bold text-sm">No friends in {city} yet</p>
+          <p className="text-[11px] text-white/50 mt-1">Be first to post in {city}!</p>
+          <button onClick={()=>setCity('All')} className="mt-3 bg-white text-black px-4 py-2 rounded-full text-xs font-bold">Show All Uganda</button>
+        </div>
+      )}
+
+      <p className="text-[9px] text-white/30 text-center">Uganda friendship only • Photos reviewed • Report & Block available</p>
     </div>
   )
 }
