@@ -5,11 +5,10 @@ import './style.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App/>)
 
-// PWA Service Worker - fixes PWABuilder warning
+// KILL old broken SW that cached white screen
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('KLA-MEET SW registered:', reg.scope))
-      .catch(err => console.log('SW failed:', err));
-  });
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(r => r.unregister())
+    caches.keys().then(keys => keys.forEach(k => caches.delete(k)))
+  })
 }
