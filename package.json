@@ -1,7 +1,7 @@
 {
   "name": "kla-meet",
   "private": false,
-  "version": "4.0.1",
+  "version": "4.0.6",
   "description": "KLA-MEET - Uganda Friendship Social Network for adults 18+ to make new friends in Kampala, Entebbe, Wakiso, Jinja, Mbarara. Safe chat, nearby friends, private messaging.",
   "author": "KLA-MEET Uganda <kla.meet.ug@gmail.com>",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "homepage": "https://kla-meet.vercel.app",
   "type": "module",
   "scripts": {
-    "prebuild": "node scripts/generate-icons.mjs",
+    "prebuild": "node scripts/generate-icons.mjs || echo 'icon skip'",
     "dev": "vite",
     "build": "vite build",
     "cap:init": "npx cap init KLA-MEET com.klameet.app --web-dir=dist",
