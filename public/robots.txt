@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://kla-meet.com/sitemap.xml
+Sitemap: https://kla-meet.vercel.app/sitemap.xml
