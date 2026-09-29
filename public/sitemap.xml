@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://kla-meet.com/</loc><lastmod>2026-09-28</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://kla-meet.com/privacy</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
-  <url><loc>https://kla-meet.com/terms</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
-  <url><loc>https://kla-meet.com/guidelines</loc><lastmod>2026-09-28</lastmod><priority>0.8</priority></url>
+  <url><loc>https://kla-meet.vercel.app/</loc><priority>1.0</priority></url>
+  <url><loc>https://kla-meet.vercel.app/privacy</loc><priority>0.8</priority></url>
+  <url><loc>https://kla-meet.vercel.app/terms</loc><priority>0.8</priority></url>
+  <url><loc>https://kla-meet.vercel.app/guidelines</loc><priority>0.8</priority></url>
 </urlset>
