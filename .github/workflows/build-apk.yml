@@ -12,35 +12,48 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+
       - run: npm install
+
       - run: npm run build
+
       - run: npx cap add android || true
+
       - run: |
-          # Fix quality: real bundled app, not wrapper
-          echo "Fixing Capacitor config for real APK..."
+          echo "Fixing Capacitor config for NATIVE app (not wrapper)..."
           cat > capacitor.config.json <<EOF
           {
             "appId": "com.klameet.app",
             "appName": "KLA-MEET Uganda",
             "webDir": "dist",
-            "bundledWebRuntime": true,
+            "bundledWebRuntime": false,
             "plugins": {
-              "SplashScreen": { "launchShowDuration": 3000 }
+              "SplashScreen": { "launchShowDuration": 3000 },
+              "Geolocation": { "permissions": ["ACCESS_FINE_LOCATION","ACCESS_COARSE_LOCATION"] },
+              "Camera": { "permissions": ["CAMERA"] },
+              "PushNotifications": { "presentationOptions": ["badge","sound","alert"] }
             }
           }
           EOF
           cat capacitor.config.json
+
       - run: npx cap sync android
+
       - run: |
-          # Fix versionCode for Uptodown
+          # Fix versionCode for Uptodown - must be 5
           sed -i "s/versionCode 1/versionCode 5/" android/app/build.gradle || true
           sed -i "s/versionCode 2/versionCode 5/" android/app/build.gradle || true
           sed -i "s/versionCode 3/versionCode 5/" android/app/build.gradle || true
           sed -i "s/versionCode 4/versionCode 5/" android/app/build.gradle || true
           sed -i "s/versionName.*/versionName \"4.0.1\"/" android/app/build.gradle || true
           grep version android/app/build.gradle
-      - run: cd android && chmod +x gradlew &&./gradlew assembleRelease
+          # Add native permissions to prove NOT WebView
+          grep -q "ACCESS_FINE_LOCATION" android/app/src/main/AndroidManifest.xml || sed -i "/<application/a \ <uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\" />\n <uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\" />\n <uses-permission android:name=\"android.permission.CAMERA\" />\n <uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\" />" android/app/src/main/AndroidManifest.xml
+          cat android/app/src/main/AndroidManifest.xml | grep permission
+
+      - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
+
       - uses: actions/upload-artifact@v4
         with:
-          name: KLA-MEET-UGANDA-4.0.1-RELEASE
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          name: KLA-MEET-UGANDA-4.0.1-NATIVE-FIXED
+          path: android/app/build/outputs/apk/debug/app-debug.apk
