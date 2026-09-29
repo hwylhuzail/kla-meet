@@ -1,13 +1,17 @@
 {
   "appId": "com.klameet.app",
-  "appName": "KLA-MEET Uganda",
+  "appName": "KLA-MEET",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "plugins": {
-    "SplashScreen": {
-      "launchShowDuration": 2000,
-      "backgroundColor": "#E11D48",
-      "showSpinner": false
+    "Geolocation": {
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
+    },
+    "Camera": {
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"]
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
     }
   }
 }
