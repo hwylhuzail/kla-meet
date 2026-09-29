@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kla-meet.com/sitemap.xml
