@@ -6,19 +6,10 @@
 <meta name="google-site-verification" content="tBfJsM_Lq0uiGCtg0iX0tPYUv7Fbet2L5Bs67_6Pe_s" />
 <title>KLA-MEET - Friendship in Uganda</title>
 <meta name="description" content="Make new friends near you in Uganda. Verified profiles, safe chat, nearby friends in Kampala, Entebbe, Jinja. 18+ only."/>
-<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+<link rel="icon" type="image/png" href="/icon-192.png"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
 <link rel="manifest" href="/manifest.json" />
 <meta name="theme-color" content="#FFCC00" />
-<!-- Ads disabled in APK to prevent white screen, enabled only on web -->
-<script>
-  if (!window.Capacitor) {
-    var s = document.createElement('script');
-    s.src = 'https://fpyf8.com/88/tag.min.js';
-    s.dataset.zone = '180584';
-    s.async = true;
-    document.head.appendChild(s);
-  }
-</script>
 <style>
   #white-fix{font-family:system-ui;padding:40px;text-align:center;background:#FFCC00;min-height:100vh}
 </style>
@@ -27,10 +18,9 @@
 <div id="root"></div>
 <script type="module" src="/src/main.jsx"></script>
 <script>
-  // If white after 3s, show error instead of blank
   setTimeout(()=>{
     if(!document.getElementById('root') || document.getElementById('root').innerHTML===''){
-      document.body.innerHTML='<div id=white-fix><h1>KLA-MEET</h1><p>Loading... if stuck, check internet</p><p>Version 4.0.5</p></div>';
+      document.body.innerHTML='<div id=white-fix><h1>KLA-MEET</h1><p>Loading... if stuck, check internet</p><p>Version 4.0.6 - Clean</p></div>';
     }
   }, 3000);
 </script>
