@@ -12,46 +12,16 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-
-      - name: Install
-        run: npm install --legacy-peer-deps
-
-      - name: Build web
-        run: npm run build
-
-      - name: Clean old android (THIS FIXES YOUR FAILURE)
-        run: rm -rf android
-
-      - name: Create NATIVE config FIRST
-        run: |
-          cat > capacitor.config.json <<'EOF'
-          {
-            "appId": "com.klameet.app",
-            "appName": "KLA-MEET Uganda",
-            "webDir": "dist",
-            "bundledWebRuntime": false
-          }
-          EOF
-          cat capacitor.config.json
-
-      - name: Add android + sync
-        run: |
-          npx cap add android
-          npx cap sync android
-
-      - name: Fix versionCode 5 for Uptodown
-        run: |
-          sed -i "s/versionCode.*/versionCode 5/" android/app/build.gradle
-          sed -i "s/versionName.*/versionName \"4.0.1\"/" android/app/build.gradle
-          grep version android/app/build.gradle
-
-      - name: Build Debug APK (signed)
-        run: |
-          cd android
-          chmod +x gradlew
-         ./gradlew assembleDebug --no-daemon
-
+      - run: npm install --legacy-peer-deps
+      - run: npm run build
+      - run: rm -rf android
+      - run: echo '{"appId":"com.klameet.app","appName":"KLA-MEET Uganda","webDir":"dist"}' > capacitor.config.json
+      - run: npx cap add android
+      - run: npx cap sync android
+      - run: sed -i "s/versionCode.*/versionCode 5/" android/app/build.gradle
+      - run: sed -i "s/versionName.*/versionName \"4.0.1\"/" android/app/build.gradle
+      - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: KLA-MEET-4.0.1-NATIVE-APPROVED
+          name: KLA-MEET-NATIVE-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
