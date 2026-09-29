@@ -19,7 +19,7 @@ jobs:
       - run: node scripts/generate-icons.mjs
       - run: npm run build
       - run: |
-          echo '{"appId":"com.klameet.app","appName":"KLA-MEET Uganda","webDir":"dist","plugins":{"Geolocation":{"permissions":["ACCESS_FINE_LOCATION"]},"Camera":{"permissions":["CAMERA"]}}}' > capacitor.config.json
+          echo '{"appId":"com.klameet.app","appName":"KLA-MEET Uganda","webDir":"dist","bundledWebRuntime":false,"plugins":{"SplashScreen":{"launchShowDuration":1500,"backgroundColor":"#FFCC00","showSpinner":false},"Geolocation":{"permissions":["ACCESS_FINE_LOCATION","ACCESS_COARSE_LOCATION"]},"Camera":{"permissions":["CAMERA","READ_EXTERNAL_STORAGE"]},"PushNotifications":{"presentationOptions":["badge","sound","alert"]}}}' > capacitor.config.json
       - run: npx cap add android || true
       - run: npx cap sync android
       - run: |
@@ -34,11 +34,14 @@ jobs:
           cp public/icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
           cp public/icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
           rm -rf android/app/src/main/res/mipmap-anydpi-v26
-          echo "✅ KLA yellow icon forced"
-      - run: sed -i "s/versionCode.*/versionCode 8/" android/app/build.gradle
-      - run: sed -i "s/versionName.*/versionName \"4.0.5\"/" android/app/build.gradle
+          mkdir -p android/app/src/main/res/drawable
+          cp public/icon-512.png android/app/src/main/res/drawable/splash.png
+          cp public/icon-512.png android/app/src/main/res/drawable/ic_launcher.png || true
+          echo "✅ KLA launcher + splash YELLOW fixed"
+      - run: sed -i "s/versionCode.*/versionCode 9/" android/app/build.gradle
+      - run: sed -i "s/versionName.*/versionName \"4.0.6\"/" android/app/build.gradle
       - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: KLA-MEET-FINAL-YELLOW-8
+          name: KLA-MEET-FINAL-YELLOW-9
           path: android/app/build/outputs/apk/debug/app-debug.apk
