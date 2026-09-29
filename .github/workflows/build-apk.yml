@@ -1,27 +1,39 @@
 name: Build KLA-MEET Release APK
-on: [push]
+on:
+  push:
+    branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+        with: { node-version: 20 }
       - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
+        with: { distribution: temurin, java-version: 17 }
       - run: npm install --legacy-peer-deps
+      - run: npm install sharp --save-dev
+      - run: node scripts/generate-icons.mjs
       - run: npm run build
-      - run: rm -rf android
-      - run: echo '{"appId":"com.klameet.app","appName":"KLA-MEET Uganda","webDir":"dist"}' > capacitor.config.json
-      - run: npx cap add android
+      - run: |
+          echo '{"appId":"com.klameet.app","appName":"KLA-MEET Uganda","webDir":"dist","plugins":{"Geolocation":{"permissions":["ACCESS_FINE_LOCATION"]},"Camera":{"permissions":["CAMERA"]}}}' > capacitor.config.json
+      - run: npx cap add android || true
       - run: npx cap sync android
-      - run: sed -i "s/versionCode.*/versionCode 5/" android/app/build.gradle
-      - run: sed -i "s/versionName.*/versionName \"4.0.1\"/" android/app/build.gradle
+      - run: |
+          cp public/icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || true
+          cp public/icon-512.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png || true
+          cp public/icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png || true
+          cp public/icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png || true
+          cp public/icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png || true
+          cp public/icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png || true
+          echo "KLA icon copied"
+      - run: sed -i "s/versionCode.*/versionCode 7/" android/app/build.gradle
+      - run: sed -i "s/versionName.*/versionName \"4.0.3\"/" android/app/build.gradle
       - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: KLA-MEET-NATIVE-APK
+          name: KLA-MEET-FINAL-YELLOW-7
           path: android/app/build/outputs/apk/debug/app-debug.apk
