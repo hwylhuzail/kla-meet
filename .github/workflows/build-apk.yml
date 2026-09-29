@@ -23,17 +23,22 @@ jobs:
       - run: npx cap add android || true
       - run: npx cap sync android
       - run: |
-          cp public/icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || true
-          cp public/icon-512.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png || true
-          cp public/icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png || true
-          cp public/icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png || true
-          cp public/icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png || true
-          cp public/icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png || true
-          echo "KLA icon copied"
-      - run: sed -i "s/versionCode.*/versionCode 7/" android/app/build.gradle
-      - run: sed -i "s/versionName.*/versionName \"4.0.3\"/" android/app/build.gradle
+          cp public/icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          cp public/icon-512.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp public/icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+          cp public/icon-512.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.png
+          cp public/icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp public/icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp public/icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp public/icon-192.png android/app/src/main/res/mipmap-xhdpi/ic_launcher_round.png
+          cp public/icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png
+          cp public/icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher_round.png
+          rm -rf android/app/src/main/res/mipmap-anydpi-v26
+          echo "✅ KLA yellow icon forced"
+      - run: sed -i "s/versionCode.*/versionCode 8/" android/app/build.gradle
+      - run: sed -i "s/versionName.*/versionName \"4.0.5\"/" android/app/build.gradle
       - run: cd android && chmod +x gradlew &&./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: KLA-MEET-FINAL-YELLOW-7
+          name: KLA-MEET-FINAL-YELLOW-8
           path: android/app/build/outputs/apk/debug/app-debug.apk
