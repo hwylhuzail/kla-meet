@@ -4,23 +4,35 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="google-site-verification" content="tBfJsM_Lq0uiGCtg0iX0tPYUv7Fbet2L5Bs67_6Pe_s" />
-<title>KLA-MEET - Friendship in Uganda - Make Friends Near You</title>
-<meta name="description" content="KLA-MEET is a friendship app to make new friends near you in Uganda. Verified profiles, safe chat, nearby friends in Kampala, Entebbe, Jinja, Arua, Gulu. No adult content. 18+ only."/>
-<meta name="keywords" content="Uganda friendship, make friends Uganda, Kampala friends, nearby friends, friendship app"/>
-<meta property="og:title" content="KLA-MEET - Friendship in Uganda"/>
-<meta property="og:description" content="Make new friends near you in Uganda. Safe, verified, friendship only. 18+ community."/>
-<meta property="og:type" content="website"/>
-<meta property="og:image" content="https://kla-meet.vercel.app/icon-512.png?v=4"/>
-<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=4"/>
-<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png?v=4"/>
-<link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png?v=4"/>
-<link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png?v=4"/>
-<link rel="manifest" href="/manifest.json?v=4" />
+<title>KLA-MEET - Friendship in Uganda</title>
+<meta name="description" content="Make new friends near you in Uganda. Verified profiles, safe chat, nearby friends in Kampala, Entebbe, Jinja. 18+ only."/>
+<link rel="icon" type="image/svg+xml" href="/icon.svg"/>
+<link rel="manifest" href="/manifest.json" />
 <meta name="theme-color" content="#FFCC00" />
-<script src="https://fpyf8.com/88/tag.min.js" data-zone="180584" async data-cfasync="false"></script>
+<!-- Ads disabled in APK to prevent white screen, enabled only on web -->
+<script>
+  if (!window.Capacitor) {
+    var s = document.createElement('script');
+    s.src = 'https://fpyf8.com/88/tag.min.js';
+    s.dataset.zone = '180584';
+    s.async = true;
+    document.head.appendChild(s);
+  }
+</script>
+<style>
+  #white-fix{font-family:system-ui;padding:40px;text-align:center;background:#FFCC00;min-height:100vh}
+</style>
 </head>
 <body>
 <div id="root"></div>
 <script type="module" src="/src/main.jsx"></script>
+<script>
+  // If white after 3s, show error instead of blank
+  setTimeout(()=>{
+    if(!document.getElementById('root') || document.getElementById('root').innerHTML===''){
+      document.body.innerHTML='<div id=white-fix><h1>KLA-MEET</h1><p>Loading... if stuck, check internet</p><p>Version 4.0.5</p></div>';
+    }
+  }, 3000);
+</script>
 </body>
 </html>
