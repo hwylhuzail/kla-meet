@@ -13,7 +13,7 @@ import ChatTab from './components/tabs/Chat'
 import NearbyTab from './components/tabs/Nearby'
 import PremiumTab from './components/tabs/Premium'
 import ProfileTab from './components/tabs/Profile'
-import AdminPanel from './AdminPanel'
+import AdminPanel from './components/admin/AdminPanel'
 
 const ADMIN_EMAILS = ["huzayirukalungi4@gmail.com", "alexmakkoali@gmail.com"]
 
@@ -112,7 +112,6 @@ export default function App(){
     setView('app'); setTab('discover')
   }
 
-  // ADMIN ACTIONS
   const onDeletePost = async (id) => {
     if(!confirm('Delete this photo/post?')) return
     const realId = id.startsWith('profile-')? null : id
