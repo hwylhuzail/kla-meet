@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import About from './About';
 import HowItWorks from './HowItWorks';
 import Safety from './Safety';
@@ -8,8 +8,7 @@ import Faqs from './Faqs';
 export default function Landing({ onEnter, onCrypto, onPesapal, form, setForm, agreed, setAgreed, onSignin, onSignup }){
   const [adLoaded, setAdLoaded] = useState(false);
 
-  const loadAdAndEnter = () => {
-    // Load ad ONLY on download/enter intent
+  const loadAd = () => {
     if (!adLoaded) {
       const s = document.createElement('script');
       s.src = 'https://quge5.com/88/tag.min.js';
@@ -19,13 +18,16 @@ export default function Landing({ onEnter, onCrypto, onPesapal, form, setForm, a
       document.body.appendChild(s);
       setAdLoaded(true);
     }
-    // Then enter app
+  };
+
+  const loadAdAndEnter = () => {
+    loadAd();
     if (onEnter) onEnter();
   };
 
   return (
     <div className="min-h-screen bg-white text-black">
-      {/* HEADER - ONE LINK */}
+      {/* HEADER */}
       <header className="bg-black text-white px-4 py-3 flex justify-between items-center sticky top-0 z-50">
         <h1 className="font-black text-[12px]">KLA-MEET • Uganda</h1>
         <div className="flex gap-2">
@@ -39,9 +41,22 @@ export default function Landing({ onEnter, onCrypto, onPesapal, form, setForm, a
         <h2 className="text-[36px] font-black leading-[0.9]">Make New Friends<br/>Near You<br/>in Uganda.</h2>
         <p className="text-[11px] bg-black text-white px-3 py-2 rounded-full font-bold inline-block mt-3">Kampala • Entebbe • Jinja • Arua • Safe</p>
         <p className="text-[11px] text-zinc-600 mt-3 leading-relaxed">Real profiles, nearby friends, safe chat. 18+ only. No fake.</p>
+
+        {/* DOWNLOAD BUTTON - NOW HERE */}
+        <div className="mt-5">
+          <a
+            href="https://kla-meet-uganda.en.uptodown.com/android"
+            onClick={loadAd}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full bg-black text-[#FFC300] rounded-full py-4 font-black text-[13px] text-center block"
+          >
+            ⬇ Download KLA-MEET APK
+          </a>
+          <p className="text-[10px] text-zinc-500 text-center mt-2">Free • Android • 4.0.6 • Verified by Uptodown</p>
+        </div>
       </div>
 
-      {/* YOUR 5 CARDS - exact format you use */}
       <div className="max-w-md mx-auto mt-6 space-y-4">
         <About />
         <HowItWorks />
@@ -54,7 +69,6 @@ export default function Landing({ onEnter, onCrypto, onPesapal, form, setForm, a
         <div className="mx-6"><Faqs /></div>
       </div>
 
-      {/* AUTH BOXES - inside same landing, same link */}
       <div className="max-w-md mx-auto p-6 space-y-4">
         <div id="signin-box" className="bg-zinc-900 text-white rounded-[24px] p-5">
           <h3 className="font-black text-sm">Welcome Back</h3>
@@ -77,6 +91,9 @@ export default function Landing({ onEnter, onCrypto, onPesapal, form, setForm, a
       </div>
 
       <footer className="py-8 text-center text-[10px] text-zinc-500 border-t">
+        <div className="mb-4">
+          <a href="https://kla-meet-uganda.en.uptodown.com/android" onClick={loadAd} target="_blank" rel="noopener noreferrer" className="bg-black text-[#FFC300] px-6 py-3 rounded-full font-black inline-block">⬇ Download APK - Uptodown</a>
+        </div>
         <a href="/privacy" className="underline mx-2">Privacy</a> | <a href="/terms" className="underline mx-2">Terms</a> | <a href="/guidelines" className="underline mx-2">Guidelines</a>
         <p className="mt-2">© 2026 KLA-MEET • 0755606000 • kla.meet.ug@gmail.com</p>
       </footer>
