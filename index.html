@@ -12,15 +12,25 @@
 <meta name="theme-color" content="#FFCC00" />
 <style>
   #white-fix{font-family:system-ui;padding:40px;text-align:center;background:#FFCC00;min-height:100vh}
+  .uptodown-badge{position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999;}
+  .uptodown-badge img{height:60px;}
 </style>
 </head>
 <body>
 <div id="root"></div>
+
+<!-- Uptodown Download Button - Embedded -->
+<div class="uptodown-badge">
+<a href='https://kla-meet-uganda.en.uptodown.com/android' title='Download KLA-MEET Uganda' target="_blank" rel="noopener">
+<img src='https://stc.utdstc.com/img/mediakit/download-gio-big.png' alt='Download KLA-MEET Uganda'>
+</a>
+</div>
+
 <script type="module" src="/src/main.jsx"></script>
 <script>
   setTimeout(()=>{
     if(!document.getElementById('root') || document.getElementById('root').innerHTML===''){
-      document.body.innerHTML='<div id=white-fix><h1>KLA-MEET</h1><p>Loading... if stuck, check internet</p><p>Version 4.0.6 - Clean</p></div>';
+      document.body.innerHTML='<div id=white-fix><h1>KLA-MEET</h1><p>Loading... if stuck, check internet</p><p>Version 4.0.6 - Clean</p><br><br><a href=\'https://kla-meet-uganda.en.uptodown.com/android\' title=\'Download KLA-MEET Uganda\'><img src=\'https://stc.utdstc.com/img/mediakit/download-gio-big.png\' alt=\'Download KLA-MEET Uganda\'></a></div>';
     }
   }, 3000);
 </script>
