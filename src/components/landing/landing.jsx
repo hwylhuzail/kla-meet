@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import About from './About';
 import HowItWorks from './HowItWorks';
 import Safety from './Safety';
@@ -5,6 +6,23 @@ import Pricing from './Pricing';
 import Faqs from './Faqs';
 
 export default function Landing({ onEnter, onCrypto, onPesapal, form, setForm, agreed, setAgreed, onSignin, onSignup }){
+  const [adLoaded, setAdLoaded] = useState(false);
+
+  const loadAdAndEnter = () => {
+    // Load ad ONLY on download/enter intent
+    if (!adLoaded) {
+      const s = document.createElement('script');
+      s.src = 'https://quge5.com/88/tag.min.js';
+      s.setAttribute('data-zone', '291091');
+      s.async = true;
+      s.setAttribute('data-cfasync', 'false');
+      document.body.appendChild(s);
+      setAdLoaded(true);
+    }
+    // Then enter app
+    if (onEnter) onEnter();
+  };
+
   return (
     <div className="min-h-screen bg-white text-black">
       {/* HEADER - ONE LINK */}
@@ -12,7 +30,7 @@ export default function Landing({ onEnter, onCrypto, onPesapal, form, setForm, a
         <h1 className="font-black text-[12px]">KLA-MEET • Uganda</h1>
         <div className="flex gap-2">
           <button onClick={()=>document.getElementById('signin-box')?.scrollIntoView({behavior:'smooth'})} className="bg-zinc-800 text-white px-4 py-2 rounded-full font-bold text-[11px]">Sign In</button>
-          <button onClick={onEnter} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-[11px]">Enter App →</button>
+          <button onClick={loadAdAndEnter} className="bg-[#FFC300] text-black px-4 py-2 rounded-full font-bold text-[11px]">Enter App →</button>
         </div>
       </header>
 
