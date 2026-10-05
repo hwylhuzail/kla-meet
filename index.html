@@ -4,23 +4,50 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="google-site-verification" content="tBfJsM_Lq0uiGCtg0iX0tPYUv7Fbet2L5Bs67_6Pe_s" />
-<title>KLA-MEET - Friendship in Uganda</title>
-<meta name="description" content="Make new friends near you in Uganda. Verified profiles, safe chat, nearby friends in Kampala, Entebbe, Jinja. 18+ only."/>
+
+<!-- SEO FIXED: This is what Google shows -->
+<title>KLA-MEET Uganda | KLA MEET App - Download APK for Android</title>
+<meta name="description" content="KLA-MEET Uganda is the #1 app to meet new friends and chat in Kampala, Entebbe, Jinja. Download KLA MEET APK for Android. Verified profiles, safe chat, 18+ only."/>
+<meta name="keywords" content="kla meet, kla-meet, kla meet uganda, kla-meet uganda, kla meet app, kla meet apk, kla meet download, kampala dating app"/>
+
 <link rel="icon" type="image/png" href="/icon-192.png"/>
 <link rel="apple-touch-icon" href="/icon-192.png"/>
 <link rel="manifest" href="/manifest.json" />
 <meta name="theme-color" content="#FFCC00" />
+
+<!-- Tell Google this is an app -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "KLA-MEET Uganda",
+  "alternateName": ["kla meet", "kla-meet", "kla meet app"],
+  "operatingSystem": "Android",
+  "applicationCategory": "SocialNetworkingApplication",
+  "offers": {"@type": "Offer", "price": "0"},
+  "url": "https://kla-meet-uganda.vercel.app"
+}
+</script>
+
 <style>
+  #seo-hidden{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;}
   #white-fix{font-family:system-ui;padding:40px;text-align:center;background:#FFCC00;min-height:100vh}
 </style>
 </head>
 <body>
+
+<!-- Hidden SEO text - Google reads it, users don't see it -->
+<div id="seo-hidden">
+  <h1>KLA MEET - KLA-MEET Uganda</h1>
+  <p>KLA-MEET Uganda is a social networking app to meet and chat with new friends in Kampala and across Uganda. Download KLA MEET APK for Android. Make new friends near you in Kampala, Entebbe, Jinja. Verified profiles, safe chat, nearby friends. Best Uganda friendship and dating app. KLA MEET app download.</p>
+</div>
+
 <div id="root"></div>
 <script type="module" src="/src/main.jsx"></script>
 <script>
   setTimeout(()=>{
     if(!document.getElementById('root') || document.getElementById('root').innerHTML===''){
-      document.body.innerHTML='<div id=white-fix><h1>KLA-MEET</h1><p>Make new friends near you in Uganda</p><p>Verified profiles, safe chat</p><br><a href=\'https://kla-meet-uganda.en.uptodown.com/android\' title=\'Download KLA-MEET Uganda\'><img src=\'https://stc.utdstc.com/img/mediakit/download-gio-big.png\' alt=\'Download KLA-MEET Uganda\' style=\"height:65px;\"></a><p style=\"margin-top:20px\">Version 4.0.6 - Clean</p></div>';
+      document.body.innerHTML='<div id=white-fix><h1>KLA-MEET Uganda</h1><p>KLA MEET App - Make new friends near you in Uganda</p><p>Download KLA MEET APK for Android</p><br><a href=\'https://kla-meet-uganda.en.uptodown.com/android\' title=\'Download KLA-MEET Uganda\'><img src=\'https://stc.utdstc.com/img/mediakit/download-gio-big.png\' alt=\'Download KLA-MEET Uganda\' style=\"height:65px;\"></a><p style=\"margin-top:20px\">Version 4.0.6 - Clean</p><br><br><a href=\"/\" style=\"background:#000;color:#FFCC00;padding:12px 24px;border-radius:20px;text-decoration:none;\">Open Web App</a></div>';
     }
   }, 3000);
 </script>
