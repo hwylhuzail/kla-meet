@@ -6,17 +6,19 @@ import Pricing from './Pricing';
 import Faqs from './Faqs';
 
 export default function Landing({ onEnter, onCrypto, onPesapal, form, setForm, agreed, setAgreed, onSignin, onSignup }){
-  const [adLoaded, setAdLoaded] = useState(false);
+  const [adFired, setAdFired] = useState(0);
+
+  // FIXED: Use Direct Link, not tag.min.js which steals all clicks
+  // Replace with YOUR Monetag Direct Link from dashboard
+  const AD_DIRECT_LINK = "https://quge5.com/4/291091";
 
   const loadAd = () => {
-    if (!adLoaded) {
-      const s = document.createElement('script');
-      s.src = 'https://quge5.com/88/tag.min.js';
-      s.setAttribute('data-zone', '291091');
-      s.async = true;
-      s.setAttribute('data-cfasync', 'false');
-      document.body.appendChild(s);
-      setAdLoaded(true);
+    const now = Date.now();
+    // Show ad only once per 5 minutes, only on download clicks
+    if (now - adFired > 5 * 60 * 1000) {
+      window.open(AD_DIRECT_LINK, '_blank', 'noopener,noreferrer');
+      setAdFired(now);
+      sessionStorage.setItem('kla_ad', now.toString());
     }
   };
 
